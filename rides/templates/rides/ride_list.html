@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BlaBlaCar - Viajes Disponibles</title>
+    <style>
+        .ride-card {
+            border: 1px solid #ddd;
+            margin: 10px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .price {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Viajes Disponibles</h1>
+    
+    {% for ride in rides %}
+    <div class="ride-card">
+        <h2>{{ ride.origin }} → {{ ride.destination }}</h2>
+        <p>Conductor: {{ ride.driver.username }}</p>
+        <p>Fecha de salida: {{ ride.departure_time }}</p>
+        <p>Asientos: {{ ride.seats_available }} disponibles de {{ ride.total_seats }} totales</p>
+        <p class="price">Precio: {{ ride.get_formatted_price }}</p>
+    </div>
+    {% empty %}
+    <p>No hay viajes disponibles.</p>
+    {% endfor %}
+</body>
+</html>
