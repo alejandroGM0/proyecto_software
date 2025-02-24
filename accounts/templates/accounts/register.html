@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro - BlaBlaCar{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .auth-container {
+        max-width: 400px;
+        margin: 40px auto;
+        background-color: var(--color-card);
+        border-radius: var(--border-radius-lg);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-sm);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .auth-container h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: var(--spacing-lg);
+        text-align: center;
+    }
+
+    .auth-form {
+        margin-top: var(--spacing-md);
+    }
+
+    .auth-links {
+        margin-top: var(--spacing-lg);
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+    .auth-links a {
+        color: var(--color-primary);
+        text-decoration: none;
+    }
+
+    .auth-links a:hover {
+        text-decoration: underline;
+    }
+
+    .help-text {
+        font-size: 0.8rem;
+        color: var(--color-secondary);
+        margin-top: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h1>Crear Cuenta</h1>
+    
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+            <div class="help-text">{{ field.help_text }}</div>
+            {% endif %}
+            {% if field.errors %}
+            <div class="error">
+                {{ field.errors }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="button button-primary" style="width: 100%;">Registrarse</button>
+    </form>
+    
+    <div class="auth-links">
+        <p>¿Ya tienes cuenta? <a href="{% url 'accounts:login' %}">Inicia sesión aquí</a></p>
+    </div>
+</div>
+{% endblock %}

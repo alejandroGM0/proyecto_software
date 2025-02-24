@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.utils import timezone
 
 class Ride(models.Model):
     driver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rides_as_driver')
@@ -17,6 +18,10 @@ class Ride(models.Model):
     @property
     def seats_available(self):
         return self.total_seats - self.passengers.count()
+
+    @property
+    def is_active(self):
+        return self.departure_time > timezone.now()
 
     def __str__(self):
         return f"{self.origin} → {self.destination} | {self.driver.username}"

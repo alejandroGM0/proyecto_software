@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}BlaBlaCar{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    {% block extra_styles %}{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="{% url 'rides:ride_list' %}" class="nav-brand">BlaBlaCar</a>
+            <div class="nav-links">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'rides:create_ride' %}" class="nav-link">Crear Viaje</a>
+                    <a href="{% url 'rides:my_rides' %}" class="nav-link">Mis Viajes</a>
+                    <a href="{% url 'accounts:profile' %}" class="nav-link">Mi Perfil</a>
+                    <a href="{% url 'accounts:logout' %}" class="nav-link">Cerrar Sesión</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="nav-link">Iniciar Sesión</a>
+                    <a href="{% url 'accounts:register' %}" class="nav-link">Registrarse</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% if messages %}
+        <div class="messages mt-2 mb-2">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+1</body>
+</html>

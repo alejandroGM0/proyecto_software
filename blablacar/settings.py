@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rides.apps.RidesConfig',
+    'rides',
+    'accounts',
     'payments.apps.PaymentsConfig',
     'reviews.apps.ReviewsConfig',
 ]
@@ -57,7 +58,7 @@ ROOT_URLCONF = 'blablacar.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],  # Añade esta línea
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -119,6 +120,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
 
 # Añadir configuración de archivos media
 MEDIA_URL = '/media/'
@@ -126,9 +130,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Añadir configuración de archivos estáticos
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
 
 # Configuración de moneda
 CURRENCY_SYMBOL = '€'
@@ -138,3 +139,6 @@ CURRENCY_CODE = 'EUR'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Cambiar la configuración de LOGIN_URL
+LOGIN_URL = 'accounts:login'  # Cambiar esto del admin al nuevo login

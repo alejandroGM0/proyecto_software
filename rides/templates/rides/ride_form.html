@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if edit_mode %}Editar{% else %}Crear{% endif %} Viaje - BlaBlaCar{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/pages/ride-form.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-hero">
+        <h1 class="form-title">{% if edit_mode %}Editar{% else %}Crear{% endif %} Viaje</h1>
+        <p class="form-subtitle">{% if edit_mode %}Modifica los detalles de tu viaje{% else %}Comparte tu viaje con otros pasajeros{% endif %}</p>
+    </div>
+
+    <div class="form-card">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.origin.id_for_label }}">Ciudad de origen</label>
+                {{ form.origin }}
+                {% if form.origin.errors %}
+                <div class="error">{{ form.origin.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.destination.id_for_label }}">Ciudad de destino</label>
+                {{ form.destination }}
+                {% if form.destination.errors %}
+                <div class="error">{{ form.destination.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.departure_time.id_for_label }}">Fecha y hora de salida</label>
+                {{ form.departure_time }}
+                {% if form.departure_time.errors %}
+                <div class="error">{{ form.departure_time.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.total_seats.id_for_label }}">Número de asientos</label>
+                {{ form.total_seats }}
+                {% if form.total_seats.errors %}
+                <div class="error">{{ form.total_seats.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.price.id_for_label }}">Precio por persona</label>
+                {{ form.price }}
+                {% if form.price.errors %}
+                <div class="error">{{ form.price.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'rides:ride_list' %}" class="button button-secondary">Cancelar</a>
+                <button type="submit" class="button button-primary">
+                    {% if edit_mode %}Guardar cambios{% else %}Publicar viaje{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

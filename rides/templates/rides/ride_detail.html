@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ ride.origin }} → {{ ride.destination }} - BlaBlaCar{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/pages/ride-detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <div class="detail-hero">
+        <h1>{{ ride.origin }} → {{ ride.destination }}</h1>
+        <div class="status-badge {% if ride.is_active %}status-active{% else %}status-inactive{% endif %}">
+            {% if ride.is_active %}Viaje Activo{% else %}Viaje Finalizado{% endif %}
+        </div>
+    </div>
+
+    <div class="detail-card">
+        <div class="detail-grid">
+            <div class="detail-info">
+                <strong>Conductor:</strong>
+                <p>{{ ride.driver.username }}</p>
+            </div>
+            <div class="detail-info">
+                <strong>Fecha de salida:</strong>
+                <p>{{ ride.departure_time }}</p>
+            </div>
+            <div class="detail-info">
+                <strong>Asientos disponibles:</strong>
+                <p>{{ ride.seats_available }} de {{ ride.total_seats }}</p>
+            </div>
+        </div>
+
+        <div class="detail-price">
+            {{ ride.get_formatted_price }}
+        </div>
+
+        <div class="detail-actions">
+            {% if user.is_authenticated and user != ride.driver and ride.is_active %}
+                <form method="post" action="{% url 'rides:book_ride' ride.id %}">
+                    {% csrf_token %}
+                    <button type="submit" 
+                            class="button button-primary"
+                            {% if ride.seats_available == 0 or user in ride.passengers.all %}disabled{% endif %}>
+                        {% if user in ride.passengers.all %}
+                            Ya reservado
+                        {% elif ride.seats_available == 0 %}
+                            No hay asientos
+                        {% else %}
+                            Reservar
+                        {% endif %}
+                    </button>
+                </form>
+            {% endif %}
+            <a href="{% url 'rides:ride_list' %}" class="button button-secondary">Volver a la lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

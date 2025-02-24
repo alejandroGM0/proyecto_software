@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Perfil - {{ user.username }}{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-hero">
+        <div class="profile-avatar">
+            {{ user.username.0|upper }}
+        </div>
+        <h1 class="profile-title">{{ user.username }}</h1>
+        <p class="profile-subtitle">Miembro desde {{ user.date_joined|date:"F Y" }}</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_rides }}</div>
+            <div class="stat-label">Viajes Totales</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ active_rides_as_driver.count }}</div>
+            <div class="stat-label">Viajes como Conductor</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ rides_as_passenger.count }}</div>
+            <div class="stat-label">Viajes como Pasajero</div>
+        </div>
+    </div>
+
+    <h2 class="section-title">Viajes Activos como Conductor</h2>
+    <div class="rides-grid">
+        {% for ride in active_rides_as_driver %}
+        <div class="profile-ride-card">
+            <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
+            <div class="ride-info">
+                <p>{{ ride.departure_time|date:"j F Y, H:i" }}</p>
+                <p>{{ ride.passengers.count }}/{{ ride.total_seats }} pasajeros</p>
+                <p class="ride-price">{{ ride.get_formatted_price }}</p>
+            </div>
+            <div class="card-actions">
+                <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
+                <a href="{% url 'rides:edit_ride' ride.id %}" class="button button-secondary">Editar</a>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center" style="grid-column: 1 / -1;">No tienes viajes activos como conductor.</p>
+        {% endfor %}
+    </div>
+
+    <div class="profile-actions">
+        <a href="{% url 'rides:create_ride' %}" class="button button-primary">Crear Viaje</a>
+        <a href="{% url 'rides:my_rides' %}" class="button button-secondary">Ver Todos Mis Viajes</a>
+    </div>
+</div>
+{% endblock %}

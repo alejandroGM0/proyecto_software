@@ -1,33 +1,274 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>BlaBlaCar - Viajes Disponibles</title>
-    <style>
-        .ride-card {
-            border: 1px solid #ddd;
-            margin: 10px;
-            padding: 15px;
-            border-radius: 5px;
-        }
-        .price {
-            color: green;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    <h1>Viajes Disponibles</h1>
-    
-    {% for ride in rides %}
-    <div class="ride-card">
-        <h2>{{ ride.origin }} → {{ ride.destination }}</h2>
-        <p>Conductor: {{ ride.driver.username }}</p>
-        <p>Fecha de salida: {{ ride.departure_time }}</p>
-        <p>Asientos: {{ ride.seats_available }} disponibles de {{ ride.total_seats }} totales</p>
-        <p class="price">Precio: {{ ride.get_formatted_price }}</p>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Viajes Disponibles - BlaBlaCar{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Reset del body para evitar scroll horizontal */
+    body {
+        overflow-x: hidden;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .hero-section {
+        position: relative;
+        height: 100vh;
+        width: 100vw;
+        margin: 0 calc(-50vw + 50%); /* Cambiado de -44px a 0 */
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+    }
+
+    .hero-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('{% static "images/cabecera.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        filter: brightness(0.75);
+        z-index: -1;
+    }
+
+    /* Contenedor interno del hero para mantener el ancho máximo */
+    .hero-content {
+        width: 100%;
+        max-width: var(--container-width);
+        padding: 0 var(--spacing-lg);
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .hero h1 {
+        font-size: 56px;
+        line-height: 1.1;
+        font-weight: 600;
+        letter-spacing: -0.003em;
+        color: white;
+        margin-bottom: var(--spacing-md);
+        text-align: center;
+    }
+
+    .hero p {
+        font-size: 21px;
+        line-height: 1.381;
+        font-weight: 400;
+        letter-spacing: .011em;
+        color: white;
+        margin-bottom: var(--spacing-xl);
+        text-align: center;
+    }
+
+    .search-form {
+        width: 100%;
+        max-width: 800px;
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: var(--border-radius-lg);
+        padding: var(--spacing-lg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+
+    .search-form form {
+        display: flex;
+        gap: var(--spacing-md);
+    }
+
+    .search-input {
+        flex: 1;
+        height: 44px;
+        padding: 0 var(--spacing-md);
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius-sm);
+        font-size: 17px;
+        line-height: 1.23536;
+        font-weight: 400;
+        letter-spacing: -.022em;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 4px rgba(0, 125, 250, 0.1);
+    }
+
+    .search-form button {
+        height: 44px;
+        padding: 0 20px;
+        background-color: var(--color-primary);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius-xl);
+        font-size: 17px;
+        line-height: 1.23536;
+        font-weight: 400;
+        letter-spacing: -.022em;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .search-form button:hover {
+        background-color: var(--color-primary-hover);
+    }
+
+    .content-section {
+        width: 100%;
+        background-color: white;
+        padding: var(--spacing-xl) 0;
+    }
+
+    .rides-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: var(--spacing-lg);
+    }
+
+    .ride-card {
+        background-color: var(--color-card);
+        border-radius: var(--border-radius-lg);
+        padding: var(--spacing-lg);
+        transition: var(--transition);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+
+    .ride-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .ride-card h2 {
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+        color: #1d1d1f;
+    }
+
+    .ride-info {
+        margin: var(--spacing-md) 0;
+        color: var(--color-secondary);
+        font-size: 0.875rem;
+    }
+
+    .price {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--color-text);
+        margin: var(--spacing-md) 0;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .inactive {
+        opacity: 0.6;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 980px;
+        font-size: 0.8rem;
+        background-color: #fae8e8;
+        color: #1d1d1f;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: var(--border-radius-xl);
+        font-size: 12px;
+        font-weight: 500;
+        background-color: rgba(255, 59, 48, 0.1);
+        color: var(--color-error);
+    }
+
+    /* Asegurarnos que el contenedor no cause scroll horizontal */
+    .container {
+        width: 100%;
+        max-width: var(--container-width);
+        margin: 0 auto;
+        padding: 0 var(--spacing-lg);
+        box-sizing: border-box;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Encuentra tu viaje perfecto</h1>
+        <p class="hero-subtitle">Viaja de manera cómoda, segura y económica</p>
+        
+        <div class="search-form">
+            <form method="get">
+                <input type="text" name="origin" placeholder="Ciudad de origen" value="{{ query_origin }}" class="search-input">
+                <input type="text" name="destination" placeholder="Ciudad de destino" value="{{ query_destination }}" class="search-input">
+                <button type="submit" class="button button-primary">Buscar</button>
+            </form>
+        </div>
     </div>
-    {% empty %}
-    <p>No hay viajes disponibles.</p>
-    {% endfor %}
-</body>
-</html>
+</div>
+
+<div class="content-section">
+    <div class="container">
+        <div class="rides-grid">
+            {% for ride in rides %}
+            <div class="ride-card {% if not ride.is_active %}inactive{% endif %}">
+                <h2 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h2>
+                <div class="ride-info">
+                    <p><strong>Conductor:</strong> {{ ride.driver.username }}</p>
+                    <p><strong>Fecha de salida:</strong> {{ ride.departure_time }}</p>
+                    <p><strong>Asientos:</strong> {{ ride.seats_available }} disponibles de {{ ride.total_seats }} totales</p>
+                </div>
+                <p class="ride-price">{{ ride.get_formatted_price }}</p>
+                
+                <div class="card-actions">
+                    <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
+                    
+                    {% if user.is_authenticated and user != ride.driver and ride.is_active %}
+                        <form method="post" action="{% url 'rides:book_ride' ride.id %}">
+                            {% csrf_token %}
+                            <button type="submit" 
+                                    class="button button-secondary" 
+                                    {% if ride.seats_available == 0 or user in ride.passengers.all %}disabled{% endif %}>
+                                {% if user in ride.passengers.all %}
+                                    Ya reservado
+                                {% elif ride.seats_available == 0 %}
+                                    No hay asientos
+                                {% else %}
+                                    Reservar
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="card text-center" style="grid-column: 1 / -1;">
+                <p>No hay viajes disponibles con los criterios de búsqueda especificados.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

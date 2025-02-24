@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Viajes - BlaBlaCar{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/pages/my-rides.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="my-rides-container">
+    <div class="my-rides-hero">
+        <h1 class="my-rides-title">Mis Viajes</h1>
+        <div class="rides-tabs">
+            <button class="rides-tab active" onclick="showTab('driver')">Como Conductor</button>
+            <button class="rides-tab" onclick="showTab('passenger')">Como Pasajero</button>
+        </div>
+    </div>
+
+    <div id="driver-tab" class="ride-section">
+        <h2 class="section-title">Viajes que publiqué</h2>
+        <div class="rides-grid">
+            {% for ride in rides_as_driver %}
+            <div class="ride-card {% if not ride.is_active %}inactive{% endif %}">
+                <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
+                <div class="ride-info">
+                    <p>Fecha: {{ ride.departure_time|date:"j F Y, H:i" }}</p>
+                    <p>Asientos: {{ ride.seats_available }} de {{ ride.total_seats }}</p>
+                </div>
+                <p class="ride-price">{{ ride.get_formatted_price }}</p>
+                <div class="card-actions">
+                    {% if ride.is_active %}
+                        <a href="{% url 'rides:edit_ride' ride.id %}" class="button button-primary">Editar</a>
+                    {% endif %}
+                    <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-secondary">Ver detalles</a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="empty-state">No has publicado ningún viaje.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="passenger-tab" class="ride-section" style="display: none;">
+        <h2 class="section-title">Viajes reservados</h2>
+        <div class="rides-grid">
+            {% for ride in rides_as_passenger %}
+            <div class="ride-card {% if not ride.is_active %}inactive{% endif %}">
+                <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
+                <div class="ride-info">
+                    <p>Conductor: {{ ride.driver.username }}</p>
+                    <p>Fecha: {{ ride.departure_time|date:"j F Y, H:i" }}</p>
+                </div>
+                <p class="ride-price">{{ ride.get_formatted_price }}</p>
+                <div class="card-actions">
+                    <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="empty-state">No te has unido a ningún viaje como pasajero.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(tab) {
+    // Actualizar tabs
+    document.querySelectorAll('.rides-tab').forEach(button => {
+        button.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    // Mostrar sección correspondiente
+    document.getElementById('driver-tab').style.display = tab === 'driver' ? 'block' : 'none';
+    document.getElementById('passenger-tab').style.display = tab === 'passenger' ? 'block' : 'none';
+}
+</script>
+{% endblock %}
