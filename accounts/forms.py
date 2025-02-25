@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 class CustomUserCreationForm(UserCreationForm):
     username = forms.CharField(
         max_length=150,
-        label="Nombre de usuario",  # Etiqueta personalizada
+        label="Nombre de usuario",  
         help_text="Ingrese un nombre de usuario único.",
         error_messages={
             'required': 'Este campo es obligatorio.',
@@ -14,7 +14,7 @@ class CustomUserCreationForm(UserCreationForm):
     )
     password1 = forms.CharField(
         widget=forms.PasswordInput,
-        label="Contraseña",  # Etiqueta personalizada
+        label="Contraseña",  
         help_text="Ingrese una contraseña segura.",
         error_messages={
             'required': 'Este campo es obligatorio.',
@@ -22,7 +22,7 @@ class CustomUserCreationForm(UserCreationForm):
     )
     password2 = forms.CharField(
         widget=forms.PasswordInput,
-        label="Confirmar contraseña",  # Etiqueta personalizada
+        label="Confirmar contraseña",  
         help_text="Ingrese la misma contraseña para verificación.",
         error_messages={
             'required': 'Este campo es obligatorio.',

@@ -53,12 +53,12 @@
 .search-form {
     width: 100%;
     max-width: 800px;
-    background: rgba(255, 255, 255, 0.15); /* Fondo más transparente */
-    backdrop-filter: blur(15px) saturate(180%); /* Ajuste del blur y saturación */
+    background: rgba(255, 255, 255, 0.15); 
+    backdrop-filter: blur(15px) saturate(180%); 
     -webkit-backdrop-filter: blur(15px) saturate(180%);
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-lg);
-    border: 1px solid rgba(255, 255, 255, 0.25); /* Borde más sutil */
+    border: 1px solid rgba(255, 255, 255, 0.25); 
 }
 
 .search-form form {
@@ -73,8 +73,8 @@
     border: none;
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-base);
-    background: rgba(255, 255, 255, 0.5); /* Fondo más transparente */
-    backdrop-filter: blur(10px); /* Ajuste del blur */
+    background: rgba(255, 255, 255, 0.5); 
+    backdrop-filter: blur(10px); 
     -webkit-backdrop-filter: blur(10px);
     color: var(--color-text);
     transition: all 0.2s ease;
@@ -82,7 +82,7 @@
 
 .search-input:focus {
     outline: none;
-    background: rgba(255, 255, 255, 0.8); /* Fondo más claro al enfocar */
+    background: rgba(255, 255, 255, 0.8); 
     box-shadow: 0 0 0 4px rgba(0, 125, 250, 0.1);
 }
 
@@ -285,7 +285,7 @@
 }
 
 .ride-title {
-    font-size: 20px; /* Ajuste Apple-like */
+    font-size: 20px; 
     font-weight: 600;
     margin-bottom: var(--spacing-md);
     color: var(--color-text);

@@ -1,7 +1,7 @@
 /* Hero Section */
 .hero-section {
     position: relative;
-    height: 580px; /* Changed from 100vh to a fixed height */
+    height: 580px; 
     width: 100vw;
     margin: 0 calc(-50vw + 50%);
     overflow: hidden;
@@ -29,7 +29,7 @@
     z-index: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* This will keep content vertically centered */
+    justify-content: center; 
     align-items: center;
 }
 
