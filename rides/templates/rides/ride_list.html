@@ -76,11 +76,12 @@
     .search-form {
         width: 100%;
         max-width: 800px;
-        background-color: rgba(255, 255, 255, 0.95);
+        background-color: rgba(255, 255, 255, 0.5); /* Fondo translúcido */
         border-radius: var(--border-radius-lg);
         padding: var(--spacing-lg);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(10px); /* Ajuste del blur */
+        -webkit-backdrop-filter: blur(10px); /* Ajuste del blur para Safari */
+        box-shadow: var(--shadow-md);
     }
 
     .search-form form {
