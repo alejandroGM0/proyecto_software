@@ -11,7 +11,7 @@
 <body>
     <header class="header">
         <nav class="nav-container">
-            <a href="{% url 'rides:ride_list' %}" class="nav-brand">BlaBlaCar</a>
+            <a href="{% url 'rides:ride_list' %}" class="nav-brand">CharlaCar</a>
             <div class="nav-links">
                 {% if user.is_authenticated %}
                     <a href="{% url 'rides:create_ride' %}" class="nav-link">Crear Viaje</a>
@@ -28,7 +28,7 @@
 
     <main>
         {% if messages %}
-        <div class="messages mt-2 mb-2">
+        <div class="messages-container">
             {% for message in messages %}
             <div class="message {{ message.tags }}">
                 {{ message }}
@@ -39,5 +39,5 @@
 
         {% block content %}{% endblock %}
     </main>
-1</body>
+</body>
 </html>
