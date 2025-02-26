@@ -24,7 +24,7 @@
 }
 
 .nav-brand {
-    font-size: var(--font-size-4xl);    
+    font-size: var(--font-size-base);   
     font-weight: 600;
     color: var(--color-text);
     text-decoration: none;
