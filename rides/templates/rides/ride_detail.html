@@ -5,55 +5,79 @@
 
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'css/pages/ride-detail.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
 <div class="detail-container">
     <div class="detail-hero">
-        <h1>{{ ride.origin }} → {{ ride.destination }}</h1>
+        <h1><span class="origin">{{ ride.origin }}</span> <i class="fas fa-arrow-right journey-arrow"></i> <span class="destination">{{ ride.destination }}</span></h1>
         <div class="status-badge {% if ride.is_active %}status-active{% else %}status-inactive{% endif %}">
+            <i class="fas {% if ride.is_active %}fa-circle-check{% else %}fa-circle-xmark{% endif %}"></i>
             {% if ride.is_active %}Viaje Activo{% else %}Viaje Finalizado{% endif %}
         </div>
     </div>
 
     <div class="detail-card">
+        <div class="card-header">
+            <i class="fas fa-car-side header-icon"></i>
+            <h2>Detalles del viaje</h2>
+        </div>
+        
         <div class="detail-grid">
             <div class="detail-info">
-                <strong>Conductor:</strong>
-                <p>{{ ride.driver.username }}</p>
+                <div class="info-icon"><i class="fas fa-user"></i></div>
+                <div class="info-content">
+                    <strong>Conductor:</strong>
+                    <p>{{ ride.driver.username }}</p>
+                </div>
             </div>
             <div class="detail-info">
-                <strong>Fecha de salida:</strong>
-                <p>{{ ride.departure_time }}</p>
+                <div class="info-icon"><i class="fas fa-clock"></i></div>
+                <div class="info-content">
+                    <strong>Fecha de salida:</strong>
+                    <p>{{ ride.departure_time }}</p>
+                </div>
             </div>
             <div class="detail-info">
-                <strong>Asientos disponibles:</strong>
-                <p>{{ ride.seats_available }} de {{ ride.total_seats }}</p>
+                <div class="info-icon"><i class="fas fa-chair"></i></div>
+                <div class="info-content">
+                    <strong>Asientos disponibles:</strong>
+                    <p>{{ ride.seats_available }} de {{ ride.total_seats }}</p>
+                </div>
             </div>
         </div>
 
-        <div class="detail-price">
-            {{ ride.get_formatted_price }}
+        <div class="price-reservation-wrapper">
+            <div class="detail-price">
+                <div class="price-label">Precio por asiento</div>
+                <div class="price-value">{{ ride.get_formatted_price }}</div>
+            </div>
+            {% if user.is_authenticated and user != ride.driver and ride.is_active and user in ride.passengers.all %}
+                <div class="reservation-confirmed">
+                    <i class="fas fa-check-circle"></i> Ya reservado
+                </div>
+            {% endif %}
         </div>
 
         <div class="detail-actions">
             {% if user.is_authenticated and user != ride.driver and ride.is_active %}
-                <form method="post" action="{% url 'rides:book_ride' ride.id %}">
-                    {% csrf_token %}
-                    <button type="submit" 
-                            class="button button-primary"
-                            {% if ride.seats_available == 0 or user in ride.passengers.all %}disabled{% endif %}>
-                        {% if user in ride.passengers.all %}
-                            Ya reservado
-                        {% elif ride.seats_available == 0 %}
-                            No hay asientos
-                        {% else %}
-                            Reservar
-                        {% endif %}
-                    </button>
-                </form>
+                {% if user not in ride.passengers.all %}
+                    {% if ride.seats_available == 0 %}
+                        <button class="button button-primary" disabled>
+                            <i class="fas fa-ban"></i> No hay asientos
+                        </button>
+                    {% else %}
+                        <form method="post" action="{% url 'rides:book_ride' ride.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="button button-primary">
+                                <i class="fas fa-ticket"></i> Reservar
+                            </button>
+                        </form>
+                    {% endif %}
+                {% endif %}
             {% endif %}
-            <a href="{% url 'rides:ride_list' %}" class="button button-secondary">Volver a la lista</a>
+            <a href="{% url 'rides:my_rides' %}" class="button button-secondary"><i class="fas fa-arrow-left"></i> Volver a mis viajes</a>
         </div>
     </div>
 </div>

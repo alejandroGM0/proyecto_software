@@ -35,21 +35,30 @@
 
 .form-group label {
     display: block;
-    font-size: var(--font-size-sm);
-    color: black;
-    margin-bottom: var(--spacing-xs);
-}
-
-.form-label {
-    display: block;
+    font-size: 14px;
+    color: #000;
     margin-bottom: 5px;
     font-weight: bold;
-    color: #000; /* Color negro para las etiquetas */
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: #007bff;
+    outline: none;
 }
 
 .error {
     color: red;
     font-size: 14px;
+    margin-top: 5px;
 }
 
 .form-actions {
@@ -66,6 +75,7 @@
     cursor: pointer;
     text-decoration: none;
     text-align: center;
+    font-size: 14px;
 }
 
 .button-primary {
@@ -76,4 +86,8 @@
 .button-secondary {
     background-color: #6c757d;
     color: #fff;
+}
+
+.button:hover {
+    opacity: 0.9;
 }
