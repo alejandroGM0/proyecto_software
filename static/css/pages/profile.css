@@ -2,12 +2,12 @@
 :root {
     --color-gradient: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     --shadow-hover: 0 10px 20px rgba(0, 0, 0, 0.15);
-    --color-primary-light: #6aafff; /* Tono azul MÁS claro para botones */
+    --color-primary-light: #6aafff;
     --color-tab-inactive: #e0e0e0;
 }
 
 .profile-container {
-    height: calc(100vh - 80px); /* Ajustar según la altura del header */
+    height: calc(100vh - 80px);
     max-width: 1200px;
     margin: 0 auto;
     padding: 0;
@@ -305,7 +305,6 @@
     font-size: 14px;
 }
 
-/* Nuevo color para botones primarios */
 .button-primary {
     background-color: var(--color-primary-light) !important;
     border-color: var(--color-primary-light) !important;
