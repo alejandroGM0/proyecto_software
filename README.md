@@ -1,3 +1,5 @@
-# proyecto_software
+## Desarrollo
 
-![Diagrama gantt](https://github.com/alejandroGM0/proyecto_software/blob/main/documentacion/diagrama%20gantt.png?raw=true)
+![Diagrama gantt](https://i.imgur.com/RC3e00j.png)
+![Diagrama gantt](https://i.imgur.com/1zgPOLy.png)
+
