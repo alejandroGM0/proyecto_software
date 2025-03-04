@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Valoración{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Detalle de Valoración</h1>
+    
+    <div class="card">
+        <div class="card-header">
+            Valoración para viaje: {{ review.ride.origin }} → {{ review.ride.destination }}
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <strong>Valoración:</strong>
+                <div>
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= review.rating %}
+                            ⭐
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <strong>Usuario:</strong> {{ review.user.username }}
+            </div>
+            
+            <div class="mb-3">
+                <strong>Comentario:</strong>
+                <p>{{ review.comment|default:"Sin comentario" }}</p>
+            </div>
+            
+            <div class="mb-3">
+                <strong>Fecha:</strong> {{ review.created_at|date:"j F Y, H:i" }}
+            </div>
+            
+            <div class="mb-3">
+                <strong>Detalles del viaje:</strong>
+                <ul>
+                    <li>Origen: {{ review.ride.origin }}</li>
+                    <li>Destino: {{ review.ride.destination }}</li>
+                    <li>Conductor: {{ review.ride.driver.username }}</li>
+                    <li>Fecha de salida: {{ review.ride.departure_time|date:"j F Y, H:i" }}</li>
+                </ul>
+            </div>
+            
+            <div class="d-flex">
+                {% if review.user == user %}
+                    <a href="{% url 'reviews:delete' review.id %}" class="btn btn-danger me-2">Eliminar</a>
+                {% endif %}
+                <a href="{% url 'reviews:list' %}" class="btn btn-secondary">Volver a la lista</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

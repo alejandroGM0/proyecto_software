@@ -9,52 +9,137 @@
 
 {% block content %}
 <div class="profile-container">
-    <div class="profile-hero">
-        <div class="profile-avatar">
-            {{ user.username.0|upper }}
-        </div>
-        <h1 class="profile-title">{{ user.username }}</h1>
-        <p class="profile-subtitle">Miembro desde {{ user.date_joined|date:"F Y" }}</p>
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-number">{{ total_rides }}</div>
-            <div class="stat-label">Viajes Totales</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ active_rides_as_driver.count }}</div>
-            <div class="stat-label">Viajes como Conductor</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ rides_as_passenger.count }}</div>
-            <div class="stat-label">Viajes como Pasajero</div>
-        </div>
-    </div>
-
-    <h2 class="section-title">Viajes Activos como Conductor</h2>
-    <div class="rides-grid">
-        {% for ride in active_rides_as_driver %}
-        <div class="profile-ride-card">
-            <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
-            <div class="ride-info">
-                <p>{{ ride.departure_time|date:"j F Y, H:i" }}</p>
-                <p>{{ ride.passengers.count }}/{{ ride.total_seats }} pasajeros</p>
-                <p class="ride-price">{{ ride.get_formatted_price }}</p>
+    <div class="profile-layout">
+        <!-- Panel izquierdo: Información del perfil -->
+        <div class="profile-sidebar">
+            <div class="profile-avatar-container">
+                <div class="profile-avatar">
+                    {{ user.username.0|upper }}
+                </div>
+                <h1 class="profile-title">{{ user.username }}</h1>
+                <p class="profile-subtitle">Miembro desde {{ user.date_joined|date:"F Y" }}</p>
             </div>
-            <div class="card-actions">
-                <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
-                <a href="{% url 'rides:edit_ride' ride.id %}" class="button button-secondary">Editar</a>
+
+            <div class="stats-container">
+                <h3 class="stats-heading">Estadísticas</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🚗</div>
+                        <div class="stat-number">{{ total_rides }}</div>
+                        <div class="stat-label">Viajes Totales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🚦</div>
+                        <div class="stat-number">{{ active_rides_as_driver.count }}</div>
+                        <div class="stat-label">Como Conductor</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👤</div>
+                        <div class="stat-number">{{ rides_as_passenger.count }}</div>
+                        <div class="stat-label">Como Pasajero</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-actions">
+                <a href="{% url 'rides:create_ride' %}" class="button button-primary">
+                    <span>✚</span> Crear Viaje
+                </a>
+                <a href="{% url 'rides:my_rides' %}" class="button button-secondary">
+                    <span>🔎</span> Ver Todos Mis Viajes
+                </a>
             </div>
         </div>
-        {% empty %}
-        <p class="text-center" style="grid-column: 1 / -1;">No tienes viajes activos como conductor.</p>
-        {% endfor %}
-    </div>
-
-    <div class="profile-actions">
-        <a href="{% url 'rides:create_ride' %}" class="button button-primary">Crear Viaje</a>
-        <a href="{% url 'rides:my_rides' %}" class="button button-secondary">Ver Todos Mis Viajes</a>
+        
+        <!-- Panel derecho: Viajes -->
+        <div class="profile-content">
+            <div class="rides-tabs">
+                <button class="tab-button active" data-tab="driver">Como Conductor</button>
+                <button class="tab-button" data-tab="passenger">Como Pasajero</button>
+            </div>
+            
+            <div class="tab-content active" id="driver-tab">
+                <div class="content-header">
+                    <h2 class="section-title">Viajes Activos como Conductor</h2>
+                </div>
+                
+                <div class="rides-grid">
+                    {% for ride in active_rides_as_driver %}
+                    <div class="profile-ride-card">
+                        <div class="ride-status"></div>
+                        <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
+                        <div class="ride-info">
+                            <p><span class="info-icon">🗓️</span> {{ ride.departure_time|date:"j F Y, H:i" }}</p>
+                            <p><span class="info-icon">👥</span> {{ ride.passengers.count }}/{{ ride.total_seats }} pasajeros</p>
+                            <p class="ride-price"><span class="info-icon">💰</span> {{ ride.get_formatted_price }}</p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
+                            <a href="{% url 'rides:edit_ride' ride.id %}" class="button button-secondary">Editar</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-icon">🚙</div>
+                        <p>No tienes viajes activos como conductor</p>
+                        <a href="{% url 'rides:create_ride' %}" class="button button-primary">Crear tu primer viaje</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="tab-content" id="passenger-tab">
+                <div class="content-header">
+                    <h2 class="section-title">Viajes como Pasajero</h2>
+                </div>
+                
+                <div class="rides-grid">
+                    {% for ride in rides_as_passenger %}
+                    <div class="profile-ride-card">
+                        <div class="ride-status passenger"></div>
+                        <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
+                        <div class="ride-info">
+                            <p><span class="info-icon">🗓️</span> {{ ride.departure_time|date:"j F Y, H:i" }}</p>
+                            <p><span class="info-icon">🧑‍✈️</span> Conductor: {{ ride.driver.username }}</p>
+                            <p class="ride-price"><span class="info-icon">💰</span> {{ ride.get_formatted_price }}</p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-icon">👤</div>
+                        <p>No tienes viajes como pasajero</p>
+                        <a href="{% url 'rides:ride_list' %}" class="button button-primary">Buscar viajes</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabs = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Desactivar todas las pestañas
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Activar la pestaña seleccionada
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId + '-tab').classList.add('active');
+            });
+        });
+    });
+</script>
+{% endblock %}
+
 {% endblock %}

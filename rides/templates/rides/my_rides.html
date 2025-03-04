@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mis Viajes - BlaBlaCar{% endblock %}
+{% block title %}Mis Viajes - CharlaCar{% endblock %}
 
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'css/pages/my-rides.css' %}">
@@ -9,16 +9,18 @@
 
 {% block content %}
 <div class="my-rides-container">
+    <div class="my-rides-banner"></div> <!-- Banner degradado -->
     <div class="my-rides-hero">
         <h1 class="my-rides-title">Mis Viajes</h1>
         <div class="rides-tabs">
-            <button class="rides-tab active" onclick="showTab('driver')">Como Conductor</button>
-            <button class="rides-tab" onclick="showTab('passenger')">Como Pasajero</button>
+            <button class="rides-tab active" data-tab="driver" onclick="showTab(event)">Como Conductor</button>
+            <button class="rides-tab" data-tab="passenger" onclick="showTab(event)">Como Pasajero</button>
         </div>
     </div>
 
+    <!-- Viajes Publicados -->
     <div id="driver-tab" class="ride-section">
-        <h2 class="section-title">Viajes que publiqué</h2>
+        <h2 class="section-title">Viajes Publicados</h2>
         <div class="rides-grid">
             {% for ride in rides_as_driver %}
             <div class="ride-card {% if not ride.is_active %}inactive{% endif %}">
@@ -30,9 +32,9 @@
                 <p class="ride-price">{{ ride.get_formatted_price }}</p>
                 <div class="card-actions">
                     {% if ride.is_active %}
-                        <a href="{% url 'rides:edit_ride' ride.id %}" class="button button-primary">Editar</a>
+                        <a href="{% url 'rides:edit_ride' ride.id %}" class="button">Editar</a>
                     {% endif %}
-                    <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-secondary">Ver detalles</a>
+                    <a href="{% url 'rides:ride_detail' ride.id %}" class="button">Ver detalles</a>
                 </div>
             </div>
             {% empty %}
@@ -41,19 +43,20 @@
         </div>
     </div>
 
+    <!-- Viajes Reservados -->
     <div id="passenger-tab" class="ride-section" style="display: none;">
-        <h2 class="section-title">Viajes reservados</h2>
+        <h2 class="section-title">Viajes Reservados</h2>
         <div class="rides-grid">
             {% for ride in rides_as_passenger %}
             <div class="ride-card {% if not ride.is_active %}inactive{% endif %}">
                 <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
                 <div class="ride-info">
-                    <p>Conductor: {{ ride.driver.username }}</p>
                     <p>Fecha: {{ ride.departure_time|date:"j F Y, H:i" }}</p>
+                    <p>Conductor: {{ ride.driver.username }}</p>
                 </div>
                 <p class="ride-price">{{ ride.get_formatted_price }}</p>
                 <div class="card-actions">
-                    <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
+                    <a href="{% url 'rides:ride_detail' ride.id %}" class="button">Ver detalles</a>
                 </div>
             </div>
             {% empty %}
@@ -64,14 +67,12 @@
 </div>
 
 <script>
-function showTab(tab) {
-    // Actualizar tabs
-    document.querySelectorAll('.rides-tab').forEach(button => {
-        button.classList.remove('active');
-    });
+function showTab(event) {
+    const tab = event.target.dataset.tab;
+
+    document.querySelectorAll('.rides-tab').forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
 
-    // Mostrar sección correspondiente
     document.getElementById('driver-tab').style.display = tab === 'driver' ? 'block' : 'none';
     document.getElementById('passenger-tab').style.display = tab === 'passenger' ? 'block' : 'none';
 }

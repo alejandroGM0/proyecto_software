@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Valoración{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Crear Valoración</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            Detalles del Viaje
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">{{ ride.origin }} → {{ ride.destination }}</h5>
+            <p class="card-text">Fecha: {{ ride.departure_time|date:"j F Y, H:i" }}</p>
+            <p class="card-text">Conductor: {{ ride.driver.username }}</p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            Tu Valoración
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label class="form-label">{{ form.rating.label }}</label>
+                    <div class="star-rating">
+                        {{ form.rating }}
+                    </div>
+                    {% if form.rating.errors %}
+                        <div class="text-danger">{{ form.rating.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">{{ form.comment.label }}</label>
+                    {{ form.comment }}
+                    {% if form.comment.errors %}
+                        <div class="text-danger">{{ form.comment.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-flex">
+                    <button type="submit" class="btn btn-primary me-2">Enviar valoración</button>
+                    <a href="{% url 'rides:ride_detail' ride.id %}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
