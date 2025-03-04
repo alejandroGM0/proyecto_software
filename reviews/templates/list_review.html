@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Valoraciones{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Mis Valoraciones</h1>
+    
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#given">Valoraciones dadas</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#received">Valoraciones recibidas</a>
+        </li>
+    </ul>
+    
+    <div class="tab-content">
+        <!-- Valoraciones dadas -->
+        <div id="given" class="tab-pane fade show active">
+            <h3>Valoraciones que has dado</h3>
+            
+            {% if reviews_given %}
+                <div class="list-group mt-3">
+                {% for review in reviews_given %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <h5>{{ review.ride.origin }} → {{ review.ride.destination }}</h5>
+                            <div>
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        ⭐
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p>{{ review.comment|default:"Sin comentario" }}</p>
+                        <small class="text-muted">Fecha: {{ review.created_at|date:"j F Y" }}</small>
+                        <div class="mt-2">
+                            <a href="{% url 'reviews:detail' review.id %}" class="btn btn-sm btn-info">Ver</a>
+                            <a href="{% url 'reviews:delete' review.id %}" class="btn btn-sm btn-danger">Eliminar</a>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No has dado ninguna valoración aún.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Valoraciones recibidas -->
+        <div id="received" class="tab-pane fade">
+            <h3>Valoraciones que has recibido</h3>
+            
+            {% if reviews_received %}
+                <div class="list-group mt-3">
+                {% for review in reviews_received %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <h5>{{ review.ride.origin }} → {{ review.ride.destination }}</h5>
+                            <div>
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        ⭐
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p>De: <strong>{{ review.user.username }}</strong></p>
+                        <p>{{ review.comment|default:"Sin comentario" }}</p>
+                        <small class="text-muted">Fecha: {{ review.created_at|date:"j F Y" }}</small>
+                        <div class="mt-2">
+                            <a href="{% url 'reviews:detail' review.id %}" class="btn btn-sm btn-info">Ver</a>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No has recibido ninguna valoración aún.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
