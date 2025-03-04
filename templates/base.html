@@ -16,6 +16,7 @@
                 {% if user.is_authenticated %}
                     <a href="{% url 'rides:create_ride' %}" class="nav-link">Crear Viaje</a>
                     <a href="{% url 'rides:my_rides' %}" class="nav-link">Mis Viajes</a>
+                    <a href="{% url 'chat:my_chats' %}" class="nav-link">Mensajes</a>
                     <a href="{% url 'accounts:profile' %}" class="nav-link">Mi Perfil</a>
                     <a href="{% url 'accounts:logout' %}" class="nav-link">Cerrar Sesión</a>
                 {% else %}
@@ -27,17 +28,8 @@
     </header>
 
     <main>
-        {% if messages %}
-        <div class="messages mt-2 mb-2">
-            {% for message in messages %}
-            <div class="message {{ message.tags }}">
-                {{ message }}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
 
         {% block content %}{% endblock %}
     </main>
-1</body>
+</body>
 </html>

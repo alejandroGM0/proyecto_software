@@ -37,21 +37,29 @@
         </div>
 
         <div class="detail-actions">
-            {% if user.is_authenticated and user != ride.driver and ride.is_active %}
-                <form method="post" action="{% url 'rides:book_ride' ride.id %}">
-                    {% csrf_token %}
-                    <button type="submit" 
-                            class="button button-primary"
-                            {% if ride.seats_available == 0 or user in ride.passengers.all %}disabled{% endif %}>
-                        {% if user in ride.passengers.all %}
-                            Ya reservado
-                        {% elif ride.seats_available == 0 %}
-                            No hay asientos
-                        {% else %}
-                            Reservar
-                        {% endif %}
-                    </button>
-                </form>
+            {% if user.is_authenticated %}
+                {% if user == ride.driver or user in ride.passengers.all %}
+                    <a href="{% url 'chat:ride_chat' ride.id %}" class="button button-primary">
+                        Chat del viaje
+                    </a>
+                {% endif %}
+                
+                {% if user.is_authenticated and user != ride.driver and ride.is_active %}
+                    <form method="post" action="{% url 'rides:book_ride' ride.id %}">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                class="button button-primary"
+                                {% if ride.seats_available == 0 or user in ride.passengers.all %}disabled{% endif %}>
+                            {% if user in ride.passengers.all %}
+                                Ya reservado
+                            {% elif ride.seats_available == 0 %}
+                                No hay asientos
+                            {% else %}
+                                Reservar
+                            {% endif %}
+                        </button>
+                    </form>
+                {% endif %}
             {% endif %}
             <a href="{% url 'rides:ride_list' %}" class="button button-secondary">Volver a la lista</a>
         </div>

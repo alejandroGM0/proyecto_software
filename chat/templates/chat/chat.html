@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if selected_ride %}Chat{% else %}Mensajes{% endif %}{% endblock %}
+
+{% block content %}
+<div>
+    <!-- Lista de chats -->
+    <div>
+        <h2>Chats</h2>
+        <div>
+            {% for chat in chats_data %}
+            <a href="{% url 'chat:ride_chat' chat.ride.id %}">
+                <div>
+                    <div>{{ chat.ride.origin }} → {{ chat.ride.destination }}</div>
+                    <div>
+                        {% if chat.ride.driver == user %}Tú{% else %}{{ chat.ride.driver.username }}{% endif %}
+                        {% if chat.last_message %}- {{ chat.last_message.content|truncatechars:30 }}{% endif %}
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div>Sin conversaciones</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div>
+        {% if selected_ride %}
+            <div>
+                <div>{{ selected_ride.origin }} → {{ selected_ride.destination }}</div>
+                <div>{{ selected_ride.departure_time|date:"j F Y, H:i" }}</div>
+                {% if not selected_ride.is_active %}<div>Chat deshabilitado</div>{% endif %}
+            </div>
+            
+            <!-- Mensajes -->
+            <div id="chat-messages"></div>
+            
+            <div>
+                <form id="chat-form" {% if not selected_ride.is_active %}disabled{% endif %}>
+                    {% csrf_token %}
+                    <input type="text" id="message-input" {% if not selected_ride.is_active %}disabled{% endif %}>
+                    <button type="submit" {% if not selected_ride.is_active %}disabled{% endif %}>Enviar</button>
+                </form>
+            </div>
+
+            <script>
+                const rideId = "{{ selected_ride.id }}";
+                const user = "{{ user.username }}";
+                const chatMessages = document.getElementById('chat-messages');
+                const chatForm = document.getElementById('chat-form');
+                const messageInput = document.getElementById('message-input');
+                let socket;
+
+                // Carga el historial de mensajes
+                fetch(`/chat/${rideId}/messages/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.messages.forEach(msg => {
+                            let div = document.createElement('div');
+                            div.innerHTML = `<p>${msg.sender}: ${msg.content}</p>`;
+                            chatMessages.appendChild(div);
+                        });
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                        
+                        if (data.is_active) {
+                            // Conecta WebSocket
+                            const wsStart = window.location.protocol == "https:" ? "wss://" : "ws://";
+                            socket = new WebSocket(wsStart + window.location.host + `/ws/chat/${rideId}/`);
+                            
+                            socket.onmessage = function(e) {
+                                const data = JSON.parse(e.data);
+                                let div = document.createElement('div');
+                                div.innerHTML = `<p>${data.sender}: ${data.content}</p>`;
+                                chatMessages.appendChild(div);
+                                chatMessages.scrollTop = chatMessages.scrollHeight;
+                            };
+                        }
+                    });
+
+                // Envía mensajes
+                chatForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const message = messageInput.value.trim();
+                    if (message && socket?.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({'message': message}));
+                        messageInput.value = '';
+                    }
+                });
+            </script>
+        {% else %}
+            <div>
+                <h3>Selecciona un chat</h3>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
