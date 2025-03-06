@@ -9,7 +9,8 @@ env/
 venv/
 ENV/
 
-# Python cache files (más específico)
+
+# Python cache files
 **/__pycache__/
 **/*.py[cod]
 *$py.class
@@ -17,6 +18,12 @@ ENV/
 
 # Database
 db.sqlite3
+db.sqlite3-journal
+
+# Media files
+media/
+media/*
+/media/
 
 # IDE
 .vscode/

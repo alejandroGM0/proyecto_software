@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}Configuración{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <h1>Configuración</h1>
+    
+    <div id="section-account">
+        <h2>Información de cuenta</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="settings_type" value="account">
+            
+            <div class="form-group">
+                <label for="username">Nombre de usuario</label>
+                <input type="text" id="username" name="username" value="{{ user.username }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Correo electrónico</label>
+                <input type="email" id="email" name="email" value="{{ user.email }}">
+            </div>
+            
+            <div class="form-group">
+                <a href="{% url 'accounts:change_password' %}">Cambiar contraseña</a>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
+    
+    <hr>
+    
+    <div id="section-profile">
+        <h2>Información personal</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="settings_type" value="profile">
+            
+            <div class="form-group">
+                <label for="id_profile_image">Foto de perfil</label>
+                {% if user_profile.profile_image %}
+                    <div>
+                        <img src="{{ user_profile.profile_image.url }}" alt="Foto de perfil" width="100">
+                    </div>
+                {% endif %}
+                <input type="file" id="id_profile_image" name="profile_image" accept="image/*">
+            </div>
+            
+            <div class="form-group">
+                <label for="id_bio">Biografía</label>
+                {{ profile_form.bio }}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_phone_number">Número de teléfono</label>
+                {{ profile_form.phone_number }}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_location">Ciudad de residencia</label>
+                {{ profile_form.location }}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_birth_date">Fecha de nacimiento</label>
+                {{ profile_form.birth_date }}
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
+    
+    <hr>
+    
+    <div id="section-vehicle">
+        <h2>Información del vehículo</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="settings_type" value="vehicle">
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="has_vehicle" {% if user_profile.has_vehicle %}checked{% endif %}>
+                    ¿Tienes vehículo?
+                </label>
+            </div>
+            
+            <div id="vehicle-details">
+                <div class="form-group">
+                    <label for="id_vehicle_model">Modelo del vehículo</label>
+                    <input type="text" id="id_vehicle_model" name="vehicle_model" value="{{ user_profile.vehicle_model|default:'' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_vehicle_year">Año del vehículo</label>
+                    <input type="number" id="id_vehicle_year" name="vehicle_year" value="{{ user_profile.vehicle_year|default:'' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_vehicle_color">Color del vehículo</label>
+                    <input type="text" id="id_vehicle_color" name="vehicle_color" value="{{ user_profile.vehicle_color|default:'' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_vehicle_features">Características adicionales</label>
+                    <textarea id="id_vehicle_features" name="vehicle_features" rows="3">{{ user_profile.vehicle_features|default:'' }}</textarea>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
+    
+    <hr>
+    
+    <div id="section-preferences">
+        <h2>Preferencias de viaje</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="settings_type" value="preferences">
+            
+            <div class="form-group">
+                <label for="id_pref_music">Música</label>
+                {{ profile_form.pref_music }}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_pref_talk">Conversación</label>
+                {{ profile_form.pref_talk }}
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="pref_pets" {% if user_profile.pref_pets %}checked{% endif %}>
+                    Acepto mascotas
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="pref_smoking" {% if user_profile.pref_smoking %}checked{% endif %}>
+                    Permito fumar
+                </label>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
+    
+    <hr>
+    
+    <div id="section-notifications">
+        <h2>Preferencias de notificaciones</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="settings_type" value="notifications">
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="email_notifications" {% if user_profile.email_notifications %}checked{% endif %}>
+                    Recibir notificaciones por correo electrónico
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="message_notifications" {% if user_profile.message_notifications %}checked{% endif %}>
+                    Notificaciones de nuevos mensajes
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="ride_notifications" {% if user_profile.ride_notifications %}checked{% endif %}>
+                    Notificaciones de viajes
+                </label>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit">Guardar preferencias</button>
+            </div>
+        </form>
+    </div>
+    
+    <hr>
+    
+    <div id="section-privacy">
+        <h2>Preferencias de privacidad</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="settings_type" value="privacy">
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="profile_visible" {% if user_profile.profile_visible %}checked{% endif %}>
+                    Perfil visible para otros usuarios
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="show_rides_history" {% if user_profile.show_rides_history %}checked{% endif %}>
+                    Mostrar historial de viajes en mi perfil
+                </label>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit">Guardar preferencias</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
