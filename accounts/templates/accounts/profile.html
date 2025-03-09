@@ -10,14 +10,37 @@
 {% block content %}
 <div class="profile-container">
     <div class="profile-layout">
-        <!-- Panel izquierdo: Información del perfil -->
         <div class="profile-sidebar">
             <div class="profile-avatar-container">
-                <div class="profile-avatar">
-                    {{ user.username.0|upper }}
-                </div>
+                {% if user_profile.profile_image %}
+                    <div class="profile-avatar">
+                        <img src="{{ user_profile.profile_image.url }}" alt="{{ user.username }}" class="profile-img">
+                    </div>
+                {% else %}
+                    <div class="profile-avatar">
+                        {{ user.username.0|upper }}
+                    </div>
+                {% endif %}
                 <h1 class="profile-title">{{ user.username }}</h1>
                 <p class="profile-subtitle">Miembro desde {{ user.date_joined|date:"F Y" }}</p>
+                
+                {% if user_profile.get_age %}
+                <p>{{ user_profile.get_age }} años</p>
+                {% endif %}
+                
+                {% if user_profile.location %}
+                <p>{{ user_profile.location }}</p>
+                {% endif %}
+                
+                {% if user_profile.last_active %}
+                <p>{{ user_profile.get_activity_status }}</p>
+                {% endif %}
+                
+                {% if user_profile.bio %}
+                <div>
+                    <p>{{ user_profile.bio|linebreaksbr }}</p>
+                </div>
+                {% endif %}
             </div>
 
             <div class="stats-container">
@@ -41,13 +64,35 @@
                 </div>
             </div>
             
+            {% if user_profile.has_vehicle %}
+            <div>
+                <h3>Mi Vehículo</h3>
+                <div>
+                    <p><strong>Modelo:</strong> {{ user_profile.vehicle_model }} ({{ user_profile.vehicle_year }})</p>
+                    <p><strong>Color:</strong> {{ user_profile.vehicle_color }}</p>
+                    {% if user_profile.vehicle_features %}
+                    <p><strong>Características:</strong> {{ user_profile.vehicle_features }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
             <div class="profile-actions">
+                {% if is_own_profile %}
                 <a href="{% url 'rides:create_ride' %}" class="button button-primary">
                     <span>✚</span> Crear Viaje
                 </a>
                 <a href="{% url 'rides:my_rides' %}" class="button button-secondary">
                     <span>🔎</span> Ver Todos Mis Viajes
                 </a>
+                <a href="{% url 'accounts:settings' %}" class="button button-secondary">
+                    <span>⚙️</span> Configuración
+                </a>
+                {% else %}
+                <a href="#" class="button button-primary">
+                    <span>✉️</span> Enviar Mensaje
+                </a>
+                {% endif %}
             </div>
         </div>
         
@@ -75,7 +120,9 @@
                         </div>
                         <div class="card-actions">
                             <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
+                            {% if is_own_profile %}
                             <a href="{% url 'rides:edit_ride' ride.id %}" class="button button-secondary">Editar</a>
+                            {% endif %}
                         </div>
                     </div>
                     {% empty %}

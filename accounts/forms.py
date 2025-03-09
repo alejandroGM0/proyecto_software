@@ -1,6 +1,10 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from .models import UserProfile
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.contrib import messages
 
 class CustomUserCreationForm(UserCreationForm):
     username = forms.CharField(
@@ -32,3 +36,18 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'password1', 'password2')
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = [
+            'profile_image', 'bio', 'phone_number', 'location', 'birth_date',
+            'has_vehicle', 'vehicle_model', 'vehicle_year', 'vehicle_color', 'vehicle_features',
+            'pref_music', 'pref_talk', 'pref_pets', 'pref_smoking',
+        ]
+        widgets = {
+            'bio': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Cuéntanos un poco sobre ti...'}),
+            'birth_date': forms.DateInput(attrs={'type': 'date'}),
+            'vehicle_features': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A/C, maletero amplio, etc.'}),
+        }
+

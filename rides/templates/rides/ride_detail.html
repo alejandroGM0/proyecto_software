@@ -29,7 +29,7 @@
                 <div class="info-icon"><i class="fas fa-user"></i></div>
                 <div class="info-content">
                     <strong>Conductor:</strong>
-                    <p>{{ ride.driver.username }}</p>
+                    <p><a href="{% url 'accounts:user_profile' ride.driver.id %}">{{ ride.driver.username }}</a></p>
                 </div>
             </div>
             <div class="detail-info">
