@@ -1,0 +1,301 @@
+/* Componentes reutilizables */
+
+/* Header y navegación */
+.header {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 999;
+    transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.16);
+}
+
+.nav-container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 22px;
+    height: 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-link {
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    opacity: 0.8;
+    transition: opacity 0.3s;
+}
+
+.nav-link:hover {
+    opacity: 1;
+    color: var(--color-primary);
+}
+
+/* Search Form */
+.search-form {
+    width: 100%;
+    max-width: 800px;
+    background: rgba(255, 255, 255, 0.15); /* Fondo más transparente */
+    backdrop-filter: blur(15px) saturate(180%); /* Ajuste del blur y saturación */
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    border: 1px solid rgba(255, 255, 255, 0.25); /* Borde más sutil */
+}
+
+.search-form form {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.search-input {
+    flex: 1;
+    height: 44px;
+    padding: 0 var(--spacing-md);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-base);
+    background: rgba(255, 255, 255, 0.5); /* Fondo más transparente */
+    backdrop-filter: blur(10px); /* Ajuste del blur */
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--color-text);
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.8); /* Fondo más claro al enfocar */
+    box-shadow: 0 0 0 4px rgba(0, 125, 250, 0.1);
+}
+
+.search-form button {
+    height: 44px;
+    padding: 0 var(--spacing-lg);
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-full);
+    font-size: var(--font-size-base);
+    font-weight: 400;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.search-form button:hover {
+    background-color: var(--color-primary-hover);
+}
+
+/* Contenedor */
+.container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 22px;
+}
+
+/* Botones */
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-xl);
+    font-size: var(--font-size-base);
+    font-weight: 400;
+    text-decoration: none;
+    transition: var(--transition);
+    cursor: pointer;
+    border: none;
+}
+
+.button-primary {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.button-primary:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.button-secondary {
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+
+.button-secondary:hover {
+    background-color: var(--color-border);
+}
+
+/* Tarjetas */
+.card {
+    background-color: var(--color-white);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    transition: var(--transition);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Formularios */
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-size: 0.875rem;
+    color: var(--color-secondary);
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    transition: var(--transition);
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background-color: var(--color-white);
+}
+
+/* Mensajes */
+.message {
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: var(--spacing-md);
+    font-size: 0.875rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.message.success {
+    background-color: rgba(41, 204, 68, 0.1);
+    color: var(--color-success);
+    border: 1px solid rgba(41, 204, 68, 0.2);
+}
+
+.message.error {
+    background-color: rgba(255, 59, 48, 0.1);
+    color: var(--color-error);
+    border: 1px solid rgba(255, 59, 48, 0.2);
+}
+
+/* Hero section */
+.hero {
+    text-align: center;
+    padding: var(--spacing-xl) 0;
+}
+
+.hero h1 {
+    font-size: 48px;
+    font-weight: 600;
+    letter-spacing: -0.003em;
+    margin-bottom: var(--spacing-md);
+}
+
+.hero p {
+    font-size: 21px;
+    font-weight: 400;
+    letter-spacing: 0.011em;
+    color: var(--color-secondary);
+}
+
+/* Hero Components */
+.hero-title {
+    font-size: var(--font-size-4xl);
+    line-height: var(--line-height-tight);
+    font-weight: 600;
+    letter-spacing: -0.003em;
+    color: var(--color-white);
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+}
+
+.hero-subtitle {
+    font-size: var(--font-size-lg);
+    line-height: 1.381;
+    font-weight: 400;
+    letter-spacing: .011em;
+    color: var(--color-white);
+    margin-bottom: var(--spacing-xl);
+    text-align: center;
+}
+
+/* Ride Cards */
+.rides-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.ride-card {
+    background-color: rgba(255, 255, 255, 0.65);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    border: none;
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: saturate(150%) blur(20px);
+    -webkit-backdrop-filter: saturate(150%) blur(20px);
+    transition: var(--transition);
+}
+
+.ride-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.ride-card.inactive {
+    opacity: 0.6;
+}
+
+.ride-title {
+    font-size: 20px; /* Ajuste Apple-like */
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text);
+}
+
+.ride-info {
+    font-size: 15px;
+    color: var(--color-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+.ride-price {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text);
+    margin: var(--spacing-md) 0;
+}
+
+.card-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
