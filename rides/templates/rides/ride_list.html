@@ -1,26 +1,22 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Viajes Disponibles - BlaBlaCar{% endblock %}
+{% block title %}Viajes Disponibles{% endblock %}
 
 {% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-    /* Reset del body para evitar scroll horizontal */
-    body {
-        overflow-x: hidden;
-        margin: 0;
-        padding: 0;
-        width: 100%;
-    }
-
+    
     .hero-section {
         position: relative;
-        height: 100vh;
+        height: 80vh;
         width: 100vw;
-        margin: 0 calc(-50vw + 50%); /* Cambiado de -44px a 0 */
+        margin: 0 calc(-50vw + 50%);
         overflow: hidden;
         display: flex;
         justify-content: center;
+        align-items: center;
     }
 
     .hero-background {
@@ -36,179 +32,109 @@
         z-index: -1;
     }
 
-    /* Contenedor interno del hero para mantener el ancho máximo */
     .hero-content {
         width: 100%;
-        max-width: var(--container-width);
-        padding: 0 var(--spacing-lg);
+        max-width: 1200px;
+        padding: 0 2rem;
         position: relative;
         z-index: 1;
+        text-align: center;
     }
 
-    .hero {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .hero h1 {
-        font-size: 56px;
-        line-height: 1.1;
+    .hero-title {
+        font-size: 3.5rem;
         font-weight: 600;
         letter-spacing: -0.003em;
         color: white;
-        margin-bottom: var(--spacing-md);
-        text-align: center;
+        margin-bottom: 1rem;
     }
 
-    .hero p {
-        font-size: 21px;
-        line-height: 1.381;
+    .hero-subtitle {
+        font-size: 1.3rem;
         font-weight: 400;
         letter-spacing: .011em;
         color: white;
-        margin-bottom: var(--spacing-xl);
-        text-align: center;
+        margin-bottom: 2.5rem;
+        opacity: 0.9;
     }
 
     .search-form {
         width: 100%;
         max-width: 800px;
-        background-color: rgba(255, 255, 255, 0.5); /* Fondo translúcido */
-        border-radius: var(--border-radius-lg);
-        padding: var(--spacing-lg);
-        backdrop-filter: blur(10px); /* Ajuste del blur */
-        -webkit-backdrop-filter: blur(10px); /* Ajuste del blur para Safari */
-        box-shadow: var(--shadow-md);
+        margin: 0 auto;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        padding: 1.5rem;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     }
 
     .search-form form {
         display: flex;
-        gap: var(--spacing-md);
+        gap: 1rem;
+        flex-wrap: wrap;
     }
 
     .search-input {
         flex: 1;
+        min-width: 200px;
         height: 44px;
-        padding: 0 var(--spacing-md);
-        border: 1px solid var(--color-border);
-        border-radius: var(--border-radius-sm);
-        font-size: 17px;
-        line-height: 1.23536;
-        font-weight: 400;
-        letter-spacing: -.022em;
+        padding: 0 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
     }
 
     .search-input:focus {
         outline: none;
-        border-color: var(--color-primary);
-        box-shadow: 0 0 0 4px rgba(0, 125, 250, 0.1);
-    }
-
-    .search-form button {
-        height: 44px;
-        padding: 0 20px;
-        background-color: var(--color-primary);
-        color: white;
-        border: none;
-        border-radius: var(--border-radius-xl);
-        font-size: 17px;
-        line-height: 1.23536;
-        font-weight: 400;
-        letter-spacing: -.022em;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .search-form button:hover {
-        background-color: var(--color-primary-hover);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
     }
 
     .content-section {
         width: 100%;
-        background-color: white;
-        padding: var(--spacing-xl) 0;
+        padding: 3rem 0;
+        background-color: var(--background-color);
     }
 
-    .rides-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: var(--spacing-lg);
-    }
-
-    .ride-card {
-        background-color: var(--color-card);
-        border-radius: var(--border-radius-lg);
-        padding: var(--spacing-lg);
-        transition: var(--transition);
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-    }
-
-    .ride-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .ride-card h2 {
-        font-size: 1.5rem;
-        margin-bottom: 16px;
-        color: #1d1d1f;
-    }
-
-    .ride-info {
-        margin: var(--spacing-md) 0;
-        color: var(--color-secondary);
-        font-size: 0.875rem;
-    }
-
-    .price {
-        font-size: 24px;
-        font-weight: 600;
-        color: var(--color-text);
-        margin: var(--spacing-md) 0;
-    }
-
-    .card-actions {
-        display: flex;
-        gap: 12px;
-        margin-top: 20px;
-    }
-
-    .inactive {
-        opacity: 0.6;
-    }
-
-    .status {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 980px;
-        font-size: 0.8rem;
-        background-color: #fae8e8;
-        color: #1d1d1f;
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px 12px;
-        border-radius: var(--border-radius-xl);
-        font-size: 12px;
-        font-weight: 500;
-        background-color: rgba(255, 59, 48, 0.1);
-        color: var(--color-error);
-    }
-
-    /* Asegurarnos que el contenedor no cause scroll horizontal */
     .container {
         width: 100%;
-        max-width: var(--container-width);
+        max-width: 1200px;
         margin: 0 auto;
-        padding: 0 var(--spacing-lg);
+        padding: 0 2rem;
         box-sizing: border-box;
+    }
+
+    
+    .rides-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+    
+    
+    .ride-price {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 1.15rem;
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+        
+        .search-form form {
+            flex-direction: column;
+        }
+        
+        .search-input {
+            width: 100%;
+        }
     }
 </style>
 {% endblock %}
@@ -221,10 +147,12 @@
         <p class="hero-subtitle">Viaja de manera cómoda, segura y económica</p>
         
         <div class="search-form">
-            <form method="get">
+            <form method="get" action="{% url 'rides:search_ride' %}">
                 <input type="text" name="origin" placeholder="Ciudad de origen" value="{{ query_origin }}" class="search-input">
                 <input type="text" name="destination" placeholder="Ciudad de destino" value="{{ query_destination }}" class="search-input">
-                <button type="submit" class="button button-primary">Buscar</button>
+                <button type="submit" class="button button-primary">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
             </form>
         </div>
     </div>
@@ -234,17 +162,37 @@
     <div class="container">
         <div class="rides-grid">
             {% for ride in rides %}
-            <div class="ride-card {% if not ride.is_active %}inactive{% endif %}">
+            <div class="profile-ride-card {% if not ride.is_active %}expired{% endif %}">
+                {% if not ride.is_active %}
+                <div class="expired-badge">
+                    <i class="fas fa-history"></i> Expirado
+                </div>
+                {% endif %}
+                
                 <h2 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h2>
                 <div class="ride-info">
-                    <p><strong>Conductor:</strong> {{ ride.driver.username }}</p>
-                    <p><strong>Fecha de salida:</strong> {{ ride.departure_time }}</p>
-                    <p><strong>Asientos:</strong> {{ ride.seats_available }} disponibles de {{ ride.total_seats }} totales</p>
+                    <p>
+                        <i class="fas fa-user-tie info-icon"></i> 
+                        {{ ride.driver.username }}
+                    </p>
+                    <p>
+                        <i class="fas fa-calendar info-icon"></i> 
+                        {{ ride.departure_time|date:"j F Y, H:i" }}
+                    </p>
+                    <p>
+                        <i class="fas fa-users info-icon"></i> 
+                        {{ ride.seats_available }}/{{ ride.total_seats }} asientos
+                    </p>
                 </div>
-                <p class="ride-price">{{ ride.get_formatted_price }}</p>
+                <p class="ride-price">
+                    <i class="fas fa-tag info-icon"></i> 
+                    {{ ride.get_formatted_price }}
+                </p>
                 
                 <div class="card-actions">
-                    <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
+                    <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">
+                        Ver detalles
+                    </a>
                     
                     {% if user.is_authenticated and user != ride.driver and ride.is_active %}
                         <form method="post" action="{% url 'rides:book_ride' ride.id %}">
@@ -253,11 +201,11 @@
                                     class="button button-secondary" 
                                     {% if ride.seats_available == 0 or user in ride.passengers.all %}disabled{% endif %}>
                                 {% if user in ride.passengers.all %}
-                                    Ya reservado
+                                    <i class="fas fa-check-circle"></i> Ya reservado
                                 {% elif ride.seats_available == 0 %}
-                                    No hay asientos
+                                    <i class="fas fa-ban"></i> No hay asientos
                                 {% else %}
-                                    Reservar
+                                    <i class="fas fa-ticket"></i> Reservar
                                 {% endif %}
                             </button>
                         </form>
@@ -265,8 +213,14 @@
                 </div>
             </div>
             {% empty %}
-            <div class="card text-center" style="grid-column: 1 / -1;">
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-car-side"></i>
+                </div>
                 <p>No hay viajes disponibles con los criterios de búsqueda especificados.</p>
+                <a href="{% url 'rides:ride_list' %}" class="button button-primary">
+                    <i class="fas fa-sync"></i> Ver todos los viajes
+                </a>
             </div>
             {% endfor %}
         </div>

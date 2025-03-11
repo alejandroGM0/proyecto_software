@@ -1,54 +1,267 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Crear Valoración{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <h1>Crear Valoración</h1>
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .page-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
     
-    <div class="card mb-4">
-        <div class="card-header">
-            Detalles del Viaje
+    .page-header {
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .ride-card {
+        background-color: var(--card-background);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px var(--shadow);
+        margin-bottom: 1.5rem;
+    }
+    
+    .ride-header {
+        padding: 1.2rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    .header-text {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+    
+    .ride-body {
+        padding: 1.5rem;
+    }
+    
+    .ride-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .ride-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        color: var(--text-secondary);
+    }
+    
+    .info-icon {
+        width: 20px;
+        margin-right: 0.5rem;
+        color: var(--text-secondary);
+    }
+    
+    .review-form-card {
+        background-color: var(--card-background);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px var(--shadow);
+    }
+    
+    .form-header {
+        padding: 1.2rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    .form-body {
+        padding: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+    
+    .star-rating {
+        display: flex;
+        gap: 0.5rem;
+        font-size: 2rem;
+        margin: 0.5rem 0 1rem;
+    }
+    
+    .star-rating label {
+        cursor: pointer;
+        color: #ccc;
+        transition: color 0.2s ease;
+    }
+    
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label {
+        color: #FFD700;
+    }
+    
+    .star-rating input {
+        display: none;
+    }
+    
+    .form-comment {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        min-height: 120px;
+    }
+    
+    .form-comment:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    }
+    
+    .error-text {
+        color: var(--error-color);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .ride-info {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">Valorar Viaje</h1>
+    </div>
+    
+    <div class="ride-card">
+        <div class="ride-header">
+            <h2 class="header-text">Detalles del Viaje</h2>
         </div>
-        <div class="card-body">
-            <h5 class="card-title">{{ ride.origin }} → {{ ride.destination }}</h5>
-            <p class="card-text">Fecha: {{ ride.departure_time|date:"j F Y, H:i" }}</p>
-            <p class="card-text">Conductor: {{ ride.driver.username }}</p>
+        <div class="ride-body">
+            <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
+            <div class="ride-info">
+                <div class="info-item">
+                    <i class="fas fa-calendar-alt info-icon"></i>
+                    {{ ride.departure_time|date:"j F Y, H:i" }}
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-user-tie info-icon"></i>
+                    {{ ride.driver.username }}
+                </div>
+            </div>
         </div>
     </div>
     
-    <div class="card">
-        <div class="card-header">
-            Tu Valoración
+    <div class="review-form-card">
+        <div class="form-header">
+            <h2 class="header-text">Tu Valoración</h2>
         </div>
-        <div class="card-body">
+        <div class="form-body">
             <form method="post">
                 {% csrf_token %}
                 
-                <div class="mb-3">
+                <div class="form-group">
                     <label class="form-label">{{ form.rating.label }}</label>
                     <div class="star-rating">
-                        {{ form.rating }}
+                        {% for i in "12345" %}
+                            <input type="radio" name="rating" id="star-{{ forloop.counter }}" value="{{ forloop.counter }}" {% if form.rating.value == forloop.counter %}checked{% endif %}>
+                            <label for="star-{{ forloop.counter }}">
+                                <i class="far fa-star"></i>
+                            </label>
+                        {% endfor %}
                     </div>
                     {% if form.rating.errors %}
-                        <div class="text-danger">{{ form.rating.errors }}</div>
+                        <div class="error-text">{{ form.rating.errors }}</div>
                     {% endif %}
                 </div>
                 
-                <div class="mb-3">
+                <div class="form-group">
                     <label class="form-label">{{ form.comment.label }}</label>
-                    {{ form.comment }}
+                    <textarea name="comment" class="form-comment" placeholder="¿Cómo fue tu experiencia en este viaje?">{{ form.comment.value|default:'' }}</textarea>
                     {% if form.comment.errors %}
-                        <div class="text-danger">{{ form.comment.errors }}</div>
+                        <div class="error-text">{{ form.comment.errors }}</div>
                     {% endif %}
                 </div>
                 
-                <div class="d-flex">
-                    <button type="submit" class="btn btn-primary me-2">Enviar valoración</button>
-                    <a href="{% url 'rides:ride_detail' ride.id %}" class="btn btn-secondary">Cancelar</a>
+                <div class="form-actions">
+                    <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="submit" class="button button-primary">
+                        <i class="fas fa-paper-plane"></i> Enviar valoración
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const starLabels = document.querySelectorAll('.star-rating label');
+        
+        starLabels.forEach(label => {
+            label.addEventListener('click', function() {
+                
+                const starValue = this.previousElementSibling.value;
+                
+                starLabels.forEach((lbl, index) => {
+                    const star = lbl.querySelector('i');
+                    if (index < starValue) {
+                        star.className = 'fas fa-star';
+                    } else {
+                        star.className = 'far fa-star';
+                    }
+                });
+            });
+        });
+        
+        
+        const selectedRating = document.querySelector('.star-rating input:checked');
+        if (selectedRating) {
+            const starValue = selectedRating.value;
+            starLabels.forEach((lbl, index) => {
+                const star = lbl.querySelector('i');
+                if (index < starValue) {
+                    star.className = 'fas fa-star';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

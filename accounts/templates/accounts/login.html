@@ -1,99 +1,137 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Iniciar Sesión - BlaBlaCar{% endblock %}
+{% block title %}Iniciar Sesión{% endblock %}
 
 {% block extra_styles %}
 <style>
+    :root {
+      --primary-color: #007aff; 
+      --secondary-color: #34c759; 
+      --background-color: #f5f5f7;
+      --card-background: #ffffff;
+      --text-primary: #1d1d1f;
+      --text-secondary: #86868b;
+      --border-color: #d2d2d7;
+      --error-color: #ff3b30;
+      --shadow: rgba(0, 0, 0, 0.05);
+    }
+
+    body {
+        background-color: var(--background-color);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        color: var(--text-primary);
+        line-height: 1.5;
+    }
+    
     .auth-container {
-        max-width: 400px;
-        margin: 40px auto;
-        background-color: rgba(255, 255, 255, 0.8); /* Fondo translúcido */
-        border-radius: var(--border-radius-lg);
-        padding: var(--spacing-lg);
-        box-shadow: var(--shadow-md);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(0, 0, 0, 0.08);
+        max-width: 450px;
+        margin: 80px auto;
+        padding: 2rem;
+        background-color: var(--card-background);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px var(--shadow);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
         text-align: center;
     }
-
-    .auth-container h1 {
-        font-size: 2rem;
+    
+    .auth-container:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--shadow);
+    }
+    
+    h1 {
         font-weight: 600;
-        margin-bottom: var(--spacing-lg);
-        color: black; 
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+        color: var(--text-primary);
     }
-
+    
     .auth-form {
-        margin-top: var(--spacing-md);
+        text-align: left;
     }
-
-    .auth-form .form-group {
-        margin-bottom: var(--spacing-md);
+    
+    .form-group {
+        margin-bottom: 1.25rem;
     }
-
-    .auth-form .form-group label {
+    
+    .form-group label {
         display: block;
-        margin-bottom: var(--spacing-xs);
-        font-size: 1rem;
-        color: black; 
         font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
     }
-
-    .auth-form .form-group input {
+    
+    .form-group input {
         width: 100%;
-        padding: var(--spacing-sm) var(--spacing-md);
-        border: 1px solid var(--color-border);
-        border-radius: var(--border-radius-sm);
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background-color: var(--card-background);
         font-size: 1rem;
-        transition: var(--transition);
-        background-color: rgba(255, 255, 255, 0.8);
-    }
-
-    .auth-form .form-group input:focus {
         outline: none;
-        border-color: var(--color-primary);
-        background-color: var(--color-white);
+        transition: border-color 0.2s ease;
     }
-
-    .auth-links {
-        margin-top: var(--spacing-lg);
-        text-align: center;
-        font-size: 0.9rem;
+    
+    .form-group input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
     }
-
-    .auth-links a {
-        color: var(--color-primary);
-        text-decoration: none;
-    }
-
-    .auth-links a:hover {
-        text-decoration: underline;
-    }
-
+    
     .error {
-        color: var(--color-error);
-        font-size: 0.8rem;
-        margin-top: 4px;
+        color: var(--error-color);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
     }
-
-    .button-primary {
-        background-color: var(--color-primary);
+    
+    button[type="submit"] {
+        background-color: var(--primary-color);
         color: white;
         border: none;
-        border-radius: var(--border-radius-xl);
-        font-size: 17px;
-        line-height: 1.23536;
-        font-weight: 400;
-        letter-spacing: -.022em;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
         cursor: pointer;
         transition: all 0.2s ease;
         width: 100%;
-        padding: var(--spacing-sm) var(--spacing-md);
+        margin-top: 1rem;
     }
-
-    .button-primary:hover {
-        background-color: var(--color-primary-hover);
+    
+    button[type="submit"]:hover {
+        background-color: #0071e3;
+        transform: translateY(-1px);
+    }
+    
+    button[type="submit"]:active {
+        transform: translateY(0);
+    }
+    
+    .auth-links {
+        margin-top: 2rem;
+        color: var(--text-secondary);
+    }
+    
+    .auth-links a {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    
+    .auth-links a:hover {
+        color: #0071e3;
+        text-decoration: underline;
+    }
+    
+    @media (max-width: 576px) {
+        .auth-container {
+            margin: 40px 15px;
+            padding: 1.5rem;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+        }
     }
 </style>
 {% endblock %}
@@ -115,7 +153,7 @@
             {% endif %}
         </div>
         {% endfor %}
-        <button type="submit" class="button button-primary" style="width: 100%;">Iniciar Sesión</button>
+        <button type="submit">Iniciar Sesión</button>
     </form>
     
     <div class="auth-links">

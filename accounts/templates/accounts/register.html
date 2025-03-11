@@ -1,101 +1,184 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Registro - BlaBlaCar{% endblock %}
+{% block title %}Registro{% endblock %}
 
 {% block extra_styles %}
 <style>
+    :root {
+      --primary-color: #007aff; 
+      --secondary-color: #34c759; 
+      --background-color: #f5f5f7;
+      --card-background: #ffffff;
+      --text-primary: #1d1d1f;
+      --text-secondary: #86868b;
+      --border-color: #d2d2d7;
+      --error-color: #ff3b30;
+      --shadow: rgba(0, 0, 0, 0.05);
+    }
+
+    body {
+        background-color: var(--background-color);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        color: var(--text-primary);
+        line-height: 1.5;
+    }
+    
     .auth-container {
-        max-width: 400px;
+        max-width: 500px;
         margin: 40px auto;
-        background-color: rgba(255, 255, 255, 0.8); /* Fondo translúcido */
-        border-radius: var(--border-radius-lg);
-        padding: var(--spacing-lg);
-        box-shadow: var(--shadow-md);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 2rem;
+        background-color: var(--card-background);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px var(--shadow);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
         text-align: center;
     }
-
-    .auth-container h1 {
-        font-size: 2rem;
+    
+    .auth-container:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--shadow);
+    }
+    
+    h1 {
         font-weight: 600;
-        margin-bottom: var(--spacing-lg);
-        color: black; 
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        color: var(--text-primary);
     }
-
+    
+    h3 {
+        font-weight: 500;
+        font-size: 1.2rem;
+        color: var(--text-primary);
+        margin: 0.5rem 0;
+        text-align: left;
+    }
+    
     .auth-form {
-        margin-top: var(--spacing-md);
+        text-align: left;
     }
-
-    .auth-form .form-group {
-        margin-bottom: var(--spacing-md);
+    
+    .form-group {
+        margin-bottom: 1.25rem;
     }
-
-    .auth-form .form-group label {
+    
+    .form-group label {
         display: block;
-        margin-bottom: var(--spacing-xs);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+    
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background-color: var(--card-background);
         font-size: 1rem;
-        color: black; 
+        outline: none;
+        transition: border-color 0.2s ease;
+    }
+    
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+    }
+    
+    .help-text {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 0.3rem;
+    }
+    
+    .error {
+        color: var(--error-color);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    
+    .error-summary {
+        background-color: rgba(255, 59, 48, 0.1);
+        border-left: 3px solid var(--error-color);
+        border-radius: 4px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        text-align: left;
+    }
+    
+    .error-summary p {
+        margin: 0 0 0.5rem;
         font-weight: 500;
     }
-
-    .auth-form .form-group input {
-        width: 100%;
-        padding: var(--spacing-sm) var(--spacing-md);
-        border: 1px solid var(--color-border);
-        border-radius: var(--border-radius-sm);
+    
+    .error-summary ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+    
+    .form-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+    }
+    
+    button[type="submit"] {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
         font-size: 1rem;
-        transition: var(--transition);
-        background-color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 100%;
+        margin-top: 1rem;
     }
-
-    .auth-form .form-group input:focus {
-        outline: none;
-        border-color: var(--color-primary);
-        background-color: var(--color-white);
+    
+    button[type="submit"]:hover {
+        background-color: #0071e3;
+        transform: translateY(-1px);
     }
-
+    
+    button[type="submit"]:active {
+        transform: translateY(0);
+    }
+    
     .auth-links {
-        margin-top: var(--spacing-lg);
-        text-align: center;
-        font-size: 0.9rem;
+        margin-top: 1.5rem;
+        color: var(--text-secondary);
     }
-
+    
     .auth-links a {
-        color: var(--color-primary);
+        color: var(--primary-color);
         text-decoration: none;
+        transition: color 0.2s ease;
     }
-
+    
     .auth-links a:hover {
+        color: #0071e3;
         text-decoration: underline;
     }
-
-    .help-text {
-        font-size: 0.8rem;
-        color: var(--color-secondary);
-        margin-top: 4px;
-    }
-
-    .error {
-        color: var(--color-error);
-        font-size: 0.8rem;
-        margin-top: 4px;
-    }
-
-    .error-summary {
-        background-color: rgba(255, 200, 200, 0.5);
-        border: 1px solid var(--color-error);
-        border-radius: var(--border-radius-sm);
-        padding: var(--spacing-md);
-        margin-bottom: var(--spacing-md);
-        color: #721c24;
-    }
-
-    .form-section {
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #eee;
+    
+    @media (max-width: 576px) {
+        .auth-container {
+            margin: 20px 15px;
+            padding: 1.5rem;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            font-size: 1.1rem;
+        }
     }
 </style>
 {% endblock %}
@@ -104,7 +187,6 @@
 <div class="auth-container">
     <h1>Crear Cuenta</h1>
     
-    <!-- Añadir mensaje de depuración para errores del formulario -->
     {% if user_form.errors or profile_form.errors %}
     <div class="error-summary">
         <p>Por favor, corrige los siguientes errores:</p>
@@ -132,7 +214,6 @@
     <form method="post" class="auth-form" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
         
-        <!-- Formulario de Usuario -->
         <div class="form-section">
             <h3>Información de cuenta</h3>
             {% for field in user_form %}
@@ -153,7 +234,6 @@
             {% endfor %}
         </div>
         
-        <!-- Formulario de Perfil -->
         <div class="form-section">
             <h3>Información de perfil</h3>
             {% for field in profile_form %}
@@ -174,7 +254,7 @@
             {% endfor %}
         </div>
         
-        <button type="submit" class="button button-primary" style="width: 100%;">Registrarse</button>
+        <button type="submit">Registrarse</button>
     </form>
     
     <div class="auth-links">

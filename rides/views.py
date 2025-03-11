@@ -5,6 +5,7 @@ from .models import Ride
 from .forms import RideForm
 from django.db.models import Q
 from django.utils import timezone
+from django.core.paginator import Paginator
 
 def ride_list(request):
     query_origin = request.GET.get('origin', '')
@@ -40,7 +41,7 @@ def book_ride(request, ride_id):
         else:
             messages.error(request, 'No hay asientos disponibles')
             
-    return redirect('rides:ride_list')
+    return redirect('rides:ride_detail', ride_id=ride_id)
 
 @login_required
 def create_ride(request):
@@ -51,7 +52,7 @@ def create_ride(request):
             ride.driver = request.user
             ride.save()
             messages.success(request, '¡Viaje creado con éxito!')
-            return redirect('rides:ride_list')
+            return redirect('accounts:profile_view', username=request.user.username)
     else:
         form = RideForm()
     
@@ -59,16 +60,22 @@ def create_ride(request):
 
 def ride_detail(request, ride_id):
     ride = get_object_or_404(Ride, id=ride_id)
-    return render(request, 'rides/ride_detail.html', {'ride': ride})
+    
+    # Check if the current user has already reviewed this ride
+    user_has_reviewed = False
+    if request.user.is_authenticated:
+        from reviews.models import Review
+        user_has_reviewed = Review.objects.filter(ride=ride, user=request.user).exists()
+    
+    return render(request, 'rides/ride_detail.html', {
+        'ride': ride,
+        'user_has_reviewed': user_has_reviewed
+    })
 
 @login_required
 def my_rides(request):
-    rides_as_driver = Ride.objects.filter(driver=request.user)
-    rides_as_passenger = request.user.rides_as_passenger.all()
-    return render(request, 'rides/my_rides.html', {
-        'rides_as_driver': rides_as_driver,
-        'rides_as_passenger': rides_as_passenger,
-    })
+    # Redireccionar al perfil del usuario en lugar de renderizar la plantilla eliminada
+    return redirect('accounts:profile_view', username=request.user.username)
 
 @login_required
 def edit_ride(request, ride_id):
@@ -77,14 +84,14 @@ def edit_ride(request, ride_id):
     # Evitar edición de viajes inactivos
     if not ride.is_active:
         messages.error(request, 'No se pueden editar viajes pasados')
-        return redirect('my_rides')
+        return redirect('accounts:profile_view', username=request.user.username)
     
     if request.method == 'POST':
         form = RideForm(request.POST, instance=ride)
         if form.is_valid():
             form.save()
             messages.success(request, '¡Viaje actualizado con éxito!')
-            return redirect('rides:my_rides')
+            return redirect('accounts:profile_view', username=request.user.username)
     else:
         form = RideForm(instance=ride)
     
@@ -93,3 +100,30 @@ def edit_ride(request, ride_id):
         'edit_mode': True,
         'ride': ride
     })
+
+def search_ride(request):
+    query_origin = request.GET.get('origin', '')
+    query_destination = request.GET.get('destination', '')
+    
+    # Filtrar viajes activos
+    rides = Ride.objects.filter(departure_time__gt=timezone.now())
+    
+    # Aplicar filtros de búsqueda si se proporcionan
+    if query_origin:
+        rides = rides.filter(origin__icontains=query_origin)
+    if query_destination:
+        rides = rides.filter(destination__icontains=query_destination)
+    
+    # Configurar la paginación (3 viajes por página)
+    paginator = Paginator(rides, 3)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'query_origin': query_origin,
+        'query_destination': query_destination,
+    }
+    
+    # Renderizar la plantilla de búsqueda específica
+    return render(request, 'rides/search_ride.html', context)

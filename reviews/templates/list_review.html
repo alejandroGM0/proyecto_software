@@ -1,84 +1,269 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Mis Valoraciones{% endblock %}
 
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .page-header {
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .tabs-container {
+        background-color: var(--card-background);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px var(--shadow);
+    }
+    
+    .tabs-header {
+        display: flex;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .tab-button {
+        padding: 1rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .tab-button.active {
+        color: var(--primary-color);
+    }
+    
+    .tab-button.active:after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: var(--primary-color);
+    }
+    
+    .tab-content {
+        display: none;
+        padding: 2rem;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: var(--text-primary);
+    }
+    
+    .reviews-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .review-card {
+        background-color: var(--card-background);
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px var(--shadow);
+        transition: all 0.2s ease;
+        border-left: 3px solid var(--primary-color);
+    }
+    
+    .review-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px var(--shadow);
+    }
+    
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .review-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .review-rating {
+        color: #FFD700;
+        font-size: 1.1rem;
+    }
+    
+    .review-comment {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .review-meta {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+    
+    .review-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .empty-message {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+    }
+    
+    .empty-icon {
+        font-size: 40px;
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+        opacity: 0.7;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h1>Mis Valoraciones</h1>
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">Mis Valoraciones</h1>
+    </div>
     
-    <ul class="nav nav-tabs mb-4">
-        <li class="nav-item">
-            <a class="nav-link active" data-bs-toggle="tab" href="#given">Valoraciones dadas</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="tab" href="#received">Valoraciones recibidas</a>
-        </li>
-    </ul>
-    
-    <div class="tab-content">
+    <div class="tabs-container">
+        <div class="tabs-header">
+            <button class="tab-button active" data-tab="given">Valoraciones dadas</button>
+            <button class="tab-button" data-tab="received">Valoraciones recibidas</button>
+        </div>
+        
         <!-- Valoraciones dadas -->
-        <div id="given" class="tab-pane fade show active">
-            <h3>Valoraciones que has dado</h3>
-            
+        <div id="given-tab" class="tab-content active">
             {% if reviews_given %}
-                <div class="list-group mt-3">
+                <div class="reviews-grid">
                 {% for review in reviews_given %}
-                    <div class="list-group-item">
-                        <div class="d-flex justify-content-between">
-                            <h5>{{ review.ride.origin }} → {{ review.ride.destination }}</h5>
-                            <div>
+                    <div class="review-card">
+                        <div class="review-header">
+                            <h3 class="review-title">{{ review.ride.origin }} → {{ review.ride.destination }}</h3>
+                            <div class="review-rating">
                                 {% for i in "12345" %}
                                     {% if forloop.counter <= review.rating %}
-                                        ⭐
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
                                     {% endif %}
                                 {% endfor %}
                             </div>
                         </div>
-                        <p>{{ review.comment|default:"Sin comentario" }}</p>
-                        <small class="text-muted">Fecha: {{ review.created_at|date:"j F Y" }}</small>
-                        <div class="mt-2">
-                            <a href="{% url 'reviews:detail' review.id %}" class="btn btn-sm btn-info">Ver</a>
-                            <a href="{% url 'reviews:delete' review.id %}" class="btn btn-sm btn-danger">Eliminar</a>
+                        <p class="review-comment">{{ review.comment|default:"Sin comentario" }}</p>
+                        <div class="review-meta">
+                            <i class="fas fa-calendar-alt info-icon"></i> {{ review.created_at|date:"j F Y" }}
+                        </div>
+                        <div class="review-actions">
+                            <a href="{% url 'reviews:detail' review.id %}" class="button button-primary">
+                                <i class="fas fa-eye"></i> Ver
+                            </a>
+                            <a href="{% url 'reviews:delete' review.id %}" class="button button-secondary">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </a>
                         </div>
                     </div>
                 {% endfor %}
                 </div>
             {% else %}
-                <p class="text-muted">No has dado ninguna valoración aún.</p>
+                <div class="empty-message">
+                    <div class="empty-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p>No has dado ninguna valoración aún.</p>
+                </div>
             {% endif %}
         </div>
         
         <!-- Valoraciones recibidas -->
-        <div id="received" class="tab-pane fade">
-            <h3>Valoraciones que has recibido</h3>
-            
+        <div id="received-tab" class="tab-content">
             {% if reviews_received %}
-                <div class="list-group mt-3">
+                <div class="reviews-grid">
                 {% for review in reviews_received %}
-                    <div class="list-group-item">
-                        <div class="d-flex justify-content-between">
-                            <h5>{{ review.ride.origin }} → {{ review.ride.destination }}</h5>
-                            <div>
+                    <div class="review-card">
+                        <div class="review-header">
+                            <h3 class="review-title">{{ review.ride.origin }} → {{ review.ride.destination }}</h3>
+                            <div class="review-rating">
                                 {% for i in "12345" %}
                                     {% if forloop.counter <= review.rating %}
-                                        ⭐
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
                                     {% endif %}
                                 {% endfor %}
                             </div>
                         </div>
-                        <p>De: <strong>{{ review.user.username }}</strong></p>
-                        <p>{{ review.comment|default:"Sin comentario" }}</p>
-                        <small class="text-muted">Fecha: {{ review.created_at|date:"j F Y" }}</small>
-                        <div class="mt-2">
-                            <a href="{% url 'reviews:detail' review.id %}" class="btn btn-sm btn-info">Ver</a>
+                        <p class="review-meta">
+                            <i class="fas fa-user info-icon"></i> De: <strong>{{ review.user.username }}</strong>
+                        </p>
+                        <p class="review-comment">{{ review.comment|default:"Sin comentario" }}</p>
+                        <div class="review-meta">
+                            <i class="fas fa-calendar-alt info-icon"></i> {{ review.created_at|date:"j F Y" }}
+                        </div>
+                        <div class="review-actions">
+                            <a href="{% url 'reviews:detail' review.id %}" class="button button-primary">
+                                <i class="fas fa-eye"></i> Ver
+                            </a>
                         </div>
                     </div>
                 {% endfor %}
                 </div>
             {% else %}
-                <p class="text-muted">No has recibido ninguna valoración aún.</p>
+                <div class="empty-message">
+                    <div class="empty-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p>No has recibido ninguna valoración aún.</p>
+                </div>
             {% endif %}
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Desactivar todos los botones y contenidos
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                
+                // Activar el botón y contenido actual
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+    });
+</script>
 {% endblock %}

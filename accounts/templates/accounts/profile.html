@@ -5,6 +5,7 @@
 
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
@@ -47,17 +48,17 @@
                 <h3 class="stats-heading">Estadísticas</h3>
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon">🚗</div>
+                        <div class="stat-icon"><i class="fas fa-car-side"></i></div>
                         <div class="stat-number">{{ total_rides }}</div>
                         <div class="stat-label">Viajes Totales</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">🚦</div>
+                        <div class="stat-icon"><i class="fas fa-road"></i></div>
                         <div class="stat-number">{{ active_rides_as_driver.count }}</div>
                         <div class="stat-label">Como Conductor</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">👤</div>
+                        <div class="stat-icon"><i class="fas fa-user"></i></div>
                         <div class="stat-number">{{ rides_as_passenger.count }}</div>
                         <div class="stat-label">Como Pasajero</div>
                     </div>
@@ -80,17 +81,20 @@
             <div class="profile-actions">
                 {% if is_own_profile %}
                 <a href="{% url 'rides:create_ride' %}" class="button button-primary">
-                    <span>✚</span> Crear Viaje
+                    <i class="fas fa-plus"></i> Crear Viaje
                 </a>
-                <a href="{% url 'rides:my_rides' %}" class="button button-secondary">
-                    <span>🔎</span> Ver Todos Mis Viajes
-                </a>
+               
                 <a href="{% url 'accounts:settings' %}" class="button button-secondary">
-                    <span>⚙️</span> Configuración
+                    <i class="fas fa-cog"></i> Configuración
+                </a>
+                
+                
+                <a href="{% url 'reviews:list' %}" class="button button-secondary">
+                    <i class="fas fa-star"></i> Mis Valoraciones
                 </a>
                 {% else %}
                 <a href="#" class="button button-primary">
-                    <span>✉️</span> Enviar Mensaje
+                    <i class="fas fa-envelope"></i> Enviar Mensaje
                 </a>
                 {% endif %}
             </div>
@@ -105,18 +109,28 @@
             
             <div class="tab-content active" id="driver-tab">
                 <div class="content-header">
-                    <h2 class="section-title">Viajes Activos como Conductor</h2>
+                    <h2 class="section-title">Viajes como Conductor</h2>
+                    
+                    <!-- Selector de estado de viajes (conductor) -->
+                    <div class="segmented-control">
+                        <button class="segment-button active" data-status="active" data-tab="driver">
+                            <i class="fas fa-clock"></i> Activos
+                        </button>
+                        <button class="segment-button" data-status="expired" data-tab="driver">
+                            <i class="fas fa-history"></i> Expirados
+                        </button>
+                    </div>
                 </div>
                 
-                <div class="rides-grid">
+                <!-- Viajes activos como conductor -->
+                <div class="rides-grid ride-status-content active" id="driver-active-rides">
                     {% for ride in active_rides_as_driver %}
                     <div class="profile-ride-card">
-                        <div class="ride-status"></div>
                         <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
                         <div class="ride-info">
-                            <p><span class="info-icon">🗓️</span> {{ ride.departure_time|date:"j F Y, H:i" }}</p>
-                            <p><span class="info-icon">👥</span> {{ ride.passengers.count }}/{{ ride.total_seats }} pasajeros</p>
-                            <p class="ride-price"><span class="info-icon">💰</span> {{ ride.get_formatted_price }}</p>
+                            <p><i class="fas fa-calendar info-icon"></i> {{ ride.departure_time|date:"j F Y, H:i" }}</p>
+                            <p><i class="fas fa-users info-icon"></i> {{ ride.passengers.count }}/{{ ride.total_seats }} pasajeros</p>
+                            <p class="ride-price"><i class="fas fa-tag info-icon"></i> {{ ride.get_formatted_price }}</p>
                         </div>
                         <div class="card-actions">
                             <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
@@ -127,9 +141,32 @@
                     </div>
                     {% empty %}
                     <div class="empty-state">
-                        <div class="empty-icon">🚙</div>
+                        <div class="empty-icon"><i class="fas fa-car-side"></i></div>
                         <p>No tienes viajes activos como conductor</p>
                         <a href="{% url 'rides:create_ride' %}" class="button button-primary">Crear tu primer viaje</a>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Viajes expirados como conductor -->
+                <div class="rides-grid ride-status-content" id="driver-expired-rides">
+                    {% for ride in expired_rides_as_driver %}
+                    <div class="profile-ride-card expired">
+                        <div class="expired-badge"><i class="fas fa-history"></i> Expirado</div>
+                        <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
+                        <div class="ride-info">
+                            <p><i class="fas fa-calendar info-icon"></i> {{ ride.departure_time|date:"j F Y, H:i" }}</p>
+                            <p><i class="fas fa-users info-icon"></i> {{ ride.passengers.count }}/{{ ride.total_seats }} pasajeros</p>
+                            <p class="ride-price"><i class="fas fa-tag info-icon"></i> {{ ride.get_formatted_price }}</p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="fas fa-history"></i></div>
+                        <p>No tienes viajes expirados como conductor</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -138,17 +175,27 @@
             <div class="tab-content" id="passenger-tab">
                 <div class="content-header">
                     <h2 class="section-title">Viajes como Pasajero</h2>
+                    
+                    <!-- Selector de estado de viajes (pasajero) -->
+                    <div class="segmented-control">
+                        <button class="segment-button active" data-status="active" data-tab="passenger">
+                            <i class="fas fa-clock"></i> Activos
+                        </button>
+                        <button class="segment-button" data-status="expired" data-tab="passenger">
+                            <i class="fas fa-history"></i> Expirados
+                        </button>
+                    </div>
                 </div>
                 
-                <div class="rides-grid">
-                    {% for ride in rides_as_passenger %}
+                <!-- Viajes activos como pasajero -->
+                <div class="rides-grid ride-status-content active" id="passenger-active-rides">
+                    {% for ride in active_rides_as_passenger %}
                     <div class="profile-ride-card">
-                        <div class="ride-status passenger"></div>
                         <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
                         <div class="ride-info">
-                            <p><span class="info-icon">🗓️</span> {{ ride.departure_time|date:"j F Y, H:i" }}</p>
-                            <p><span class="info-icon">🧑‍✈️</span> Conductor: {{ ride.driver.username }}</p>
-                            <p class="ride-price"><span class="info-icon">💰</span> {{ ride.get_formatted_price }}</p>
+                            <p><i class="fas fa-calendar info-icon"></i> {{ ride.departure_time|date:"j F Y, H:i" }}</p>
+                            <p><i class="fas fa-user-tie info-icon"></i> Conductor: {{ ride.driver.username }}</p>
+                            <p class="ride-price"><i class="fas fa-tag info-icon"></i> {{ ride.get_formatted_price }}</p>
                         </div>
                         <div class="card-actions">
                             <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
@@ -156,9 +203,32 @@
                     </div>
                     {% empty %}
                     <div class="empty-state">
-                        <div class="empty-icon">👤</div>
-                        <p>No tienes viajes como pasajero</p>
+                        <div class="empty-icon"><i class="fas fa-user-friends"></i></div>
+                        <p>No tienes viajes activos como pasajero</p>
                         <a href="{% url 'rides:ride_list' %}" class="button button-primary">Buscar viajes</a>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Viajes expirados como pasajero -->
+                <div class="rides-grid ride-status-content" id="passenger-expired-rides">
+                    {% for ride in expired_rides_as_passenger %}
+                    <div class="profile-ride-card expired">
+                        <div class="expired-badge"><i class="fas fa-history"></i> Expirado</div>
+                        <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
+                        <div class="ride-info">
+                            <p><i class="fas fa-calendar info-icon"></i> {{ ride.departure_time|date:"j F Y, H:i" }}</p>
+                            <p><i class="fas fa-user-tie info-icon"></i> Conductor: {{ ride.driver.username }}</p>
+                            <p class="ride-price"><i class="fas fa-tag info-icon"></i> {{ ride.get_formatted_price }}</p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="fas fa-history"></i></div>
+                        <p>No tienes viajes expirados como pasajero</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -170,19 +240,47 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        
         const tabs = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
         
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
-                // Desactivar todas las pestañas
+                
                 tabs.forEach(t => t.classList.remove('active'));
                 tabContents.forEach(c => c.classList.remove('active'));
                 
-                // Activar la pestaña seleccionada
+               
                 tab.classList.add('active');
                 const tabId = tab.getAttribute('data-tab');
                 document.getElementById(tabId + '-tab').classList.add('active');
+            });
+        });
+        
+        
+        const segmentButtons = document.querySelectorAll('.segment-button');
+        
+        segmentButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                
+                const tab = button.getAttribute('data-tab');
+                const status = button.getAttribute('data-status');
+                
+                
+                document.querySelectorAll(`.segment-button[data-tab="${tab}"]`).forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                
+                document.querySelectorAll(`#${tab}-tab .ride-status-content`).forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+               
+                button.classList.add('active');
+                
+                
+                document.getElementById(`${tab}-${status}-rides`).classList.add('active');
             });
         });
     });

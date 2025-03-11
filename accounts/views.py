@@ -52,39 +52,77 @@ def logout_view(request):
     return redirect('rides:ride_list')
 
 @login_required
-def user_profile(request, user_id):
-    profile_user = get_object_or_404(User, id=user_id)
-    user_profile = profile_user.profile
+def profile_view(request, username):
+    """
+    Vista única y optimizada para mostrar el perfil de usuario
+    y sus viajes como conductor y como pasajero.
+    """
+    # Obtener el usuario y su perfil
+    user = get_object_or_404(User, username=username)
+    user_profile = get_object_or_404(UserProfile, user=user)
+    is_own_profile = request.user == user
     
-    if not user_profile.profile_visible and request.user.id != user_id:
-        messages.error(request, 'Este perfil es privado.')
-        return redirect('rides:ride_list')
+    # Viajes como conductor
+    active_rides_as_driver = Ride.objects.filter(
+        driver=user,
+        departure_time__gt=timezone.now()
+    ).order_by('departure_time')
     
-    rides_as_driver = Ride.objects.filter(driver=profile_user)
-    rides_as_passenger = profile_user.rides_as_passenger.all()
+    expired_rides_as_driver = Ride.objects.filter(
+        driver=user,
+        departure_time__lte=timezone.now()
+    ).order_by('-departure_time')
     
-    active_rides_as_driver = rides_as_driver.filter(departure_time__gt=timezone.now())
-    past_rides_as_driver = rides_as_driver.filter(departure_time__lte=timezone.now())
+    # Viajes como pasajero - usando la tabla de relación directamente
+    # Esta es la parte clave - necesitamos acceder a través de la tabla intermedia
+    active_rides_as_passenger = Ride.objects.filter(
+        passengers__id=user.id,  # Usar __id para acceder directamente al ID
+        departure_time__gt=timezone.now()
+    ).distinct().order_by('departure_time')
     
-    if not user_profile.show_rides_history and request.user.id != user_id:
-        active_rides_as_driver = active_rides_as_driver.none()
-        past_rides_as_driver = past_rides_as_driver.none()
-        rides_as_passenger = rides_as_passenger.none()
+    expired_rides_as_passenger = Ride.objects.filter(
+        passengers__id=user.id,
+        departure_time__lte=timezone.now()
+    ).distinct().order_by('-departure_time')
+    
+    # Para estadísticas
+    rides_as_passenger = Ride.objects.filter(passengers__id=user.id).distinct()
+    
+    # Calcular estadísticas
+    total_rides = (
+        active_rides_as_driver.count() +
+        expired_rides_as_driver.count() +
+        rides_as_passenger.count()
+    )
+    
+    # Debug info
+    print(f"Usuario: {user.username}, ID: {user.id}")
+    print(f"Viajes como pasajero totales encontrados: {rides_as_passenger.count()}")
+    print(f"Viajes activos como pasajero: {active_rides_as_passenger.count()}")
+    print(f"Viajes expirados como pasajero: {expired_rides_as_passenger.count()}")
+    
+    # Solo para depuración - listar los IDs de los viajes
+    for ride in active_rides_as_passenger:
+        print(f"Viaje activo pasajero #{ride.id}: {ride.origin} → {ride.destination}")
     
     context = {
-        'user': profile_user,
+        'user': user,
         'user_profile': user_profile,
+        'is_own_profile': is_own_profile,
         'active_rides_as_driver': active_rides_as_driver,
-        'past_rides_as_driver': past_rides_as_driver,
+        'expired_rides_as_driver': expired_rides_as_driver,
+        'active_rides_as_passenger': active_rides_as_passenger,
+        'expired_rides_as_passenger': expired_rides_as_passenger,
         'rides_as_passenger': rides_as_passenger,
-        'total_rides': rides_as_driver.count() + rides_as_passenger.count(),
-        'is_own_profile': request.user.id == user_id
+        'total_rides': total_rides,
     }
+    
     return render(request, 'accounts/profile.html', context)
 
 @login_required
 def profile(request):
-    return user_profile(request, request.user.id)
+    """Redirige al perfil del usuario logueado"""
+    return redirect('accounts:profile_view', username=request.user.username)
 
 @login_required
 def settings_view(request):

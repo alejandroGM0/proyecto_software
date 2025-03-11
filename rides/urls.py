@@ -22,9 +22,9 @@ app_name = 'rides'
 
 urlpatterns = [
     path('', views.ride_list, name='ride_list'),  # Página principal
+    path('search/', views.search_ride, name='search_ride'),  
     path('book/<int:ride_id>/', views.book_ride, name='book_ride'),
     path('ride/<int:ride_id>/', views.ride_detail, name='ride_detail'),
     path('ride/create/', views.create_ride, name='create_ride'),
-    path('my-rides/', views.my_rides, name='my_rides'),
     path('ride/<int:ride_id>/edit/', views.edit_ride, name='edit_ride'),
 ]

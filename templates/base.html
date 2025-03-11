@@ -16,10 +16,8 @@
             <div class="nav-links">
                 {% if user.is_authenticated %}
                     <a href="{% url 'rides:create_ride' %}" class="nav-link">Crear Viaje</a>
-                    <a href="{% url 'rides:my_rides' %}" class="nav-link">Mis Viajes</a>
                     <a href="{% url 'chat:my_chats' %}" class="nav-link">Mensajes</a>
                     <a href="{% url 'accounts:profile' %}" class="nav-link">Mi Perfil</a>
-                    <a href="{% url 'accounts:settings' %}" class="nav-link">Configuración</a>
                     <a href="{% url 'accounts:logout' %}" class="nav-link">Cerrar Sesión</a>
                 {% else %}
                     <a href="{% url 'accounts:login' %}" class="nav-link">Iniciar Sesión</a>

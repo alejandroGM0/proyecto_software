@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Buscar Viaje{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .page-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 600;
+        letter-spacing: -0.003em;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+    }
+    
+    .search-container {
+        background-color: var(--card-background);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 0 auto 2rem;
+        max-width: 800px; 
+        box-shadow: 0 2px 8px var(--shadow);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .search-container:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    .search-form {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center; 
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 200px;
+        height: 44px;
+        padding: 0 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 500;
+        margin: 1.5rem 0;
+        color: var(--text-primary);
+        text-align: center; /* Centrar el título */
+    }
+
+    .rides-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        justify-content: center;
+    }
+
+    /* Override ride price color */
+    .ride-price {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 1.15rem;
+    }
+    
+   
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 2.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .pagination {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        background-color: var(--card-background);
+        border-radius: 980px;
+        padding: 0.3rem;
+        box-shadow: 0 2px 8px var(--shadow);
+    }
+    
+    .page-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 50%;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        background-color: transparent;
+        transition: all 0.2s ease;
+        font-weight: 400;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .page-button:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        transform: none;
+    }
+    
+    .page-button.active {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 500;
+    }
+    
+    .page-button.disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+    
+    .page-arrow {
+        padding: 0 0.5rem;
+        font-size: 1.1rem;
+        color: var(--primary-color);
+    }
+
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .search-form {
+            flex-direction: column;
+        }
+        
+        .search-input {
+            width: 100%;
+        }
+        
+        .rides-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .pagination {
+            max-width: 100%;
+            overflow-x: auto;
+            padding: 0.3rem 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">Buscar viaje</h1>
+    </div>
+    
+    <div class="search-container">
+        <form method="get" class="search-form">
+            <input type="text" name="origin" placeholder="Ciudad de origen" value="{{ query_origin }}" class="search-input">
+            <input type="text" name="destination" placeholder="Ciudad de destino" value="{{ query_destination }}" class="search-input">
+            <button type="submit" class="button button-primary">
+                <i class="fas fa-search"></i> Buscar
+            </button>
+        </form>
+    </div>
+    
+    {% if query_origin or query_destination %}
+    <h2 class="section-title">Resultados para {% if query_origin %}{{ query_origin }}{% endif %}{% if query_origin and query_destination %} a {% endif %}{% if query_destination %}{{ query_destination }}{% endif %}</h2>
+    {% else %}
+    <h2 class="section-title">Todos los viajes disponibles</h2>
+    {% endif %}
+    
+    <div class="rides-grid">
+        {% for ride in page_obj %}
+        <div class="profile-ride-card {% if not ride.is_active %}expired{% endif %}">
+            {% if not ride.is_active %}
+            <div class="expired-badge">
+                <i class="fas fa-history"></i> Expirado
+            </div>
+            {% endif %}
+            
+            <h2 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h2>
+            <div class="ride-info">
+                <p>
+                    <i class="fas fa-user-tie info-icon"></i> 
+                    {{ ride.driver.username }}
+                </p>
+                <p>
+                    <i class="fas fa-calendar info-icon"></i> 
+                    {{ ride.departure_time|date:"j F Y, H:i" }}
+                </p>
+                <p>
+                    <i class="fas fa-users info-icon"></i> 
+                    {{ ride.seats_available }}/{{ ride.total_seats }} asientos
+                </p>
+            </div>
+            <p class="ride-price">
+                <i class="fas fa-tag info-icon"></i> 
+                {{ ride.get_formatted_price }}
+            </p>
+            
+            <div class="card-actions">
+                <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">
+                    Ver detalles
+                </a>
+                
+                {% if user.is_authenticated and user != ride.driver and ride.is_active %}
+                    <form method="post" action="{% url 'rides:book_ride' ride.id %}">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                class="button button-secondary" 
+                                {% if ride.seats_available == 0 or user in ride.passengers.all %}disabled{% endif %}>
+                            {% if user in ride.passengers.all %}
+                                <i class="fas fa-check-circle"></i> Ya reservado
+                            {% elif ride.seats_available == 0 %}
+                                <i class="fas fa-ban"></i> No hay asientos
+                            {% else %}
+                                <i class="fas fa-ticket"></i> Reservar
+                            {% endif %}
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-car-side"></i>
+            </div>
+            <p>No hay viajes disponibles con los criterios de búsqueda especificados.</p>
+            <a href="{% url 'rides:ride_list' %}" class="button button-primary">
+                <i class="fas fa-sync"></i> Ver todos los viajes
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination-container">
+        <div class="pagination">
+            <a href="{% if page_obj.has_previous %}?{% if query_origin %}origin={{ query_origin }}&{% endif %}{% if query_destination %}destination={{ query_destination }}&{% endif %}page={{ page_obj.previous_page_number }}{% else %}#{% endif %}" class="page-button page-arrow {% if not page_obj.has_previous %}disabled{% endif %}">
+                ‹
+            </a>
+            
+            
+            {% for i in page_obj.paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <a class="page-button active">{{ i }}</a>
+                {% elif i > page_obj.number|add:"-3" and i < page_obj.number|add:"3" %}
+                    <a href="?{% if query_origin %}origin={{ query_origin }}&{% endif %}{% if query_destination %}destination={{ query_destination }}&{% endif %}page={{ i }}" class="page-button">{{ i }}</a>
+                {% endif %}
+                
+                
+                {% if i == 1 and page_obj.number > 3 %}
+                    <span class="page-button disabled">...</span>
+                {% endif %}
+                
+                {% if i == page_obj.paginator.num_pages and page_obj.number < page_obj.paginator.num_pages|add:"-2" %}
+                    <span class="page-button disabled">...</span>
+                {% endif %}
+            {% endfor %}
+            
+            
+            <a href="{% if page_obj.has_next %}?{% if query_origin %}origin={{ query_origin }}&{% endif %}{% if query_destination %}destination={{ query_destination }}&{% endif %}page={{ page_obj.next_page_number }}{% else %}#{% endif %}" class="page-button page-arrow {% if not page_obj.has_next %}disabled{% endif %}">
+                ›
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

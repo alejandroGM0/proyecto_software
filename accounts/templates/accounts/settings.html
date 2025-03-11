@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Configuración{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/pages/settings.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="settings-container">

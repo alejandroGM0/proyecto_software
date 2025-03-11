@@ -1,3 +1,4 @@
+<!-- filepath: c:\Users\Alvaro\OneDrive\Escritorio\UNIVERSIDAD\CURSO 3\PROYECTO_SOFTWARE\proyecto_software\rides\templates\rides\ride_detail.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -29,7 +30,7 @@
                 <div class="info-icon"><i class="fas fa-user"></i></div>
                 <div class="info-content">
                     <strong>Conductor:</strong>
-                    <p><a href="{% url 'accounts:user_profile' ride.driver.id %}">{{ ride.driver.username }}</a></p>
+                    <p><a href="{% url 'accounts:profile_view' ride.driver.username %}">{{ ride.driver.username }}</a></p>
                 </div>
             </div>
             <div class="detail-info">
@@ -77,8 +78,97 @@
                     {% endif %}
                 {% endif %}
             {% endif %}
-            <a href="{% url 'rides:my_rides' %}" class="button button-secondary"><i class="fas fa-arrow-left"></i> Volver a mis viajes</a>
+            <a href="{% url 'accounts:profile_view' user.username %}" class="button button-secondary"><i class="fas fa-arrow-left"></i> Volver a mis viajes</a>
         </div>
+    </div>
+
+    <!-- Sección de valoraciones -->
+    <div class="detail-card reviews-container">
+        <div class="reviews-header">
+            <h2 class="reviews-title">
+                <i class="fas fa-star"></i> Valoraciones
+            </h2>
+            
+            {% if ride.review_set.all %}
+            <span class="review-count">{{ ride.review_set.count }} valoración{{ ride.review_set.count|pluralize:"es" }}</span>
+            {% endif %}
+        </div>
+        
+        {% if ride.review_set.all %}
+            <div class="reviews-list">
+                {% for review in ride.review_set.all %}
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                {% if review.user.profile.profile_image %}
+                                    <div class="reviewer-avatar-img">
+                                        <img src="{{ review.user.profile.profile_image.url }}" alt="{{ review.user.username }}" class="profile-img">
+                                    </div>
+                                {% else %}
+                                    <div class="reviewer-avatar">
+                                        {{ review.user.username|first|upper }}
+                                    </div>
+                                {% endif %}
+                                <span class="reviewer-name">{{ review.user.username }}</span>
+                            </div>
+                            <span class="review-date">{{ review.created_at|date:"j M Y" }}</span>
+                        </div>
+                        
+                        <div class="star-rating">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        {% if review.comment %}
+                            <p class="review-comment">{{ review.comment }}</p>
+                        {% endif %}
+                        
+                        {% if review.user == user %}
+                            <div class="review-actions">
+                                <a href="{% url 'reviews:detail' review.id %}" class="button button-primary">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                                <a href="{% url 'reviews:delete' review.id %}" class="button button-secondary">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-reviews">
+                <i class="far fa-star"></i>
+                <p>No hay valoraciones para este viaje todavía.</p>
+            </div>
+        {% endif %}
+        
+        {% if user.is_authenticated and ride.is_active == False %}
+            {% if user == ride.driver or user in ride.passengers.all %}
+                {% if user_has_reviewed %}
+                    <div class="review-prompt">
+                        <p>Ya has valorado este viaje.</p>
+                        {% if user_review %}
+                            <a href="{% url 'reviews:detail' user_review.id %}" class="button button-primary">
+                                <i class="fas fa-eye"></i> Ver mi valoración
+                            </a>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="review-prompt">
+                        <p>¡Comparte tu experiencia con otros usuarios!</p>
+                        <a href="{% url 'reviews:create' ride.id %}" class="button button-primary">
+                            <i class="fas fa-star"></i> Valorar este viaje
+                        </a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endif %}
     </div>
 </div>
 {% endblock %}

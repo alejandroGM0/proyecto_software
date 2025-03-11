@@ -1,55 +1,198 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Detalle de Valoración{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <h1>Detalle de Valoración</h1>
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .page-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
     
-    <div class="card">
+    .page-header {
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .detail-card {
+        background-color: var(--card-background);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px var(--shadow);
+    }
+    
+    .card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    .header-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .header-icon {
+        color: var(--primary-color);
+        font-size: 1rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .info-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .section-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .section-content {
+        color: var(--text-secondary);
+    }
+    
+    .rating-stars {
+        color: #FFD700;
+        font-size: 1.5rem;
+        margin-top: 0.25rem;
+    }
+    
+    .actions-container {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 2rem;
+        justify-content: flex-end;
+    }
+    
+    .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0;
+    }
+    
+    .info-list li {
+        padding: 0.5rem 0;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .info-list li:last-child {
+        border-bottom: none;
+    }
+    
+    .info-icon {
+        color: var(--text-secondary);
+        margin-right: 0.5rem;
+        width: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">Detalle de Valoración</h1>
+    </div>
+    
+    <div class="detail-card">
         <div class="card-header">
-            Valoración para viaje: {{ review.ride.origin }} → {{ review.ride.destination }}
+            <h2 class="header-title">
+                <i class="fas fa-map-marked-alt header-icon"></i>
+                Valoración para viaje: {{ review.ride.origin }} → {{ review.ride.destination }}
+            </h2>
         </div>
+        
         <div class="card-body">
-            <div class="mb-3">
-                <strong>Valoración:</strong>
-                <div>
+            <div class="info-section">
+                <div class="section-label">Valoración</div>
+                <div class="rating-stars">
                     {% for i in "12345" %}
                         {% if forloop.counter <= review.rating %}
-                            ⭐
+                            <i class="fas fa-star"></i>
+                        {% else %}
+                            <i class="far fa-star"></i>
                         {% endif %}
                     {% endfor %}
                 </div>
             </div>
             
-            <div class="mb-3">
-                <strong>Usuario:</strong> {{ review.user.username }}
+            <div class="info-section">
+                <div class="section-label">Usuario</div>
+                <div class="section-content">
+                    <i class="fas fa-user info-icon"></i> {{ review.user.username }}
+                </div>
             </div>
             
-            <div class="mb-3">
-                <strong>Comentario:</strong>
-                <p>{{ review.comment|default:"Sin comentario" }}</p>
+            <div class="info-section">
+                <div class="section-label">Comentario</div>
+                <div class="section-content">
+                    {{ review.comment|default:"Sin comentario" }}
+                </div>
             </div>
             
-            <div class="mb-3">
-                <strong>Fecha:</strong> {{ review.created_at|date:"j F Y, H:i" }}
+            <div class="info-section">
+                <div class="section-label">Fecha</div>
+                <div class="section-content">
+                    <i class="fas fa-calendar-alt info-icon"></i> {{ review.created_at|date:"j F Y, H:i" }}
+                </div>
             </div>
             
-            <div class="mb-3">
-                <strong>Detalles del viaje:</strong>
-                <ul>
-                    <li>Origen: {{ review.ride.origin }}</li>
-                    <li>Destino: {{ review.ride.destination }}</li>
-                    <li>Conductor: {{ review.ride.driver.username }}</li>
-                    <li>Fecha de salida: {{ review.ride.departure_time|date:"j F Y, H:i" }}</li>
+            <div class="info-section">
+                <div class="section-label">Detalles del viaje</div>
+                <ul class="info-list">
+                    <li>
+                        <i class="fas fa-map-marker-alt info-icon"></i> 
+                        <span>Origen: {{ review.ride.origin }}</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-map-marker info-icon"></i> 
+                        <span>Destino: {{ review.ride.destination }}</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-user-tie info-icon"></i> 
+                        <span>Conductor: {{ review.ride.driver.username }}</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-clock info-icon"></i> 
+                        <span>Fecha de salida: {{ review.ride.departure_time|date:"j F Y, H:i" }}</span>
+                    </li>
                 </ul>
             </div>
             
-            <div class="d-flex">
+            <div class="actions-container">
                 {% if review.user == user %}
-                    <a href="{% url 'reviews:delete' review.id %}" class="btn btn-danger me-2">Eliminar</a>
+                    <a href="{% url 'reviews:delete' review.id %}" class="button button-secondary">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </a>
                 {% endif %}
-                <a href="{% url 'reviews:list' %}" class="btn btn-secondary">Volver a la lista</a>
+                <a href="{% url 'reviews:list' %}" class="button button-primary">
+                    <i class="fas fa-arrow-left"></i> Volver a la lista
+                </a>
             </div>
         </div>
     </div>
