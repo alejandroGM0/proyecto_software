@@ -24,7 +24,7 @@
 }
 
 .nav-brand {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-base);   
     font-weight: 600;
     color: var(--color-text);
     text-decoration: none;
@@ -36,28 +36,29 @@
 }
 
 .nav-link {
+    font-weight: bold;
     color: var(--color-text);
     text-decoration: none;
-    font-size: var(--font-size-sm);
-    opacity: 0.8;
-    transition: opacity 0.3s;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    transition: background-color 0.3s ease;
 }
 
 .nav-link:hover {
-    opacity: 1;
-    color: var(--color-primary);
+    background-color: rgba(0, 0, 0, 0.1);
+    text-decoration: none;
 }
 
 /* Search Form */
 .search-form {
     width: 100%;
     max-width: 800px;
-    background: rgba(255, 255, 255, 0.15); /* Fondo más transparente */
-    backdrop-filter: blur(15px) saturate(180%); /* Ajuste del blur y saturación */
+    background: rgba(255, 255, 255, 0.15); 
+    backdrop-filter: blur(15px) saturate(180%); 
     -webkit-backdrop-filter: blur(15px) saturate(180%);
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-lg);
-    border: 1px solid rgba(255, 255, 255, 0.25); /* Borde más sutil */
+    border: 1px solid rgba(255, 255, 255, 0.25); 
 }
 
 .search-form form {
@@ -72,8 +73,8 @@
     border: none;
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-base);
-    background: rgba(255, 255, 255, 0.5); /* Fondo más transparente */
-    backdrop-filter: blur(10px); /* Ajuste del blur */
+    background: rgba(255, 255, 255, 0.5); 
+    backdrop-filter: blur(10px); 
     -webkit-backdrop-filter: blur(10px);
     color: var(--color-text);
     transition: all 0.2s ease;
@@ -81,7 +82,7 @@
 
 .search-input:focus {
     outline: none;
-    background: rgba(255, 255, 255, 0.8); /* Fondo más claro al enfocar */
+    background: rgba(255, 255, 255, 0.8); 
     box-shadow: 0 0 0 4px rgba(0, 125, 250, 0.1);
 }
 
@@ -185,25 +186,34 @@
 }
 
 /* Mensajes */
+.messages-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
 .message {
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius-lg);
-    margin-bottom: var(--spacing-md);
-    font-size: 0.875rem;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    margin-bottom: var (--spacing-sm);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
 }
 
 .message.success {
-    background-color: rgba(41, 204, 68, 0.1);
-    color: var(--color-success);
-    border: 1px solid rgba(41, 204, 68, 0.2);
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
 }
 
 .message.error {
-    background-color: rgba(255, 59, 48, 0.1);
-    color: var(--color-error);
-    border: 1px solid rgba(255, 59, 48, 0.2);
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
 }
 
 /* Hero section */
@@ -275,7 +285,7 @@
 }
 
 .ride-title {
-    font-size: 20px; /* Ajuste Apple-like */
+    font-size: 20px; 
     font-weight: 600;
     margin-bottom: var(--spacing-md);
     color: var(--color-text);
