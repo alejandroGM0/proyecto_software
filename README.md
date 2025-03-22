@@ -97,6 +97,31 @@ python .\manage.py runserver
 python -m daphne -p 8000 blablacar.asgi:application
 ```
 
+## Ejecución de tests
+
+Para ejecutar todos los tests del proyecto:
+```bash
+python manage.py test
+```
+
+Para ejecutar tests de una aplicación específica:
+```bash
+python manage.py test nombre_app
+```
+
+Para ejecutar un módulo de test específico:
+```bash
+python manage.py test nombre_app.tests.test_module
+```
+
+
+
+Para ejecutar un método de test específico:
+```bash
+python manage.py test nombre_app.tests.test_module.NombreClaseTest.test_metodo
+```
+
+
 ## Estructura del proyecto
 
 ```

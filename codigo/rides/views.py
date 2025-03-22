@@ -74,7 +74,6 @@ def ride_detail(request, ride_id):
 
 @login_required
 def my_rides(request):
-    # Redireccionar al perfil del usuario en lugar de renderizar la plantilla eliminada
     return redirect('accounts:profile_view', username=request.user.username)
 
 @login_required
@@ -113,6 +112,8 @@ def search_ride(request):
         rides = rides.filter(origin__icontains=query_origin)
     if query_destination:
         rides = rides.filter(destination__icontains=query_destination)
+    
+    rides = rides.order_by('departure_time')
     
     # Configurar la paginación (3 viajes por página)
     paginator = Paginator(rides, 3)

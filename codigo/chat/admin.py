@@ -29,7 +29,9 @@ class MessageAdmin(admin.ModelAdmin):
     short_content.short_description = 'Mensaje'
     
     def get_ride_info(self, obj):
-        return f"{obj.ride.origin} → {obj.ride.destination}"
+        if hasattr(obj, 'ride') and obj.ride:
+            return f"{obj.ride.origin} → {obj.ride.destination}"
+        return "Sin viaje asociado"
     get_ride_info.short_description = 'Conversación'
     
     fieldsets = (
