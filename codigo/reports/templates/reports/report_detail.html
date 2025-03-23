@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ report.title }} - BlaBlaCar{% endblock %}
+
+{% block styles %}
+<style>
+    .report-detail-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .report-header {
+        margin-bottom: 30px;
+    }
+    .report-meta {
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+    .meta-item {
+        display: inline-block;
+        margin-right: 20px;
+    }
+    .report-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-left: 10px;
+    }
+    .badge-payment {
+        background-color: #e3f2fd;
+        color: #0d6efd;
+    }
+    .badge-ride {
+        background-color: #d1e7dd;
+        color: #198754;
+    }
+    .badge-user {
+        background-color: #f8d7da;
+        color: #dc3545;
+    }
+    .badge-system {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .importance-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    .importance-normal {
+        background-color: #f0f0f0;
+        color: #555;
+    }
+    .importance-important {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .importance-urgent {
+        background-color: #f8d7da;
+        color: #dc3545;
+    }
+    .report-content {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .response-container {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .response-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        color: #6c757d;
+    }
+    .response-form {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .report-actions {
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-detail-container">
+    <div class="report-header">
+        <h1>
+            {{ report.title }}
+            <span class="report-badge badge-{{ report.report_type }}">{{ report.get_report_type_display }}</span>
+            <span class="importance-badge importance-{{ report.importance }}">
+                {{ report.get_importance_display }}
+            </span>
+        </h1>
+        <div class="report-meta">
+            <span class="meta-item">Creado por: {{ report.user.get_full_name|default:report.user.username }}</span>
+            <span class="meta-item">Fecha: {{ report.created_at|date:"d/m/Y H:i" }}</span>
+            {% if is_admin %}
+            <span class="meta-item">Estado: {% if report.read %}Leído{% else %}No leído{% endif %}</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="report-content">
+        <h2>Descripción</h2>
+        {{ report.description|linebreaks }}
+    </div>
+    
+    {% if report.response %}
+    <div class="response-container">
+        <h2>Respuesta</h2>
+        <div class="response-header">
+            <span>Respondido por: {{ report.response_by.get_full_name|default:report.response_by.username }}</span>
+            <span>Fecha: {{ report.response_at|date:"d/m/Y H:i" }}</span>
+        </div>
+        {{ report.response|linebreaks }}
+    </div>
+    {% elif is_admin %}
+    <div class="response-form">
+        <h2>Responder</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ response_form.as_p }}
+            <button type="submit" class="button button-primary">Enviar respuesta</button>
+        </form>
+    </div>
+    {% endif %}
+    
+    <div class="report-actions">
+        <a href="{% url 'reports:report_list' %}" class="button button-secondary">Volver a la lista</a>
+        
+        {% if not report.response or is_admin %}
+        <a href="{% url 'reports:update_report' report.id %}" class="button button-primary">Editar reporte</a>
+        {% endif %}
+        
+        <a href="{% url 'reports:delete_report' report.id %}" class="button button-danger">Eliminar reporte</a>
+        
+        {% if is_admin %}
+            {% if report.read %}
+                <a href="{% url 'reports:mark_as_unread' report.id %}" class="button">Marcar como no leído</a>
+            {% else %}
+                <a href="{% url 'reports:mark_as_read' report.id %}" class="button">Marcar como leído</a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
