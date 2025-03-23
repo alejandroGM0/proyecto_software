@@ -40,10 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rides',
     'accounts',
-    'payments.apps.PaymentsConfig',
-    'reviews.apps.ReviewsConfig',
+    'payments',
+    'reviews',
     'channels',
     'chat',
+    'reports',
 ]
 
 MIDDLEWARE = [

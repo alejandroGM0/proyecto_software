@@ -1,0 +1,67 @@
+/* Variables globales */
+:root {
+    /* Colors - Apple exact colors */
+    --color-primary: #0066CC;
+    --color-primary-hover: #0055B3;
+    --color-secondary: #86868b;
+    --color-text: #1d1d1f;
+    --color-background: #FBFBFD;
+    --color-white: #ffffff;
+    --color-border: #d2d2d7;
+    
+    /* Typography - Apple's SF Pro */
+    --font-family-text: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --font-family-display: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-base: 17px;
+    --font-size-lg: 21px;
+    --font-size-xl: 40px;
+    --font-size-2xl: 48px;
+    --font-size-3xl: 56px;
+    --font-size-4xl: 80px;
+    --line-height-tight: 1.1;
+    --line-height-base: 1.47059;
+    
+    /* Layout */
+    --container-width: 980px;
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+    
+    /* Effects */
+    --border-radius-sm: 12px;
+    --border-radius-lg: 14px;
+    --border-radius-xl: 18px;
+    --border-radius-full: 999px;
+    --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.12);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset y estilos base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family-text);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    line-height: var(--line-height-base);
+    font-weight: 400;
+    letter-spacing: -0.022em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-display);
+}

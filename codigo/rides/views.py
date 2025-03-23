@@ -48,8 +48,8 @@ def ride_list(request):
         SEARCH_FORM_KEY: search_form
     })
 
+#TODO Q hace esto?
 def search_ride(request):
-    # Si el usuario está autenticado, actualizar su última actividad
     if request.user.is_authenticated:
         update_last_activity(request.user)
     
@@ -57,21 +57,17 @@ def search_ride(request):
     query_origin = request.GET.get(ORIGIN_KEY, '')
     query_destination = request.GET.get(DESTINATION_KEY, '')
     
-    # Filtrar viajes activos
     rides = Ride.objects.filter(departure_time__gt=timezone.now())
     
-    # Aplicar filtros si se proporcionan
     if query_origin:
-        rides = rides.filter(origin__icontains(query_origin))
+        rides = rides.filter(origin__icontains=query_origin)
     if query_destination:
-        rides = rides.filter(destination__icontains(query_destination))
+        rides = rides.filter(destination__icontains=query_destination)
     
-    # Ordenar y paginar los resultados
     paginator = Paginator(rides.order_by('departure_time'), RESULTS_PER_PAGE)
     page_number = request.GET.get(PAGE_KEY, 1)
     page_obj = paginator.get_page(page_number)
     
-    # Preparar el contexto para la plantilla
     context = {
         'page_obj': page_obj,
         'query_origin': query_origin,

@@ -1,7 +1,6 @@
 # Static files
 /staticfiles/
 /static/admin/
-/static/
 *.pyc
 __pycache__/
 .env
