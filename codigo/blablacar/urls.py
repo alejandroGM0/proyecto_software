@@ -25,6 +25,8 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('reviews/', include('reviews.urls')),
     path('chat/', include('chat.urls', namespace='chat')),
+    path('payments/', include('payments.urls', namespace='payments')),
+    path('reports/', include('reports.urls', namespace='reports')),
 
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if report %}Editar{% else %}Crear{% endif %} Reporte - BlaBlaCar{% endblock %}
+
+{% block styles %}
+<style>
+    .create-report-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    .form-group textarea {
+        min-height: 100px;
+    }
+    .form-row {
+        display: flex;
+        gap: 20px;
+    }
+    .form-row .form-group {
+        flex: 1;
+    }
+    .actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+    .help-text {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    .errorlist {
+        color: #dc3545;
+        list-style: none;
+        padding: 0;
+        margin: 5px 0 0;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-report-container">
+    <h1>{% if report %}Editar{% else %}Crear{% endif %} Reporte</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Por favor corrige los errores:</strong>
+            {{ form.errors }}
+        </div>
+        {% endif %}
+        
+        {{ form.as_p }}
+        
+        <button type="submit" class="button button-primary">Guardar reporte</button>
+        <a href="{% url 'reports:report_list' %}" class="button button-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

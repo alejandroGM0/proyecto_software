@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Reporte - BlaBlaCar{% endblock %}
+
+{% block styles %}
+<style>
+    .delete-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+    }
+    .delete-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 30px;
+    }
+    .warning-icon {
+        font-size: 48px;
+        color: #dc3545;
+        margin-bottom: 20px;
+    }
+    .report-info {
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        text-align: left;
+    }
+    .actions {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+    .delete-title {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <div class="delete-card">
+        <div class="warning-icon">⚠️</div>
+        <h1 class="delete-title">Eliminar Reporte</h1>
+        <p>¿Estás seguro de que quieres eliminar el siguiente reporte?</p>
+        
+        <div class="report-info">
+            <p><strong>Título:</strong> {{ report.title }}</p>
+            <p><strong>Descripción:</strong> {{ report.description|truncatechars:100 }}</p>
+            <p><strong>Tipo:</strong> {{ report.get_report_type_display }}</p>
+            <p><strong>Importancia:</strong> {{ report.get_importance_display }}</p>
+            <p><strong>Creado:</strong> {{ report.created_at|date:"d/m/Y H:i" }}</p>
+        </div>
+        
+        <p>Esta acción no se puede deshacer.</p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="actions">
+                <button type="submit" class="button button-danger">Confirmar eliminación</button>
+                <a href="{% url 'reports:report_detail' report.id %}" class="button button-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
