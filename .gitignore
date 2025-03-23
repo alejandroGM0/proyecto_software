@@ -1,6 +1,7 @@
 # Static files
 /staticfiles/
 /static/admin/
+/static/
 *.pyc
 __pycache__/
 .env
@@ -19,7 +20,7 @@ ENV/
 # Database
 db.sqlite3
 db.sqlite3-journal
-fgbfbg
+
 # Media files
 media/
 media/*

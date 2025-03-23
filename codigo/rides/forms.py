@@ -1,5 +1,6 @@
 from django import forms
 from .models import Ride
+from .constants import ORIGIN_KEY, DESTINATION_KEY, DATE_KEY
 
 class RideForm(forms.ModelForm):
     class Meta:
@@ -28,3 +29,23 @@ class RideForm(forms.ModelForm):
                 'min': '0'
             })
         }
+#TODO NO ES NECESARIO ELIMINAR
+class RideSearchForm(forms.Form):
+    origin = forms.CharField(
+        label='Origen',
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Ciudad de origen'})
+    )
+    destination = forms.CharField(
+        label='Destino',
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Ciudad de destino'})
+    )
+    date = forms.DateField(
+        label='Fecha',
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+
+    class Meta:
+        fields = [ORIGIN_KEY, DESTINATION_KEY, DATE_KEY]
