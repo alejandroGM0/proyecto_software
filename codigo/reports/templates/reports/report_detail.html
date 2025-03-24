@@ -4,98 +4,340 @@
 
 {% block styles %}
 <style>
+    /* Modern Apple Design System - 2025 */
+    :root {
+        --apple-background: #f5f5f7;
+        --apple-card: #ffffff;
+        --apple-text: #1d1d1f;
+        --apple-secondary-text: #86868b;
+        --apple-danger: #ff3b30;
+        --apple-danger-light: #fff2f2;
+        --apple-blue: #0071e3;
+        --apple-blue-dark: #0058b0;
+        --apple-blue-light: #e6f2ff;
+        --apple-green: #34c759;
+        --apple-green-light: #e6f9ed;
+        --apple-orange: #ff9500;
+        --apple-orange-light: #fff9e6;
+        --apple-gray: #f2f2f2;
+        --apple-gray-dark: #d2d2d7;
+        --apple-border: rgba(0, 0, 0, 0.1);
+        --apple-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 6px 10px rgba(0, 0, 0, 0.05);
+        --apple-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.06);
+        --card-radius: 18px;
+        --button-radius: 12px;
+        --badge-radius: 18px;
+    }
+    
+    body {
+        background-color: var(--apple-background);
+        color: var(--apple-text);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.5;
+    }
+    
     .report-detail-container {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 20px;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 0 24px;
     }
+    
     .report-header {
-        margin-bottom: 30px;
+        margin-bottom: 36px;
     }
+    
+    .report-header h1 {
+        font-size: 36px;
+        font-weight: 600;
+        letter-spacing: -0.022em;
+        color: var(--apple-text);
+        margin-bottom: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(90deg, #000000, #434343);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    
     .report-meta {
-        color: #6c757d;
-        margin-bottom: 20px;
+        color: var(--apple-secondary-text);
+        margin-bottom: 24px;
+        font-size: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
     }
+    
     .meta-item {
-        display: inline-block;
-        margin-right: 20px;
+        display: inline-flex;
+        align-items: center;
     }
+    
     .report-badge {
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 4px;
+        display: inline-flex;
+        padding: 5px 12px;
+        border-radius: var(--badge-radius);
         font-size: 12px;
-        font-weight: bold;
+        font-weight: 500;
         text-transform: uppercase;
-        margin-left: 10px;
     }
+    
     .badge-payment {
-        background-color: #e3f2fd;
-        color: #0d6efd;
+        background: linear-gradient(145deg, #e4f0ff, #d2e7ff);
+        color: var(--apple-blue);
     }
+    
     .badge-ride {
-        background-color: #d1e7dd;
-        color: #198754;
+        background: linear-gradient(145deg, #e6f9ed, #d4f5e0);
+        color: var(--apple-green);
     }
+    
     .badge-user {
-        background-color: #f8d7da;
-        color: #dc3545;
+        background: linear-gradient(145deg, #fff2f2, #ffe5e5);
+        color: var(--apple-danger);
     }
+    
     .badge-system {
-        background-color: #fff3cd;
-        color: #856404;
+        background: linear-gradient(145deg, #fff9e6, #fff0cc);
+        color: var(--apple-orange);
     }
+    
     .importance-badge {
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 4px;
+        display: inline-flex;
+        padding: 5px 12px;
+        border-radius: var(--badge-radius);
         font-size: 12px;
-        font-weight: bold;
+        font-weight: 500;
     }
+    
     .importance-normal {
-        background-color: #f0f0f0;
-        color: #555;
+        background: linear-gradient(145deg, #f5f5f7, #e8e8e8);
+        color: var(--apple-secondary-text);
     }
+    
     .importance-important {
-        background-color: #fff3cd;
-        color: #856404;
+        background: linear-gradient(145deg, #fff9e6, #fff0cc);
+        color: var(--apple-orange);
     }
+    
     .importance-urgent {
-        background-color: #f8d7da;
-        color: #dc3545;
+        background: linear-gradient(145deg, #fff2f2, #ffe5e5);
+        color: var(--apple-danger);
     }
+    
     .report-content {
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        padding: 30px;
-        margin-bottom: 30px;
+        background-color: var(--apple-card);
+        border-radius: var(--card-radius);
+        box-shadow: var(--apple-shadow-sm);
+        padding: 32px;
+        margin-bottom: 36px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
+    
+    .report-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(140deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+        pointer-events: none;
+    }
+    
+    .report-content:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--apple-shadow);
+    }
+    
+    .report-content h2 {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--apple-text);
+        margin-top: 0;
+        margin-bottom: 20px;
+        letter-spacing: -0.018em;
+    }
+    
     .response-container {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        padding: 30px;
-        margin-bottom: 30px;
+        background: linear-gradient(145deg, var(--apple-green-light), #f0fdf5);
+        border-radius: var(--card-radius);
+        box-shadow: var(--apple-shadow-sm);
+        padding: 32px;
+        margin-bottom: 36px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
+    
+    .response-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(140deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%);
+        pointer-events: none;
+    }
+    
+    .response-container:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--apple-shadow);
+    }
+    
+    .response-container h2 {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--apple-text);
+        margin-top: 0;
+        margin-bottom: 20px;
+        letter-spacing: -0.018em;
+    }
+    
     .response-header {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 15px;
-        color: #6c757d;
-    }
-    .response-form {
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        padding: 30px;
-        margin-bottom: 30px;
-    }
-    .report-actions {
-        margin-top: 20px;
-        display: flex;
+        margin-bottom: 20px;
+        color: var(--apple-secondary-text);
+        font-size: 14px;
         flex-wrap: wrap;
         gap: 10px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(52, 199, 89, 0.15);
+    }
+    
+    .response-form {
+        background-color: var(--apple-card);
+        border-radius: var(--card-radius);
+        box-shadow: var(--apple-shadow-sm);
+        padding: 32px;
+        margin-bottom: 36px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .response-form::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(140deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+        pointer-events: none;
+    }
+    
+    .response-form:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--apple-shadow);
+    }
+    
+    .response-form h2 {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--apple-text);
+        margin-top: 0;
+        margin-bottom: 20px;
+        letter-spacing: -0.018em;
+    }
+    
+    .response-form textarea {
+        width: 100%;
+        padding: 14px 18px;
+        border: 1px solid var(--apple-gray-dark);
+        border-radius: 14px;
+        font-size: 16px;
+        color: var(--apple-text);
+        background-color: var(--apple-card);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+        transition: all 0.2s ease;
+        min-height: 150px;
+        resize: vertical;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    
+    .response-form textarea:focus {
+        outline: none;
+        border-color: var(--apple-blue);
+        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+        transform: translateY(-1px);
+    }
+    
+    .report-actions {
+        margin-top: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+    
+    .button {
+        padding: 14px 24px;
+        border-radius: var(--button-radius);
+        font-size: 16px;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .button-primary {
+        background: linear-gradient(145deg, var(--apple-blue), var(--apple-blue-dark));
+        color: white;
+    }
+    
+    .button-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 113, 227, 0.25);
+    }
+    
+    .button-primary:active {
+        transform: translateY(1px);
+        box-shadow: 0 1px 3px rgba(0, 113, 227, 0.2);
+    }
+    
+    .button-secondary {
+        background: linear-gradient(145deg, #f8f8f8, var(--apple-gray));
+        color: var(--apple-text);
+    }
+    
+    .button-secondary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .button-danger {
+        background: linear-gradient(145deg, var(--apple-danger-light), #ffe5e5);
+        color: var(--apple-danger);
+    }
+    
+    .button-danger:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(255, 59, 48, 0.15);
+    }
+    
+    .button-outline {
+        background: transparent;
+        color: var(--apple-blue);
+        border: 1px solid var(--apple-blue);
+    }
+    
+    .button-outline:hover {
+        background: rgba(0, 113, 227, 0.05);
+        transform: translateY(-1px);
     }
 </style>
 {% endblock %}
@@ -155,9 +397,9 @@
         
         {% if is_admin %}
             {% if report.read %}
-                <a href="{% url 'reports:mark_as_unread' report.id %}" class="button">Marcar como no leído</a>
+                <a href="{% url 'reports:mark_as_unread' report.id %}" class="button button-outline">Marcar como no leído</a>
             {% else %}
-                <a href="{% url 'reports:mark_as_read' report.id %}" class="button">Marcar como leído</a>
+                <a href="{% url 'reports:mark_as_read' report.id %}" class="button button-outline">Marcar como leído</a>
             {% endif %}
         {% endif %}
     </div>
