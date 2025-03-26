@@ -68,7 +68,7 @@ class UserProfile(models.Model):
         diff = now - self.last_active
         
         if diff.days == 0:
-            if diff.seconds < 3600:  # Menos de una hora
+            if diff.seconds < 3600:
                 return "En línea recientemente"
             return "Hoy"
         elif diff.days == 1:

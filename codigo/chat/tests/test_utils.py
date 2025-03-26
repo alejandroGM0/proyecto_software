@@ -6,7 +6,8 @@ from decimal import Decimal
 
 from chat.models import Message
 from rides.models import Ride
-from chat.utils import user_has_chat_access, get_user_chats
+from chat.public import user_has_chat_access, get_user_chats
+from chat._utils import format_message_for_api, get_messages_for_ride, can_send_message
 from .test_constants import *
 
 class ChatUtilsTests(TestCase):

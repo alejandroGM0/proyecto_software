@@ -13,6 +13,7 @@ from .public import (
 )
 from .constants import *
 from ._utils import *
+from django.core.paginator import Paginator
 
 def login_view(request):
     if request.method == 'POST':
@@ -63,15 +64,50 @@ def profile_view(request, username):
     if not user:
         return redirect(RIDE_LIST_URL)
     
+    # Primero obtenemos los datos de viajes
     rides_data = get_user_rides_data(user)
     profile_data = get_user_profile_data(user)
     
+    # Extraemos las listas de viajes de rides_data
+    active_rides_as_driver = rides_data.get('active_rides_as_driver', [])
+    expired_rides_as_driver = rides_data.get('expired_rides_as_driver', [])
+    active_rides_as_passenger = rides_data.get('active_rides_as_passenger', [])
+    expired_rides_as_passenger = rides_data.get('expired_rides_as_passenger', [])
+    
+    # Ahora creamos los paginadores con las listas obtenidas
+    # Paginación para viajes como conductor (activos)
+    paginator_driver_active = Paginator(active_rides_as_driver, 6)
+    driver_active_page = request.GET.get('page') if request.GET.get('tab') == 'driver' and request.GET.get('status') == 'active' else 1
+    active_driver_page_obj = paginator_driver_active.get_page(driver_active_page)
+    
+    # Paginación para viajes como conductor (finalizados)
+    paginator_driver_expired = Paginator(expired_rides_as_driver, 6)
+    driver_expired_page = request.GET.get('page') if request.GET.get('tab') == 'driver' and request.GET.get('status') == 'expired' else 1
+    expired_driver_page_obj = paginator_driver_expired.get_page(driver_expired_page)
+    
+    # Paginación para viajes como pasajero (activos)
+    paginator_passenger_active = Paginator(active_rides_as_passenger, 6)
+    passenger_active_page = request.GET.get('page') if request.GET.get('tab') == 'passenger' and request.GET.get('status') == 'active' else 1
+    active_passenger_page_obj = paginator_passenger_active.get_page(passenger_active_page)
+    
+    # Paginación para viajes como pasajero (finalizados)
+    paginator_passenger_expired = Paginator(expired_rides_as_passenger, 6)
+    passenger_expired_page = request.GET.get('page') if request.GET.get('tab') == 'passenger' and request.GET.get('status') == 'expired' else 1
+    expired_passenger_page_obj = paginator_passenger_expired.get_page(passenger_expired_page)
+    
+    # También necesitamos modificar el contexto para mostrar las versiones paginadas
     context = {
         USER_KEY: user,
         USER_PROFILE_KEY: user_profile,
         IS_OWN_PROFILE_KEY: request.user == user,
+        # Incluimos los datos originales para mantener la compatibilidad con código existente
         **rides_data,
         **profile_data,
+        # Añadimos los objetos de paginación
+        'active_driver_page_obj': active_driver_page_obj,
+        'expired_driver_page_obj': expired_driver_page_obj,
+        'active_passenger_page_obj': active_passenger_page_obj,
+        'expired_passenger_page_obj': expired_passenger_page_obj,
     }
     
     return render(request, PROFILE_TEMPLATE, context)

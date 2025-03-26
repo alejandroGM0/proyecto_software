@@ -8,7 +8,6 @@ from django.db.models import Q
 
 from .models import Report
 from .forms import ReportForm, ReportFilterForm, ReportResponseForm
-
 @login_required
 def report_list(request):
     """Vista para ver la lista de reportes."""
