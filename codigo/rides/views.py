@@ -2,9 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from django.core.paginator import Paginator
-from django.db.models import Q
 
+from ._utils import paginate_rides, filter_rides_complex, get_ride_context
+from .public import (
+    get_ride_by_id, get_active_rides, get_rides_by_origin_destination,
+    user_can_book_ride, add_passenger_to_ride
+)
 from .models import Ride
 from .forms import RideForm, RideSearchForm
 from accounts.public import update_last_activity, get_user_profile
@@ -25,49 +28,35 @@ def ride_list(request):
         update_last_activity(request.user)
         
     search_form = RideSearchForm(request.GET or None)
-    rides = Ride.objects.filter(departure_time__gt=timezone.now())
+    
+    rides = get_active_rides()
     
     if search_form.is_valid():
         origin = search_form.cleaned_data.get(ORIGIN_KEY)
         destination = search_form.cleaned_data.get(DESTINATION_KEY)
         date = search_form.cleaned_data.get(DATE_KEY)
         
-        if origin:
-            rides = rides.filter(origin__icontains=origin)
-        if destination:
-            rides = rides.filter(destination__icontains=destination)
-        if date:
-            rides = rides.filter(departure_time__date=date)
+        rides = filter_rides_complex(origin=origin, destination=destination, date=date)
     
-    paginator = Paginator(rides.order_by('departure_time'), RESULTS_PER_PAGE)
     page_number = request.GET.get(PAGE_KEY)
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginate_rides(rides.order_by('departure_time'), page_number, RESULTS_PER_PAGE)
     
     return render(request, RIDE_LIST_TEMPLATE, {
         RIDES_KEY: page_obj,
         SEARCH_FORM_KEY: search_form
     })
 
-#TODO Q hace esto?
 def search_ride(request):
     if request.user.is_authenticated:
         update_last_activity(request.user)
     
-    # Obtener parámetros de búsqueda
     query_origin = request.GET.get(ORIGIN_KEY, '')
     query_destination = request.GET.get(DESTINATION_KEY, '')
     
-    rides = Ride.objects.filter(departure_time__gt=timezone.now())
+    rides = get_rides_by_origin_destination(query_origin, query_destination)
     
-    if query_origin:
-        rides = rides.filter(origin__icontains=query_origin)
-    if query_destination:
-        rides = rides.filter(destination__icontains=query_destination)
-    
-   
-    paginator = Paginator(rides.order_by('departure_time'), 6)
     page_number = request.GET.get(PAGE_KEY, 1)
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginate_rides(rides, page_number, 6)
     
     context = {
         'page_obj': page_obj,
@@ -80,41 +69,34 @@ def search_ride(request):
 @login_required
 def ride_detail(request, ride_id):
     update_last_activity(request.user)
-    ride = get_object_or_404(Ride, id=ride_id)
-    is_driver = request.user == ride.driver
-    is_passenger = ride.passengers.filter(id=request.user.id).exists()
-    available_seats = ride.total_seats - ride.passengers.count()
     
-    return render(request, RIDE_DETAIL_TEMPLATE, {
-        RIDE_KEY: ride,
-        IS_DRIVER_KEY: is_driver,
-        IS_PASSENGER_KEY: is_passenger,
-        AVAILABLE_SEATS_KEY: available_seats
-    })
+    ride = get_ride_by_id(ride_id)
+    if not ride:
+        return redirect(RIDE_LIST_URL)
+    
+    context = get_ride_context(ride, request.user)
+    
+    return render(request, RIDE_DETAIL_TEMPLATE, context)
 
 @login_required
 def book_ride(request, ride_id):
     update_last_activity(request.user)
-    ride = get_object_or_404(Ride, id=ride_id)
     
-    # Verificar si el usuario ya es pasajero
-    if ride.passengers.filter(id=request.user.id).exists():
-        messages.warning(request, RIDE_ALREADY_BOOKED_ERROR)
+    ride = get_ride_by_id(ride_id)
+    if not ride:
+        return redirect(RIDE_LIST_URL)
+    
+    if not user_can_book_ride(request.user, ride):
+        if ride.passengers.filter(id=request.user.id).exists():
+            messages.warning(request, RIDE_ALREADY_BOOKED_ERROR)
+        elif request.user == ride.driver:
+            messages.warning(request, RIDE_OWN_ERROR)
+        else:
+            messages.error(request, RIDE_FULL_ERROR)
         return redirect(RIDE_DETAIL_URL, ride_id=ride.id)
     
-    # Verificar si el usuario es el conductor
-    if request.user == ride.driver:
-        messages.warning(request, RIDE_OWN_ERROR)
-        return redirect(RIDE_DETAIL_URL, ride_id=ride.id)
-    
-    # Verificar si hay asientos disponibles
-    if ride.passengers.count() >= ride.total_seats:
-        messages.error(request, RIDE_FULL_ERROR)
-        return redirect(RIDE_DETAIL_URL, ride_id=ride.id)
-    
-    # Añadir al usuario como pasajero
-    ride.passengers.add(request.user)
-    messages.success(request, RIDE_BOOKED_SUCCESS)
+    if add_passenger_to_ride(request.user, ride):
+        messages.success(request, RIDE_BOOKED_SUCCESS)
     
     return redirect(RIDE_DETAIL_URL, ride_id=ride.id)
 
@@ -140,7 +122,10 @@ def create_ride(request):
 @login_required
 def edit_ride(request, ride_id):
     update_last_activity(request.user)
-    ride = get_object_or_404(Ride, id=ride_id)
+    
+    ride = get_ride_by_id(ride_id)
+    if not ride:
+        return redirect(RIDE_LIST_URL)
     
     if request.user != ride.driver:
         messages.error(request, NO_PERMISSION_ERROR)
