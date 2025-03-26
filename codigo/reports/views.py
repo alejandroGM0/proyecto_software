@@ -1,13 +1,23 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseForbidden
-from django.core.paginator import Paginator
-from django.utils import timezone
-from django.db.models import Q
 
 from .models import Report
 from .forms import ReportForm, ReportFilterForm, ReportResponseForm
+from . import _utils
+from . import public
+from .constants import (
+    REPORT_LIST_NAME, REPORT_DETAIL_NAME, CREATE_REPORT_NAME,
+    UPDATE_REPORT_NAME, DELETE_REPORT_NAME, MARK_READ_NAME, MARK_UNREAD_NAME,
+    get_url_full, REPORT_LIST_TEMPLATE, REPORT_DETAIL_TEMPLATE, REPORT_FORM_TEMPLATE,
+    REPORT_DELETE_TEMPLATE, REPORTS_KEY, FILTER_FORM_KEY, PAGE_OBJ_KEY,
+    IS_PAGINATED_KEY, PAGINATOR_KEY, IS_ADMIN_KEY, RESPONSE_FORM_KEY,
+    REPORTED_USER_KEY, RIDE_KEY, PAYMENT_KEY, REPORT_KEY,
+    REPORT_CREATED_SUCCESS, REPORT_UPDATED_SUCCESS, REPORT_DELETED_SUCCESS,
+    REPORT_MARKED_READ, REPORT_MARKED_UNREAD
+)
+
 @login_required
 def report_list(request):
     """Vista para ver la lista de reportes."""
@@ -15,170 +25,128 @@ def report_list(request):
     if request.user.is_staff:
         reports = Report.objects.all().order_by('-created_at')
     else:
-        reports = Report.objects.filter(user=request.user).order_by('-created_at')
+        reports = public.get_user_reports(request.user)
     
-    # Aplicar filtros si existen
-    filter_form = ReportFilterForm(request.GET)
+    reports, filter_form = _utils.filter_reports(request, reports)
+    page_obj = _utils.paginate_reports(request, reports)
     
-    if filter_form.is_valid():
-        # Filtrar por tipo
-        if report_type := filter_form.cleaned_data.get('report_type'):
-            reports = reports.filter(report_type=report_type)
-        
-        # Filtrar por importancia
-        if importance := filter_form.cleaned_data.get('importance'):
-            reports = reports.filter(importance=importance)
-        
-        # Filtrar por leídos/no leídos
-        if filter_form.cleaned_data.get('read'):
-            reports = reports.filter(read=False)
-        
-        # Búsqueda de texto
-        if search := filter_form.cleaned_data.get('search'):
-            reports = reports.filter(
-                Q(title__icontains=search) | 
-                Q(description__icontains=search)
-            )
+    context = _utils.prepare_report_list_context(page_obj, filter_form, request.user)
     
-    # Paginación
-    paginator = Paginator(reports, 10)  # 10 reportes por página
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'reports': page_obj,
-        'filter_form': filter_form,
-        'page_obj': page_obj,
-        'is_paginated': True,
-        'paginator': paginator,
-        'is_admin': request.user.is_staff
-    }
-    
-    return render(request, 'reports/report_list.html', context)
+    return render(request, REPORT_LIST_TEMPLATE, context)
 
 @login_required
 def report_detail(request, pk):
     """Vista para ver un reporte específico."""
-    report = get_object_or_404(Report, id=pk)
+    report = _utils.get_report_or_404(pk)
     
-    # Verificar permisos (solo admin o el creador pueden ver)
-    if not request.user.is_staff and request.user != report.user:
-        return HttpResponseForbidden("No tienes permiso para ver este reporte.")
+    permission_check = _utils.check_report_view_permission(request, report)
+    if permission_check:
+        return permission_check
     
-    # Marcar como leído si es admin
     if request.user.is_staff and not report.read:
-        report.read = True
-        report.save()
+        public.mark_report_as_read(report)
     
-    # Procesar respuesta si es admin
     if request.user.is_staff and request.method == 'POST':
-        response_form = ReportResponseForm(request.POST, instance=report)
-        if response_form.is_valid():
-            report_response = response_form.save(commit=False)
-            report_response.response_by = request.user
-            report_response.response_at = timezone.now()
-            report_response.save()
-            messages.success(request, 'Respuesta enviada correctamente.')
-            return redirect('reports:report_detail', pk=report.pk)
-    else:
-        response_form = ReportResponseForm(instance=report)
+        response_result = _utils.handle_report_response(request, report)
+        if response_result:
+            return response_result
     
-    context = {
-        'report': report,
-        'is_admin': request.user.is_staff,
-        'response_form': response_form if request.user.is_staff else None
-    }
+    context = _utils.prepare_report_context(report, request.user)
     
-    return render(request, 'reports/report_detail.html', context)
+    return render(request, REPORT_DETAIL_TEMPLATE, context)
 
 @login_required
 def create_report(request):
     """Vista para crear un nuevo reporte."""
+    reported_user, ride, payment, initial_data = _utils.get_related_objects(request)
+    
     if request.method == 'POST':
         form = ReportForm(request.POST)
         if form.is_valid():
             try:
                 report = form.save(commit=False)
                 report.user = request.user
+                
+                if reported_user:
+                    report.reported_user = reported_user
+                elif ride:
+                    report.ride = ride
+                elif payment:
+                    report.payment = payment
+                
                 report.save()
                 
-                messages.success(request, 'Reporte enviado exitosamente.')
-                return redirect('reports:report_detail', pk=report.pk)
+                messages.success(request, REPORT_CREATED_SUCCESS)
+                return redirect(get_url_full(REPORT_DETAIL_NAME), pk=report.pk)
             except Exception as e:
                 messages.error(request, f'Error al crear el reporte: {str(e)}')
                 print(f"ERROR: {str(e)}")
         else:
             print(f"Errores de formulario: {form.errors}")
     else:
-        form = ReportForm()
+        form = ReportForm(initial=initial_data)
     
-    return render(request, 'reports/report_form.html', {'form': form})
+    context = _utils.prepare_create_report_context(form, reported_user, ride, payment)
+    
+    return render(request, REPORT_FORM_TEMPLATE, context)
 
 @login_required
 def update_report(request, pk):
     """Vista para actualizar un reporte existente."""
-    report = get_object_or_404(Report, pk=pk)
+    report = _utils.get_report_or_404(pk)
     
-    # Solo el creador o un admin pueden editar
-    if not request.user.is_staff and request.user != report.user:
-        return HttpResponseForbidden("No tienes permiso para editar este reporte.")
-    
-    # No se puede editar si ya tiene respuesta
-    if report.response and not request.user.is_staff:
-        messages.warning(request, 'No puedes editar un reporte que ya ha sido respondido.')
-        return redirect('reports:report_detail', pk=report.pk)
+    permission_check = _utils.check_report_edit_permission(request, report)
+    if permission_check:
+        return permission_check
     
     if request.method == 'POST':
         form = ReportForm(request.POST, instance=report)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Reporte actualizado exitosamente.')
-            return redirect('reports:report_detail', pk=report.pk)
+            messages.success(request, REPORT_UPDATED_SUCCESS)
+            return redirect(get_url_full(REPORT_DETAIL_NAME), pk=report.pk)
     else:
         form = ReportForm(instance=report)
     
-    return render(request, 'reports/report_form.html', {'form': form, 'report': report})
+    return render(request, REPORT_FORM_TEMPLATE, {'form': form, 'report': report})
 
 @login_required
 def delete_report(request, pk):
     """Vista para eliminar un reporte."""
-    report = get_object_or_404(Report, pk=pk)
+    report = _utils.get_report_or_404(pk)
     
-    # Solo el creador o un admin pueden eliminar
-    if not request.user.is_staff and request.user != report.user:
+    if not public.can_delete_report(request.user, report):
         return HttpResponseForbidden("No tienes permiso para eliminar este reporte.")
     
     if request.method == 'POST':
         report.delete()
-        messages.success(request, 'Reporte eliminado exitosamente.')
-        return redirect('reports:report_list')
+        messages.success(request, REPORT_DELETED_SUCCESS)
+        return redirect(get_url_full(REPORT_LIST_NAME))
     
-    return render(request, 'reports/report_confirm_delete.html', {'report': report})
+    return render(request, REPORT_DELETE_TEMPLATE, {'report': report})
 
 @login_required
 def mark_as_read(request, pk):
     """Vista para marcar un reporte como leído."""
-    report = get_object_or_404(Report, pk=pk)
+    report = _utils.get_report_or_404(pk)
     
-    # Solo los administradores pueden marcar como leído/no leído
-    if not request.user.is_staff:
-        return HttpResponseForbidden("Solo los administradores pueden marcar reportes como leídos.")
+    permission_check = _utils.check_admin_permission(request)
+    if permission_check:
+        return permission_check
     
-    report.read = True
-    report.save()
-    messages.success(request, 'Reporte marcado como leído.')
-    return redirect('reports:report_list')
+    public.mark_report_as_read(report)
+    messages.success(request, REPORT_MARKED_READ)
+    return redirect(get_url_full(REPORT_LIST_NAME))
 
 @login_required
 def mark_as_unread(request, pk):
     """Vista para marcar un reporte como no leído."""
-    report = get_object_or_404(Report, pk=pk)
+    report = _utils.get_report_or_404(pk)
     
-    # Solo los administradores pueden marcar como leído/no leído
-    if not request.user.is_staff:
-        return HttpResponseForbidden("Solo los administradores pueden marcar reportes como no leídos.")
+    permission_check = _utils.check_admin_permission(request)
+    if permission_check:
+        return permission_check
     
-    report.read = False
-    report.save()
-    messages.success(request, 'Reporte marcado como no leído.')
-    return redirect('reports:report_list')
+    public.mark_report_as_unread(report)
+    messages.success(request, REPORT_MARKED_UNREAD)
+    return redirect(get_url_full(REPORT_LIST_NAME))

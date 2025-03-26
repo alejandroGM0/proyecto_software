@@ -228,12 +228,127 @@
         opacity: 0.5;
         transition: opacity 0.2s ease;
     }
+    
+    .context-info {
+        background-color: var(--apple-gray);
+        border-radius: var(--card-radius);
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+    
+    .context-info h3 {
+        margin-top: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--apple-text);
+        margin-bottom: 16px;
+    }
+    
+    .info-list {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+    }
+    
+    .info-list li {
+        margin-bottom: 10px;
+        display: flex;
+    }
+    
+    .info-label {
+        font-weight: 500;
+        color: var(--apple-secondary-text);
+        width: 140px;
+        flex-shrink: 0;
+    }
+    
+    .info-value {
+        flex: 1;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="create-report-container">
     <h1>{% if report %}Editar{% else %}Crear{% endif %} Reporte</h1>
+    
+    {% if reported_user or ride or payment %}
+    <div class="context-info">
+        {% if reported_user %}
+        <h3>Información del usuario reportado</h3>
+        <ul class="info-list">
+            <li>
+                <span class="info-label">Nombre de usuario:</span>
+                <span class="info-value">{{ reported_user.username }}</span>
+            </li>
+            <li>
+                <span class="info-label">Nombre completo:</span>
+                <span class="info-value">{{ reported_user.get_full_name|default:"No especificado" }}</span>
+            </li>
+            <li>
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ reported_user.email }}</span>
+            </li>
+        </ul>
+        {% endif %}
+        
+        {% if ride %}
+        <h3>Información del viaje reportado</h3>
+        <ul class="info-list">
+            <li>
+                <span class="info-label">Origen:</span>
+                <span class="info-value">{{ ride.origin }}</span>
+            </li>
+            <li>
+                <span class="info-label">Destino:</span>
+                <span class="info-value">{{ ride.destination }}</span>
+            </li>
+            <li>
+                <span class="info-label">Fecha y hora:</span>
+                <span class="info-value">{{ ride.departure_time|date:"d/m/Y H:i" }}</span>
+            </li>
+            <li>
+                <span class="info-label">Conductor:</span>
+                <span class="info-value">{{ ride.driver.username }}</span>
+            </li>
+            <li>
+                <span class="info-label">Precio:</span>
+                <span class="info-value">{{ ride.price }} €</span>
+            </li>
+            <li>
+                <span class="info-label">Asientos:</span>
+                <span class="info-value">{{ ride.seats_available }}/{{ ride.total_seats }} disponibles</span>
+            </li>
+        </ul>
+        {% endif %}
+        
+        {% if payment %}
+        <h3>Información del pago reportado</h3>
+        <ul class="info-list">
+            <li>
+                <span class="info-label">Importe:</span>
+                <span class="info-value">{{ payment.amount }} €</span>
+            </li>
+            <li>
+                <span class="info-label">Estado:</span>
+                <span class="info-value">{{ payment.get_status_display }}</span>
+            </li>
+            <li>
+                <span class="info-label">Fecha:</span>
+                <span class="info-value">{{ payment.created_at|date:"d/m/Y H:i" }}</span>
+            </li>
+            <li>
+                <span class="info-label">Pagador:</span>
+                <span class="info-value">{{ payment.payer.username }}</span>
+            </li>
+            <li>
+                <span class="info-label">Destinatario:</span>
+                <span class="info-value">{{ payment.recipient.username }}</span>
+            </li>
+        </ul>
+        {% endif %}
+    </div>
+    {% endif %}
     
     <form method="post">
         {% csrf_token %}

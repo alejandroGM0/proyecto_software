@@ -1,5 +1,7 @@
 from django.contrib import admin
 from .models import Report
+from . import public
+from .constants import REPORT_MARKED_READ, REPORT_MARKED_UNREAD
 
 @admin.register(Report)
 class ReportAdmin(admin.ModelAdmin):
@@ -25,11 +27,11 @@ class ReportAdmin(admin.ModelAdmin):
     has_response.short_description = "Respondido"
     
     def mark_as_read(self, request, queryset):
-        queryset.update(read=True)
+        queryset.update(read=REPORT_MARKED_READ)
         self.message_user(request, f"{queryset.count()} reportes marcados como leídos.")
     mark_as_read.short_description = "Marcar como leídos"
     
     def mark_as_unread(self, request, queryset):
-        queryset.update(read=False)
+        queryset.update(read=REPORT_MARKED_UNREAD)
         self.message_user(request, f"{queryset.count()} reportes marcados como no leídos.")
     mark_as_unread.short_description = "Marcar como no leídos"

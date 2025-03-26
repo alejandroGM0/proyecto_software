@@ -324,6 +324,42 @@
         </div>
     </div>
     
+    {% if report.reported_user or report.ride or report.payment %}
+    <div class="report-content context-info">
+        {% if report.reported_user %}
+        <h2>Usuario reportado</h2>
+        <ul class="info-list">
+            <li><span class="info-label">Nombre de usuario:</span> <span class="info-value">{{ report.reported_user.username }}</span></li>
+            <li><span class="info-label">Nombre completo:</span> <span class="info-value">{{ report.reported_user.get_full_name|default:"No especificado" }}</span></li>
+            <li><span class="info-label">Email:</span> <span class="info-value">{{ report.reported_user.email }}</span></li>
+        </ul>
+        {% endif %}
+        
+        {% if report.ride %}
+        <h2>Viaje reportado</h2>
+        <ul class="info-list">
+            <li><span class="info-label">Origen:</span> <span class="info-value">{{ report.ride.origin }}</span></li>
+            <li><span class="info-label">Destino:</span> <span class="info-value">{{ report.ride.destination }}</span></li>
+            <li><span class="info-label">Fecha y hora:</span> <span class="info-value">{{ report.ride.departure_time|date:"d/m/Y H:i" }}</span></li>
+            <li><span class="info-label">Conductor:</span> <span class="info-value">{{ report.ride.driver.username }}</span></li>
+            <li><span class="info-label">Precio:</span> <span class="info-value">{{ report.ride.price }} €</span></li>
+            <li><span class="info-label">Asientos:</span> <span class="info-value">{{ report.ride.seats_available }}/{{ report.ride.total_seats }} disponibles</span></li>
+        </ul>
+        {% endif %}
+        
+        {% if report.payment %}
+        <h2>Pago reportado</h2>
+        <ul class="info-list">
+            <li><span class="info-label">Importe:</span> <span class="info-value">{{ report.payment.amount }} €</span></li>
+            <li><span class="info-label">Estado:</span> <span class="info-value">{{ report.payment.get_status_display }}</span></li>
+            <li><span class="info-label">Fecha:</span> <span class="info-value">{{ report.payment.created_at|date:"d/m/Y H:i" }}</span></li>
+            <li><span class="info-label">Pagador:</span> <span class="info-value">{{ report.payment.payer.username }}</span></li>
+            <li><span class="info-label">Destinatario:</span> <span class="info-value">{{ report.payment.recipient.username }}</span></li>
+        </ul>
+        {% endif %}
+    </div>
+    {% endif %}
+    
     <div class="report-content">
         <h2>Descripción</h2>
         {{ report.description|linebreaks }}

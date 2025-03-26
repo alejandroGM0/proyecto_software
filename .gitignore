@@ -1,5 +1,5 @@
 # Static files
-/staticfiles/
+codigo/staticfiles/
 /static/admin/
 *.pyc
 __pycache__/

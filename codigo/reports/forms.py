@@ -1,5 +1,9 @@
 from django import forms
 from .models import Report
+from .constants import (
+    PAYMENT_TYPE, RIDE_TYPE, USER_TYPE, SYSTEM_TYPE,
+    NORMAL_IMPORTANCE, IMPORTANT_IMPORTANCE, URGENT_IMPORTANCE
+)
 
 class ReportForm(forms.ModelForm):
     class Meta:
@@ -29,4 +33,4 @@ class ReportFilterForm(forms.Form):
     report_type = forms.ChoiceField(choices=TYPE_CHOICES, required=False)
     importance = forms.ChoiceField(choices=IMPORTANCE_CHOICES, required=False)
     read = forms.BooleanField(required=False, label="Solo mostrar no leídos")
-    search = forms.CharField(required=False)
+    search = forms.CharField(required=False, label="Buscar")
