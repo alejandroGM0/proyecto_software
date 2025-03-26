@@ -64,7 +64,8 @@ def search_ride(request):
     if query_destination:
         rides = rides.filter(destination__icontains=query_destination)
     
-    paginator = Paginator(rides.order_by('departure_time'), RESULTS_PER_PAGE)
+   
+    paginator = Paginator(rides.order_by('departure_time'), 6)
     page_number = request.GET.get(PAGE_KEY, 1)
     page_obj = paginator.get_page(page_number)
     

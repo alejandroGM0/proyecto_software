@@ -117,7 +117,7 @@
                             <i class="fas fa-clock"></i> Activos
                         </button>
                         <button class="segment-button" data-status="expired" data-tab="driver">
-                            <i class="fas fa-history"></i> Expirados
+                            <i class="fas fa-history"></i> Finalizados
                         </button>
                     </div>
                 </div>
@@ -125,19 +125,18 @@
                 <!-- Viajes activos como conductor -->
                 <div class="rides-grid ride-status-content active" id="driver-active-rides">
                     {% for ride in active_rides_as_driver %}
-                    <div class="profile-ride-card">
+                    <div class="profile-ride-card" data-details-url="{% url 'rides:ride_detail' ride.id %}">
                         <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
                         <div class="ride-info">
                             <p><i class="fas fa-calendar info-icon"></i> {{ ride.departure_time|date:"j F Y, H:i" }}</p>
                             <p><i class="fas fa-users info-icon"></i> {{ ride.passengers.count }}/{{ ride.total_seats }} pasajeros</p>
                             <p class="ride-price"><i class="fas fa-tag info-icon"></i> {{ ride.get_formatted_price }}</p>
                         </div>
+                        {% if is_own_profile %}
                         <div class="card-actions">
-                            <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
-                            {% if is_own_profile %}
                             <a href="{% url 'rides:edit_ride' ride.id %}" class="button button-secondary">Editar</a>
-                            {% endif %}
                         </div>
+                        {% endif %}
                     </div>
                     {% empty %}
                     <div class="empty-state">
@@ -148,25 +147,22 @@
                     {% endfor %}
                 </div>
                 
-                <!-- Viajes expirados como conductor -->
+                <!-- Viajes Finalizados como conductor -->
                 <div class="rides-grid ride-status-content" id="driver-expired-rides">
                     {% for ride in expired_rides_as_driver %}
-                    <div class="profile-ride-card expired">
-                        <div class="expired-badge"><i class="fas fa-history"></i> Expirado</div>
+                    <div class="profile-ride-card expired" data-details-url="{% url 'rides:ride_detail' ride.id %}">
+                        <div class="expired-badge"><i class="fas fa-history"></i> Finalizado</div>
                         <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
                         <div class="ride-info">
                             <p><i class="fas fa-calendar info-icon"></i> {{ ride.departure_time|date:"j F Y, H:i" }}</p>
                             <p><i class="fas fa-users info-icon"></i> {{ ride.passengers.count }}/{{ ride.total_seats }} pasajeros</p>
                             <p class="ride-price"><i class="fas fa-tag info-icon"></i> {{ ride.get_formatted_price }}</p>
                         </div>
-                        <div class="card-actions">
-                            <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
-                        </div>
                     </div>
                     {% empty %}
                     <div class="empty-state">
                         <div class="empty-icon"><i class="fas fa-history"></i></div>
-                        <p>No tienes viajes expirados como conductor</p>
+                        <p>No tienes viajes finalizados como conductor</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -182,7 +178,7 @@
                             <i class="fas fa-clock"></i> Activos
                         </button>
                         <button class="segment-button" data-status="expired" data-tab="passenger">
-                            <i class="fas fa-history"></i> Expirados
+                            <i class="fas fa-history"></i> Finalizados
                         </button>
                     </div>
                 </div>
@@ -190,15 +186,12 @@
                 <!-- Viajes activos como pasajero -->
                 <div class="rides-grid ride-status-content active" id="passenger-active-rides">
                     {% for ride in active_rides_as_passenger %}
-                    <div class="profile-ride-card">
+                    <div class="profile-ride-card" data-details-url="{% url 'rides:ride_detail' ride.id %}">
                         <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
                         <div class="ride-info">
                             <p><i class="fas fa-calendar info-icon"></i> {{ ride.departure_time|date:"j F Y, H:i" }}</p>
                             <p><i class="fas fa-user-tie info-icon"></i> Conductor: {{ ride.driver.username }}</p>
                             <p class="ride-price"><i class="fas fa-tag info-icon"></i> {{ ride.get_formatted_price }}</p>
-                        </div>
-                        <div class="card-actions">
-                            <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
                         </div>
                     </div>
                     {% empty %}
@@ -210,25 +203,22 @@
                     {% endfor %}
                 </div>
                 
-                <!-- Viajes expirados como pasajero -->
+                <!-- Viajes finalizados como pasajero -->
                 <div class="rides-grid ride-status-content" id="passenger-expired-rides">
                     {% for ride in expired_rides_as_passenger %}
-                    <div class="profile-ride-card expired">
-                        <div class="expired-badge"><i class="fas fa-history"></i> Expirado</div>
+                    <div class="profile-ride-card expired" data-details-url="{% url 'rides:ride_detail' ride.id %}">
+                        <div class="expired-badge"><i class="fas fa-history"></i> Finalizado</div>
                         <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
                         <div class="ride-info">
                             <p><i class="fas fa-calendar info-icon"></i> {{ ride.departure_time|date:"j F Y, H:i" }}</p>
                             <p><i class="fas fa-user-tie info-icon"></i> Conductor: {{ ride.driver.username }}</p>
                             <p class="ride-price"><i class="fas fa-tag info-icon"></i> {{ ride.get_formatted_price }}</p>
                         </div>
-                        <div class="card-actions">
-                            <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">Ver detalles</a>
-                        </div>
                     </div>
                     {% empty %}
                     <div class="empty-state">
                         <div class="empty-icon"><i class="fas fa-history"></i></div>
-                        <p>No tienes viajes expirados como pasajero</p>
+                        <p>No tienes viajes finalizados como pasajero</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -240,47 +230,74 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Obtener parámetros de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab') || 'driver';
+        const statusParam = urlParams.get('status') || 'active';
         
+        // Activar la pestaña correcta
         const tabs = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
         
         tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                
+            if (tab.getAttribute('data-tab') === tabParam) {
                 tabs.forEach(t => t.classList.remove('active'));
                 tabContents.forEach(c => c.classList.remove('active'));
                 
-               
                 tab.classList.add('active');
+                document.getElementById(tabParam + '-tab').classList.add('active');
+            }
+            
+            tab.addEventListener('click', () => {
                 const tabId = tab.getAttribute('data-tab');
-                document.getElementById(tabId + '-tab').classList.add('active');
+                // En lugar de manipular el historial, hacer una navegación completa
+                window.location.href = `?tab=${tabId}&status=active`;
             });
         });
         
-        
+        // Activar el estado correcto (activo/finalizado)
         const segmentButtons = document.querySelectorAll('.segment-button');
         
         segmentButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                
-                const tab = button.getAttribute('data-tab');
-                const status = button.getAttribute('data-status');
-                
-                
-                document.querySelectorAll(`.segment-button[data-tab="${tab}"]`).forEach(btn => {
+            const btnTab = button.getAttribute('data-tab');
+            const btnStatus = button.getAttribute('data-status');
+            
+            if (btnTab === tabParam && btnStatus === statusParam) {
+                document.querySelectorAll(`.segment-button[data-tab="${btnTab}"]`).forEach(btn => {
                     btn.classList.remove('active');
                 });
-                
-                
-                document.querySelectorAll(`#${tab}-tab .ride-status-content`).forEach(content => {
+                document.querySelectorAll(`#${btnTab}-tab .ride-status-content`).forEach(content => {
                     content.classList.remove('active');
                 });
                 
-               
                 button.classList.add('active');
+                document.getElementById(`${btnTab}-${btnStatus}-rides`).classList.add('active');
+            }
+            
+            button.addEventListener('click', () => {
+                const tab = button.getAttribute('data-tab');
+                const status = button.getAttribute('data-status');
                 
+                // En lugar de manipular el historial, hacer una navegación completa
+                window.location.href = `?tab=${tab}&status=${status}`;
+            });
+        });
+        
+        // Hacer las tarjetas clickeables
+        document.querySelectorAll('.profile-ride-card').forEach(card => {
+            card.style.cursor = 'pointer';
+            
+            card.addEventListener('click', function(e) {
+                // No activar si se hace clic en un botón
+                if (e.target.closest('.button') || e.target.closest('a')) {
+                    return;
+                }
                 
-                document.getElementById(`${tab}-${status}-rides`).classList.add('active');
+                // Obtener la URL de detalles del viaje
+                const detailsUrl = this.dataset.detailsUrl;
+                if (detailsUrl) {
+                    window.location.href = detailsUrl;
+                }
             });
         });
     });

@@ -2,9 +2,9 @@
 
 {% block title %}Reportes - BlaBlaCar{% endblock %}
 
-{% block styles %}
+{% block extra_styles %}
 <style>
-    /* Modern Apple Design System - 2025 */
+   
     :root {
         --apple-background: #f5f5f7;
         --apple-card: #ffffff;
@@ -57,10 +57,6 @@
         letter-spacing: -0.022em;
         color: var(--apple-text);
         margin: 0;
-        background: linear-gradient(90deg, #000000, #434343);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
     }
     
     .filter-container {
@@ -156,25 +152,16 @@
         box-shadow: var(--apple-shadow);
     }
     
-    .report-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(140deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
-        pointer-events: none;
-    }
+    /* Eliminar el pseudo-elemento con degradado */
     
     .report-card.unread {
         border-left: 5px solid var(--apple-blue);
-        background: linear-gradient(100deg, rgba(0,113,227,0.05) 0%, rgba(255,255,255,1) 90%);
+        background-color: rgba(0,113,227,0.03);
     }
     
     .report-card.responded {
         border-left: 5px solid var(--apple-green);
-        background: linear-gradient(100deg, rgba(52,199,89,0.05) 0%, rgba(255,255,255,1) 90%);
+        background-color: rgba(52,199,89,0.03);
     }
     
     .report-info {
@@ -222,22 +209,22 @@
     }
     
     .badge-payment {
-        background: linear-gradient(145deg, #e4f0ff, #d2e7ff);
+        background-color: var(--apple-blue-light);
         color: var(--apple-blue);
     }
     
     .badge-ride {
-        background: linear-gradient(145deg, #e6f9ed, #d4f5e0);
+        background-color: var(--apple-green-light);
         color: var(--apple-green);
     }
     
     .badge-user {
-        background: linear-gradient(145deg, #fff2f2, #ffe5e5);
+        background-color: var(--apple-danger-light);
         color: var(--apple-danger);
     }
     
     .badge-system {
-        background: linear-gradient(145deg, #fff9e6, #fff0cc);
+        background-color: var(--apple-orange-light);
         color: var(--apple-orange);
     }
     
@@ -250,17 +237,17 @@
     }
     
     .importance-normal {
-        background: linear-gradient(145deg, #f5f5f7, #e8e8e8);
+        background-color: var(--apple-gray);
         color: var(--apple-secondary-text);
     }
     
     .importance-important {
-        background: linear-gradient(145deg, #fff9e6, #fff0cc);
+        background-color: var(--apple-orange-light);
         color: var(--apple-orange);
     }
     
     .importance-urgent {
-        background: linear-gradient(145deg, #fff2f2, #ffe5e5);
+        background-color: var(--apple-danger-light);
         color: var(--apple-danger);
     }
     
@@ -270,7 +257,7 @@
         border-radius: var(--badge-radius);
         font-size: 12px;
         font-weight: 500;
-        background: linear-gradient(145deg, #e6f9ed, #d4f5e0);
+        background-color: var(--apple-green-light);
         color: var(--apple-green);
     }
     
@@ -291,7 +278,7 @@
     }
     
     .button-primary {
-        background: linear-gradient(145deg, var(--apple-blue), var(--apple-blue-dark));
+        background-color: var(--apple-blue);
         color: white;
     }
     
@@ -306,7 +293,7 @@
     }
     
     .button-secondary {
-        background: linear-gradient(145deg, #f8f8f8, var(--apple-gray));
+        background-color: var(--apple-gray);
         color: var(--apple-text);
     }
     
@@ -316,7 +303,7 @@
     }
     
     .button-danger {
-        background: linear-gradient(145deg, var(--apple-danger-light), #ffe5e5);
+        background-color: var(--apple-danger-light);
         color: var(--apple-danger);
     }
     
@@ -342,15 +329,65 @@
         border-radius: 10px;
     }
     
-    .pagination {
-        margin-top: 40px;
+    .pagination-container {
         display: flex;
         justify-content: center;
-        gap: 10px;
+        align-items: center;
+        margin-top: 2.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--apple-border);
     }
-    
-    .page-item {
-        margin: 0;
+
+    .pagination {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        background-color: var(--apple-card);
+        border-radius: 980px;
+        padding: 0.3rem;
+        box-shadow: var(--apple-shadow-sm);
+        margin-top: 0;
+    }
+
+    .page-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 50%;
+        font-size: 0.95rem;
+        color: var(--apple-text);
+        background-color: transparent;
+        transition: all 0.2s ease;
+        font-weight: 400;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .page-button:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        transform: none;
+    }
+
+    .page-button.active {
+        background-color: var(--apple-blue);
+        color: white;
+        font-weight: 500;
+    }
+
+    .page-button.disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .page-arrow {
+        padding: 0 0.5rem;
+        font-size: 1.1rem;
+        color: var(--apple-blue);
     }
     
     .no-reports {
@@ -364,30 +401,7 @@
         overflow: hidden;
     }
     
-    .no-reports::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(140deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%);
-        pointer-events: none;
-    }
     
-    .no-reports p {
-        font-size: 18px;
-        max-width: 450px;
-        margin: 20px auto;
-        line-height: 1.6;
-    }
-    
-    .no-reports::after {
-        content: '📋';
-        font-size: 48px;
-        display: block;
-        margin-bottom: 16px;
-    }
 </style>
 {% endblock %}
 
@@ -395,29 +409,63 @@
 <div class="report-container">
     <div class="report-header">
         <h1>Reportes</h1>
-        <a href="{% url 'reports:create_report' %}" class="button button-primary">Crear nuevo reporte</a>
-    </div>
-    
-    <div class="filter-container">
-        <h3>Filtros</h3>
-        <form method="get" class="filter-form">
-            {{ filter_form.as_p }}
-            <button type="submit" class="button button-primary">Filtrar</button>
-            <a href="{% url 'reports:report_list' %}" class="button button-outline">Limpiar</a>
-        </form>
+        <div>
+            <a href="{% url 'reports:create_report' %}" class="button button-primary">Crear nuevo reporte</a>
+        </div>
     </div>
     
     {% if reports %}
+        <div class="filter-container">
+            <h3>Filtrar reportes</h3>
+            <form method="get" class="filter-form">
+                <div class="form-group">
+                    <label for="report_type">Tipo de reporte</label>
+                    <select name="report_type" id="report_type">
+                        <option value="">Todos los tipos</option>
+                        <option value="payment" {% if request.GET.report_type == 'payment' %}selected{% endif %}>Pago</option>
+                        <option value="ride" {% if request.GET.report_type == 'ride' %}selected{% endif %}>Viaje</option>
+                        <option value="user" {% if request.GET.report_type == 'user' %}selected{% endif %}>Usuario</option>
+                        <option value="system" {% if request.GET.report_type == 'system' %}selected{% endif %}>Sistema</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="importance">Importancia</label>
+                    <select name="importance" id="importance">
+                        <option value="">Todas las importancias</option>
+                        <option value="1" {% if request.GET.importance == '1' %}selected{% endif %}>Normal</option>
+                        <option value="2" {% if request.GET.importance == '2' %}selected{% endif %}>Importante</option>
+                        <option value="3" {% if request.GET.importance == '3' %}selected{% endif %}>Urgente</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status">Estado</label>
+                    <select name="status" id="status">
+                        <option value="">Todos los estados</option>
+                        <option value="unread" {% if request.GET.status == 'unread' %}selected{% endif %}>No leídos</option>
+                        <option value="read" {% if request.GET.status == 'read' %}selected{% endif %}>Leídos</option>
+                        <option value="responded" {% if request.GET.status == 'responded' %}selected{% endif %}>Respondidos</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="search">Buscar</label>
+                    <input type="text" name="search" id="search" placeholder="Buscar por título, descripción..." value="{{ request.GET.search }}">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button type="submit" class="button button-primary" style="width: 100%;">Filtrar</button>
+                </div>
+            </form>
+        </div>
+        
         <div class="reports-list">
-            {% for report in reports %}
-                <div class="report-card {% if not report.read and is_admin %}unread{% endif %} {% if report.response %}responded{% endif %}">
+            {% for report in page_obj %}
+                <div class="report-card {% if not report.read %}unread{% endif %} {% if report.response %}responded{% endif %}">
                     <div class="report-info">
                         <div class="report-title">
                             {{ report.title }}
                             <span class="report-type-badge badge-{{ report.report_type }}">
                                 {{ report.get_report_type_display }}
                             </span>
-                            <span class="importance-badge importance-{{ report.importance }}">
+                            <span class="importance-badge importance-{{ report.get_importance_display|lower }}">
                                 {{ report.get_importance_display }}
                             </span>
                             {% if report.response %}
@@ -450,32 +498,34 @@
             {% endfor %}
         </div>
         
-        <!-- Paginación -->
+        <!-- Paginación actualizada al estilo de search_ride.html -->
         {% if is_paginated %}
-        <div class="pagination">
-            <span class="page-item">
-                {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}" class="button button-sm button-secondary">&laquo; Anterior</a>
-                {% endif %}
-            </span>
-            
-            {% for num in paginator.page_range %}
-                {% if page_obj.number == num %}
-                    <span class="page-item">
-                        <a href="?page={{ num }}" class="button button-sm button-primary">{{ num }}</a>
-                    </span>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <span class="page-item">
-                        <a href="?page={{ num }}" class="button button-sm button-secondary">{{ num }}</a>
-                    </span>
-                {% endif %}
-            {% endfor %}
-            
-            <span class="page-item">
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}" class="button button-sm button-secondary">Siguiente &raquo;</a>
-                {% endif %}
-            </span>
+        <div class="pagination-container">
+            <div class="pagination">
+                <a href="{% if page_obj.has_previous %}?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}{% else %}#{% endif %}" class="page-button page-arrow {% if not page_obj.has_previous %}disabled{% endif %}">
+                    ‹
+                </a>
+                
+                {% for i in paginator.page_range %}
+                    {% if page_obj.number == i %}
+                        <a class="page-button active">{{ i }}</a>
+                    {% elif i > page_obj.number|add:"-3" and i < page_obj.number|add:"3" %}
+                        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ i }}" class="page-button">{{ i }}</a>
+                    {% endif %}
+                    
+                    {% if i == 1 and page_obj.number > 3 %}
+                        <span class="page-button disabled">...</span>
+                    {% endif %}
+                    
+                    {% if i == paginator.num_pages and page_obj.number < paginator.num_pages|add:"-2" %}
+                        <span class="page-button disabled">...</span>
+                    {% endif %}
+                {% endfor %}
+                
+                <a href="{% if page_obj.has_next %}?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}{% else %}#{% endif %}" class="page-button page-arrow {% if not page_obj.has_next %}disabled{% endif %}">
+                    ›
+                </a>
+            </div>
         </div>
         {% endif %}
         
