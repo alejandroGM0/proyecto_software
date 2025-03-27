@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalles del pago - BlaBlaCar{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h1 class="h3 mb-0">Detalles del Pago</h1>
+        </div>
+        <div class="card-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="text-muted">Información del Pago</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Estado:</span>
+                            <span class="badge bg-{{ payment.status|lower }}">{{ payment.get_status_display }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Importe:</span>
+                            <strong>{{ payment.amount }}€</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Método:</span>
+                            <span>{{ payment.get_payment_method_display }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Fecha:</span>
+                            <span>{{ payment.created_at|date:"d/m/Y H:i" }}</span>
+                        </li>
+                        {% if payment.concept %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Concepto:</span>
+                            <span>{{ payment.concept }}</span>
+                        </li>
+                        {% endif %}
+                        
+                        <!-- Mostrar IDs de Stripe solo a administradores -->
+                        {% if is_admin %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>ID Transacción Stripe:</span>
+                            <span class="text-monospace">{{ payment.stripe_payment_intent_id|default:"-" }}</span>
+                        </li>
+                        {% if payment.stripe_refund_id %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>ID Reembolso Stripe:</span>
+                            <span class="text-monospace">{{ payment.stripe_refund_id }}</span>
+                        </li>
+                        {% endif %}
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                <div class="col-md-6">
+                    <h5 class="text-muted">Información de las Partes</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Pagador:</span>
+                            <span>{{ payment.payer.get_full_name|default:payment.payer.username }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Destinatario:</span>
+                            <span>{{ payment.recipient.get_full_name|default:payment.recipient.username }}</span>
+                        </li>
+                    </ul>
+                    
+                    {% if payment.ride %}
+                    <h5 class="text-muted mt-4">Información del Viaje</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Ruta:</span>
+                            <span>{{ payment.ride.origin }} → {{ payment.ride.destination }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Fecha:</span>
+                            <span>{{ payment.ride.departure_time|date:"d/m/Y H:i" }}</span>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="{% url 'rides:ride_detail' payment.ride.id %}" class="btn btn-sm btn-outline-primary">Ver Detalles del Viaje</a>
+                        </li>
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Acciones disponibles según el estado y rol del usuario -->
+            <div class="mt-4">
+                {% if payment.status == 'PENDING' and user == payment.payer %}
+                    <form action="{% url 'payments:cancel_payment' payment.id %}" method="post" style="display: inline-block">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning" onclick="return confirm('¿Estás seguro de cancelar este pago?')">Cancelar Pago</button>
+                    </form>
+                {% endif %}
+                
+                {% if payment.status == 'COMPLETED' and user == payment.recipient %}
+                    <a href="{% url 'payments:refund_payment' payment.id %}" class="btn btn-info">Reembolsar Pago</a>
+                {% endif %}
+                
+                <a href="{% url 'payments:payment_list' %}" class="btn btn-secondary">Volver a Mis Pagos</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

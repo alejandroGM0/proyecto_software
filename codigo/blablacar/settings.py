@@ -59,6 +59,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'blablacar.urls'
 
+# Stripe configuration
+STRIPE_PUBLIC_KEY = 'pk_test_51R3ZmNIYHTFQ1lylb4g6zz53qwvgHnIGPlK4axRXOxU08GLHFj1Brx943V6H5LsLukTZ76Nih7NHS27MlAfT9ZO7006Bks3yPP'
+STRIPE_SECRET_KEY = 'sk_test_51R3ZmNIYHTFQ1lylkVolMJBTawNPBJ6yEoKzCzUXrc148GcLXdbf2EWxVfckMs4UfhPUGG54yqcv5qMsgP1jL2KA00gErm8hXD'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

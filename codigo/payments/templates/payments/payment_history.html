@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Historial de Pagos - BlaBlaCar{% endblock %}
+
+{% block styles %}
+<style>
+    .history-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .history-header {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .filters {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .filter-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .filter-pill {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        border: 1px solid #ddd;
+        cursor: pointer;
+        background-color: #fff;
+    }
+    .filter-pill.active {
+        background-color: var(--color-primary);
+        color: #fff;
+        border-color: transparent;
+    }
+    .payment-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    .payment-table th {
+        background-color: var(--color-bg-light);
+        padding: 12px;
+        text-align: left;
+        border-bottom: 2px solid #ddd;
+    }
+    .payment-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+    }
+    .payment-status {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+    .status-completed {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .status-failed {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .status-refunded {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+    .empty-history {
+        text-align: center;
+        padding: 40px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <div class="history-header">
+        <div>
+            <h1>Historial de Pagos</h1>
+            <p>Historial completo de tus transacciones</p>
+        </div>
+    </div>
+    
+    <div class="filters">
+        <h3>Filtrar por estado:</h3>
+        <div class="filter-row">
+            <a href="{% url 'payments:payment_history' %}" class="filter-pill {% if not status_filter %}active{% endif %}">
+                Todos
+            </a>
+            <a href="{% url 'payments:payment_history' %}?status=completed" class="filter-pill {% if status_filter == 'completed' %}active{% endif %}">
+                Completados
+            </a>
+            <a href="{% url 'payments:payment_history' %}?status=pending" class="filter-pill {% if status_filter == 'pending' %}active{% endif %}">
+                Pendientes
+            </a>
+            <a href="{% url 'payments:payment_history' %}?status=failed" class="filter-pill {% if status_filter == 'failed' %}active{% endif %}">
+                Fallidos
+            </a>
+            <a href="{% url 'payments:payment_history' %}?status=refunded" class="filter-pill {% if status_filter == 'refunded' %}active{% endif %}">
+                Reembolsados
+            </a>
+        </div>
+    </div>
+    
+    {% if payments %}
+        <table class="payment-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Descripción</th>
+                    <th>Tipo</th>
+                    <th>Importe</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr>
+                    <td>{{ payment.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        {% if payment.ride %}
+                            Viaje: {{ payment.ride.origin }} → {{ payment.ride.destination }}
+                        {% else %}
+                            {{ payment.concept|default:"N/A" }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if payment.payer == request.user %}
+                            <span title="Pago realizado">➡️ Enviado a {{ payment.recipient.get_full_name|default:payment.recipient.username }}</span>
+                        {% else %}
+                            <span title="Pago recibido">⬅️ Recibido de {{ payment.payer.get_full_name|default:payment.payer.username }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ payment.amount }}€</td>
+                    <td>
+                        <span class="payment-status status-{{ payment.status|lower }}">
+                            {{ payment.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'payments:payment_detail' payment.id %}" class="button button-sm">Detalles</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-history">
+            <p>No hay pagos que coincidan con los criterios de búsqueda.</p>
+        </div>
+    {% endif %}
+    
+    <div class="back-link" style="margin-top: 20px;">
+        <a href="{% url 'payments:payment_list' %}" class="button button-secondary">Volver a Mis Pagos</a>
+    </div>
+</div>
+{% endblock %}

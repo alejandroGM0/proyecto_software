@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Pagos - BlaBlaCar{% endblock %}
+
+{% block styles %}
+<style>
+    .payments-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .payments-header {
+        margin-bottom: 20px;
+    }
+    .tab-content {
+        margin-top: 20px;
+    }
+    .payment-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 15px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .payment-details {
+        flex: 1;
+    }
+    .payment-amount {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    .payment-status {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    .status-completed {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .status-failed {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .status-refunded {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+    .empty-list {
+        text-align: center;
+        padding: 30px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    .tabs {
+        display: flex;
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 20px;
+    }
+    .tab {
+        padding: 10px 20px;
+        cursor: pointer;
+    }
+    .tab.active {
+        border-bottom: 3px solid var(--color-primary);
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payments-container">
+    <div class="payments-header">
+        <h1>Mis Pagos</h1>
+        <p>Administra tus pagos realizados y recibidos</p>
+    </div>
+    
+    <div class="tabs">
+        <div class="tab active" data-target="made">Pagos Realizados</div>
+        <div class="tab" data-target="received">Pagos Recibidos</div>
+    </div>
+    
+    <div class="tab-content" id="payments-made">
+        {% if payments_made %}
+            {% for payment in payments_made %}
+            <div class="payment-card">
+                <div class="payment-details">
+                    <h3>Pago a {{ payment.recipient.get_full_name|default:payment.recipient.username }}</h3>
+                    <p>
+                        {% if payment.ride %}
+                            Viaje: {{ payment.ride.origin }} → {{ payment.ride.destination }}
+                        {% else %}
+                            Concepto: {{ payment.concept|default:"N/A" }}
+                        {% endif %}
+                    </p>
+                    <p>Fecha: {{ payment.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div class="payment-info">
+                    <div class="payment-amount">{{ payment.amount }}€</div>
+                    <div class="payment-status status-{{ payment.status|lower }}">{{ payment.get_status_display }}</div>
+                </div>
+                <div class="payment-actions">
+                    <a href="{% url 'payments:payment_detail' payment.id %}" class="button button-secondary">Ver detalles</a>
+                    {% if payment.status == 'PENDING' %}
+                        <a href="{% url 'payments:cancel_payment' payment.id %}" class="button button-danger">Cancelar</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-list">
+                <p>No has realizado ningún pago todavía.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="tab-content" id="payments-received" style="display: none;">
+        {% if payments_received %}
+            {% for payment in payments_received %}
+            <div class="payment-card">
+                <div class="payment-details">
+                    <h3>Pago de {{ payment.payer.get_full_name|default:payment.payer.username }}</h3>
+                    <p>
+                        {% if payment.ride %}
+                            Viaje: {{ payment.ride.origin }} → {{ payment.ride.destination }}
+                        {% else %}
+                            Concepto: {{ payment.concept|default:"N/A" }}
+                        {% endif %}
+                    </p>
+                    <p>Fecha: {{ payment.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div class="payment-info">
+                    <div class="payment-amount">{{ payment.amount }}€</div>
+                    <div class="payment-status status-{{ payment.status|lower }}">{{ payment.get_status_display }}</div>
+                </div>
+                <div class="payment-actions">
+                    <a href="{% url 'payments:payment_detail' payment.id %}" class="button button-secondary">Ver detalles</a>
+                    {% if payment.status == 'COMPLETED' %}
+                        <a href="{% url 'payments:refund_payment' payment.id %}" class="button button-warning">Reembolsar</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-list">
+                <p>No has recibido ningún pago todavía.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="view-all">
+        <a href="{% url 'payments:payment_history' %}" class="button button-primary">Ver historial completo</a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabs = document.querySelectorAll('.tab');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // Show the selected tab content
+                const target = this.getAttribute('data-target');
+                document.getElementById('payments-' + target).style.display = 'block';
+            });
+        });
+    });
+</script>
+{% endblock %}

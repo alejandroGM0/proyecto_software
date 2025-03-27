@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Reembolsar Pago - BlaBlaCar{% endblock %}
+
+{% block styles %}
+<style>
+    .refund-payment-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+    }
+    .refund-payment-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 30px;
+    }
+    .payment-info {
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: var(--border-radius-sm);
+    }
+    .info-icon {
+        font-size: 3rem;
+        color: var(--color-info);
+        margin-bottom: 20px;
+    }
+    .refund-actions {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="refund-payment-container">
+    <div class="refund-payment-card">
+        <div class="info-icon">ℹ️</div>
+        <h1>Reembolsar Pago</h1>
+        <p>¿Estás seguro de que quieres reembolsar este pago?</p>
+        
+        <div class="payment-info">
+            <p><strong>Importe a reembolsar:</strong> {{ payment.amount }}€</p>
+            <p><strong>Pagado por:</strong> {{ payment.payer.get_full_name|default:payment.payer.username }}</p>
+            <p><strong>Fecha del pago:</strong> {{ payment.created_at|date:"d/m/Y H:i" }}</p>
+            {% if payment.ride %}
+                <p><strong>Viaje:</strong> {{ payment.ride.origin }} → {{ payment.ride.destination }}</p>
+            {% endif %}
+        </div>
+        
+        <p>Una vez reembolsado, este proceso no puede deshacerse.</p>
+        
+        <div class="refund-actions">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="button button-warning">Confirmar Reembolso</button>
+            </form>
+            <a href="{% url 'payments:payment_detail' payment.id %}" class="button button-secondary">Volver</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

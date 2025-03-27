@@ -1,10 +1,21 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import HttpResponseForbidden
+
 from .models import Review
-from rides.models import Ride
 from .forms import ReviewForm
+from ._utils import (
+    get_review_or_404, get_ride_or_404, check_review_permission,
+    check_delete_permission, prepare_review_form_context,
+    prepare_review_list_context, prepare_review_detail_context,
+    prepare_review_delete_context, redirect_after_delete
+)
+from .constants import (
+    CREATE_REVIEW_TEMPLATE, DELETE_REVIEW_TEMPLATE,
+    LIST_REVIEWS_TEMPLATE, DETAIL_REVIEW_TEMPLATE,
+    REVIEW_CREATED_SUCCESS, REVIEW_DELETED_SUCCESS
+)
+from .public import create_review
 
 @login_required
 def create(request, ride_id):
@@ -13,45 +24,31 @@ def create(request, ride_id):
     Solo se permite una reseña por usuario y viaje.
     """
     # Obtener el viaje o devolver 404
-    ride = get_object_or_404(Ride, pk=ride_id)
+    ride = get_ride_or_404(ride_id)
     
-    # Verificar que el usuario participó en el viaje (como conductor o pasajero)
-    if request.user != ride.driver and request.user not in ride.passengers.all():
-        messages.error(request, "Solo puedes valorar viajes en los que hayas participado.")
-        return redirect('rides:ride_detail', ride_id=ride_id)
-    
-    # Verificar si el usuario ya ha dejado una reseña para este viaje
-    existing_review = Review.objects.filter(ride=ride, user=request.user).first()
-    
-    if existing_review:
-        messages.info(request, "Ya has valorado este viaje anteriormente.")
-        return redirect('rides:ride_detail', ride_id=ride_id)
-    
-    # Validar que el viaje ya ha ocurrido
-    from django.utils import timezone
-    if ride.departure_time > timezone.now():
-        messages.error(request, "Solo puedes valorar viajes que ya hayan ocurrido.")
-        return redirect('rides:ride_detail', ride_id=ride_id)
+    # Verificar permisos para crear la reseña
+    check_result = check_review_permission(request, ride)
+    if check_result:
+        return check_result
     
     if request.method == 'POST':
         form = ReviewForm(request.POST)
         if form.is_valid():
-            review = form.save(commit=False)
-            review.user = request.user
-            review.ride = ride
-            review.save()
+            # Usar la función create_review de la API pública
+            review = create_review(
+                user=request.user,
+                ride=ride,
+                rating=form.cleaned_data['rating'],
+                comment=form.cleaned_data['comment']
+            )
             
-            messages.success(request, "Tu valoración ha sido registrada correctamente.")
+            messages.success(request, REVIEW_CREATED_SUCCESS)
             return redirect('rides:ride_detail', ride_id=ride_id)
     else:
         form = ReviewForm()
     
-    context = {
-        'form': form,
-        'ride': ride
-    }
-    
-    return render(request, 'create_review.html', context)
+    context = prepare_review_form_context(request, ride)
+    return render(request, CREATE_REVIEW_TEMPLATE, context)
 
 @login_required
 def delete(request, review_id):
@@ -59,68 +56,44 @@ def delete(request, review_id):
     Vista para eliminar una reseña.
     Solo el autor de la reseña puede eliminarla.
     """
-    review = get_object_or_404(Review, pk=review_id)
+    review = get_review_or_404(review_id)
     
-    # Verificar que el usuario es el autor de la reseña
-    if review.user != request.user:
-        return HttpResponseForbidden("No tienes permiso para eliminar esta valoración.")
-    
-    # Almacenar el ride_id para redireccionar después de eliminar
-    ride_id = review.ride.id if review.ride else None
+    # Verificar permisos para eliminar
+    check_result = check_delete_permission(request, review)
+    if check_result:
+        return check_result
     
     if request.method == 'POST':
         review.delete()
-        messages.success(request, "La valoración ha sido eliminada correctamente.")
-        
-        # Redireccionar a la página de detalles del viaje o a la lista de reseñas
-        if ride_id:
-            return redirect('rides:ride_detail', ride_id=ride_id)
-        else:
-            return redirect('reviews:list')  # Asumiendo que añadirás esta URL más tarde
+        messages.success(request, REVIEW_DELETED_SUCCESS)
+        return redirect_after_delete(review)
     
-    context = {
-        'review': review
-    }
-    
-    return render(request, 'delete_review.html', context)
+    context = prepare_review_delete_context(review)
+    return render(request, DELETE_REVIEW_TEMPLATE, context)
 
 @login_required
 def list_reviews(request):
     """
     Vista para listar todas las reseñas del usuario actual.
     """
-    # Obtener reseñas hechas por el usuario
-    reviews_given = Review.objects.filter(user=request.user).order_by('-created_at')
-    
-    # Obtener reseñas recibidas (para viajes en los que el usuario fue conductor)
-    reviews_received = Review.objects.filter(
-        ride__driver=request.user
-    ).exclude(user=request.user).order_by('-created_at')
-    
-    context = {
-        'reviews_given': reviews_given,
-        'reviews_received': reviews_received
-    }
-    
-    return render(request, 'list_review.html', context)
+    context = prepare_review_list_context(request)
+    return render(request, LIST_REVIEWS_TEMPLATE, context)
 
 @login_required
 def detail(request, review_id):
     """
     Vista para ver los detalles de una reseña específica.
     """
-    review = get_object_or_404(Review, pk=review_id)
+    review = get_review_or_404(review_id)
     
-    # Verificar que el usuario tiene permiso para ver esta reseña
-    # (es el autor, el conductor o un pasajero del viaje)
+    # Las comprobaciones de permisos se mantienen igual por ahora
     if (review.user != request.user and 
         (not review.ride or 
          (review.ride.driver != request.user and 
           request.user not in review.ride.passengers.all()))):
-        return HttpResponseForbidden("No tienes permiso para ver esta valoración.")
+        from django.http import HttpResponseForbidden
+        from .constants import NO_PERMISSION_ERROR
+        return HttpResponseForbidden(NO_PERMISSION_ERROR)
     
-    context = {
-        'review': review
-    }
-    
-    return render(request, 'detail_review.html', context)
+    context = prepare_review_detail_context(review)
+    return render(request, DETAIL_REVIEW_TEMPLATE, context)

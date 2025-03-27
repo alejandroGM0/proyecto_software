@@ -1,16 +1,14 @@
 from django import forms
 from .models import Review
+from .constants import MIN_RATING, MAX_RATING
 
 class ReviewForm(forms.ModelForm):
     """
     Formulario para crear y editar reseñas.
     """
+    # Generar opciones de rating dinámicamente usando las constantes
     RATING_CHOICES = [
-        (1, '⭐'),
-        (2, '⭐⭐'),
-        (3, '⭐⭐⭐'),
-        (4, '⭐⭐⭐⭐'),
-        (5, '⭐⭐⭐⭐⭐'),
+        (i, "⭐" * i) for i in range(MIN_RATING, MAX_RATING + 1)
     ]
     
     rating = forms.ChoiceField(
@@ -35,4 +33,10 @@ class ReviewForm(forms.ModelForm):
         
     def clean_rating(self):
         # Convertimos el valor a entero (viene como string del formulario)
-        return int(self.cleaned_data['rating'])
+        rating = int(self.cleaned_data['rating'])
+        
+        # Validamos que esté dentro del rango permitido
+        if not (MIN_RATING <= rating <= MAX_RATING):
+            raise forms.ValidationError(f"La puntuación debe estar entre {MIN_RATING} y {MAX_RATING}.")
+        
+        return rating
