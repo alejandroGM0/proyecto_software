@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils import timezone
+from chat.models import Chat
 
 class Ride(models.Model):
     driver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rides_as_driver')
@@ -11,6 +12,7 @@ class Ride(models.Model):
     departure_time = models.DateTimeField()
     total_seats = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=7, decimal_places=2)
+    chat = models.OneToOneField(Chat, on_delete=models.SET_NULL, null=True, related_name='ride')
 
     def get_formatted_price(self):
         return f"{settings.CURRENCY_SYMBOL}{self.price}"

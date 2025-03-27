@@ -93,7 +93,7 @@
                     <i class="fas fa-star"></i> Mis Valoraciones
                 </a>
                 {% else %}
-                <a href="#" class="button button-primary">
+                <a href="{% url 'chat:create_direct_chat' user.id %}" class="button button-primary">
                     <i class="fas fa-envelope"></i> Enviar Mensaje
                 </a>
                 {% endif %}

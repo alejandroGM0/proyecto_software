@@ -29,7 +29,7 @@ class RideForm(forms.ModelForm):
                 'min': '0'
             })
         }
-#TODO NO ES NECESARIO ELIMINAR
+        
 class RideSearchForm(forms.Form):
     origin = forms.CharField(
         label='Origen',

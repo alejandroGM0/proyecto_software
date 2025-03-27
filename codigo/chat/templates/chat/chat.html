@@ -1,96 +1,188 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{% if selected_ride %}Chat{% else %}Mensajes{% endif %}{% endblock %}
+{% block title %}{% if selected_chat %}Chat{% else %}Mensajes{% endif %}{% endblock %}
 
 {% block content %}
-<div>
+<div class="chat-container">
     <!-- Lista de chats -->
-    <div>
-        <h2>Chats</h2>
-        <div>
-            {% for chat in chats_data %}
-            <a href="{% url 'chat:ride_chat' chat.ride.id %}">
-                <div>
-                    <div>{{ chat.ride.origin }} → {{ chat.ride.destination }}</div>
-                    <div>
-                        {% if chat.ride.driver == user %}Tú{% else %}{{ chat.ride.driver.username }}{% endif %}
-                        {% if chat.last_message %}- {{ chat.last_message.content|truncatechars:30 }}{% endif %}
-                    </div>
+    <div class="chat-sidebar">
+        <h2>Mis Chats</h2>
+        <div class="chat-list">
+            {% for chat_data in chats_data %}
+            <a href="{% if chat_data.is_ride_chat %}{% url 'chat:chat_view' chat_data.chat.id %}{% else %}{% url 'chat:chat_view' chat_data.chat.id %}{% endif %}" 
+               class="chat-item {% if selected_chat.id == chat_data.chat.id %}active{% endif %}">
+                <div class="chat-item-content">
+                    {% if chat_data.is_ride_chat %}
+                        <div class="chat-title">
+                            <i class="fas fa-car"></i> {{ chat_data.ride.origin }} → {{ chat_data.ride.destination }}
+                        </div>
+                        <div class="chat-subtitle">
+                            {% if chat_data.ride.driver == user %}Conductor{% else %}{{ chat_data.ride.driver.username }}{% endif %}
+                        </div>
+                    {% else %}
+                        <div class="chat-title">
+                            <i class="fas fa-comments"></i> 
+                            {% for participant in chat_data.chat.participants.all %}
+                                {% if participant != user %}
+                                    {{ participant.username }}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="chat-subtitle">Chat directo</div>
+                    {% endif %}
+                    
+                    {% if chat_data.last_message %}
+                        <div class="chat-preview">
+                            {{ chat_data.last_message.content|truncatechars:30 }}
+                        </div>
+                    {% endif %}
                 </div>
             </a>
             {% empty %}
-            <div>Sin conversaciones</div>
+            <div class="empty-chats">Sin conversaciones</div>
             {% endfor %}
         </div>
+        
+        <a href="{% url 'chat:my_chats' %}" class="button button-primary">
+            <i class="fas fa-plus"></i> Nuevo Chat
+        </a>
     </div>
 
-    <div>
-        {% if selected_ride %}
-            <div>
-                <div>{{ selected_ride.origin }} → {{ selected_ride.destination }}</div>
-                <div>{{ selected_ride.departure_time|date:"j F Y, H:i" }}</div>
-                {% if not selected_ride.is_active %}<div>Chat deshabilitado</div>{% endif %}
+    <!-- Área de mensajes -->
+    <div class="chat-main">
+        {% if selected_chat %}
+            <div class="chat-header">
+                {% if selected_ride %}
+                    <div class="chat-title">
+                        <i class="fas fa-car"></i> {{ selected_ride.origin }} → {{ selected_ride.destination }}
+                    </div>
+                    <div class="chat-info">
+                        <span>Conductor: {{ selected_ride.driver.username }}</span> |
+                        <span>{{ selected_ride.departure_time|date:"j F Y, H:i" }}</span>
+                        {% if not selected_ride.is_active %}<div class="chat-badge inactive">Viaje finalizado</div>{% endif %}
+                    </div>
+                {% else %}
+                    <div class="chat-title">
+                        <i class="fas fa-comments"></i> Chat con 
+                        {% for participant in selected_chat.participants.all %}
+                            {% if participant != user %}
+                                {{ participant.username }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
             
             <!-- Mensajes -->
-            <div id="chat-messages"></div>
+            <div id="chat-messages" class="chat-messages"></div>
             
-            <div>
-                <form id="chat-form" {% if not selected_ride.is_active %}disabled{% endif %}>
+            <!-- Formulario para enviar mensajes -->
+            <div class="chat-input">
+                <form id="chat-form" {% if selected_ride and not selected_ride.is_active %}class="disabled"{% endif %}>
                     {% csrf_token %}
-                    <input type="text" id="message-input" {% if not selected_ride.is_active %}disabled{% endif %}>
-                    <button type="submit" {% if not selected_ride.is_active %}disabled{% endif %}>Enviar</button>
+                    <input type="text" id="message-input" placeholder="Escribe un mensaje..." 
+                           {% if selected_ride and not selected_ride.is_active %}disabled{% endif %}>
+                    <button type="submit" class="button button-primary" 
+                           {% if selected_ride and not selected_ride.is_active %}disabled{% endif %}>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </form>
             </div>
 
             <script>
-                const rideId = "{{ selected_ride.id }}";
-                const user = "{{ user.username }}";
+                const chatId = "{{ selected_chat.id }}";
+                const userId = "{{ user.id }}";
+                const username = "{{ user.username }}";
                 const chatMessages = document.getElementById('chat-messages');
                 const chatForm = document.getElementById('chat-form');
                 const messageInput = document.getElementById('message-input');
-                let socket;
-
-                // Carga el historial de mensajes
-                fetch(`/chat/${rideId}/messages/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        data.messages.forEach(msg => {
-                            let div = document.createElement('div');
-                            div.innerHTML = `<p>${msg.sender}: ${msg.content}</p>`;
-                            chatMessages.appendChild(div);
-                        });
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
-                        
-                        if (data.is_active) {
-                            // Conecta WebSocket
-                            const wsStart = window.location.protocol == "https:" ? "wss://" : "ws://";
-                            socket = new WebSocket(wsStart + window.location.host + `/ws/chat/${rideId}/`);
-                            
-                            socket.onmessage = function(e) {
-                                const data = JSON.parse(e.data);
-                                let div = document.createElement('div');
-                                div.innerHTML = `<p>${data.sender}: ${data.content}</p>`;
-                                chatMessages.appendChild(div);
-                                chatMessages.scrollTop = chatMessages.scrollHeight;
-                            };
-                        }
-                    });
-
-                // Envía mensajes
-                chatForm.addEventListener('submit', function(event) {
-                    event.preventDefault();
+                
+                // Cargar mensajes iniciales
+                loadMessages();
+                
+                // Configurar WebSocket
+                const chatSocket = new WebSocket(
+                    'ws://' + window.location.host + '/ws/chat/' + chatId + '/'
+                );
+                
+                chatSocket.onmessage = function(e) {
+                    const data = JSON.parse(e.data);
+                    
+                    if (data.message) {
+                        addMessage(data.message);
+                    }
+                    
+                    if (data.error) {
+                        console.error(data.error);
+                    }
+                };
+                
+                chatSocket.onclose = function(e) {
+                    console.error('Chat socket closed unexpectedly');
+                };
+                
+                // Enviar mensaje
+                chatForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
                     const message = messageInput.value.trim();
-                    if (message && socket?.readyState === WebSocket.OPEN) {
-                        socket.send(JSON.stringify({'message': message}));
+                    if (message) {
+                        chatSocket.send(JSON.stringify({
+                            'message': message
+                        }));
                         messageInput.value = '';
                     }
                 });
+                
+                // Cargar mensajes existentes
+                function loadMessages() {
+                    fetch('/chat/' + chatId + '/messages/')
+                        .then(response => response.json())
+                        .then(data => {
+                            // Limpiar mensajes existentes
+                            chatMessages.innerHTML = '';
+                            
+                            // Añadir todos los mensajes
+                            data.messages.forEach(message => {
+                                addMessage(message);
+                            });
+                            
+                            // Scroll al final
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                        });
+                }
+                
+                function addMessage(message) {
+                    // Crear elemento de mensaje
+                    const messageElement = document.createElement('div');
+                    messageElement.classList.add('message');
+                    messageElement.classList.add(message.sender === username ? 'sent' : 'received');
+                    
+                    // Contenido del mensaje
+                    messageElement.innerHTML = `
+                        <div class="message-content">
+                            <div class="message-text">${message.content}</div>
+                            <div class="message-info">
+                                <span class="message-sender">${message.sender}</span>
+                                <span class="message-time">${message.timestamp}</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Añadir al contenedor de mensajes
+                    chatMessages.appendChild(messageElement);
+                    
+                    // Scroll al final
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
             </script>
         {% else %}
-            <div>
-                <h3>Selecciona un chat</h3>
+            <div class="chat-placeholder">
+                <div class="empty-state">
+                    <i class="fas fa-comments empty-icon"></i>
+                    <p>Selecciona un chat o inicia una nueva conversación</p>
+                </div>
             </div>
         {% endif %}
     </div>

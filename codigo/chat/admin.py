@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Message
+from .models import Message, Chat
 from rides.models import Ride
 
 class RideChatFilter(admin.SimpleListFilter):
@@ -15,12 +15,45 @@ class RideChatFilter(admin.SimpleListFilter):
             return queryset.filter(ride__id=self.value())
         return queryset
 
+class ChatFilter(admin.SimpleListFilter):
+    title = 'Tipo de Chat'
+    parameter_name = 'chat_type'
+    
+    def lookups(self, request, model_admin):
+        return [
+            ('ride', 'Chats de Viaje'),
+            ('direct', 'Chats Directos'),
+        ]
+    
+    def queryset(self, request, queryset):
+        if self.value() == 'ride':
+            return queryset.filter(ride__isnull=False)
+        if self.value() == 'direct':
+            return queryset.filter(ride__isnull=True)
+        return queryset
+
+@admin.register(Chat)
+class ChatAdmin(admin.ModelAdmin):
+    list_display = ('id', 'get_participants', 'created_at', 'has_ride')
+    list_filter = (ChatFilter, 'created_at')
+    search_fields = ('participants__username',)
+    filter_horizontal = ('participants',)
+    
+    def get_participants(self, obj):
+        return ", ".join(user.username for user in obj.participants.all()[:3])
+    get_participants.short_description = 'Participantes'
+    
+    def has_ride(self, obj):
+        return hasattr(obj, 'ride') and obj.ride is not None
+    has_ride.boolean = True
+    has_ride.short_description = 'Chat de Viaje'
+
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ('get_ride_info', 'sender', 'short_content', 'created_at', 'is_read')
-    list_filter = (RideChatFilter, 'is_read', 'created_at', 'sender')
-    list_display_links = ('get_ride_info', 'short_content')
-    search_fields = ('content', 'sender__username', 'ride__origin', 'ride__destination')
+    list_display = ('get_chat_info', 'sender', 'short_content', 'created_at', 'is_read')
+    list_filter = ('is_read', 'created_at', 'sender', ChatFilter)
+    list_display_links = ('get_chat_info', 'short_content')
+    search_fields = ('content', 'sender__username', 'chat__participants__username')
     date_hierarchy = 'created_at'
     list_per_page = 50
     
@@ -28,22 +61,9 @@ class MessageAdmin(admin.ModelAdmin):
         return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
     short_content.short_description = 'Mensaje'
     
-    def get_ride_info(self, obj):
-        if hasattr(obj, 'ride') and obj.ride:
-            return f"{obj.ride.origin} → {obj.ride.destination}"
-        return "Sin viaje asociado"
-    get_ride_info.short_description = 'Conversación'
-    
-    fieldsets = (
-        ('Información del Mensaje', {
-            'fields': ('content', 'is_read')
-        }),
-        ('Relaciones', {
-            'fields': ('ride', 'sender')
-        }),
-        ('Información Temporal', {
-            'fields': ('created_at',),
-            'classes': ('collapse',)
-        }),
-    )
-    readonly_fields = ('created_at',)
+    def get_chat_info(self, obj):
+        if hasattr(obj.chat, 'ride') and obj.chat.ride:
+            ride = obj.chat.ride
+            return f"Viaje: {ride.origin} → {ride.destination}"
+        return f"Directo: {', '.join(user.username for user in obj.chat.participants.all()[:3])}"
+    get_chat_info.short_description = 'Chat'

@@ -2,7 +2,7 @@
 Funciones de utilidad interna para la aplicación de chat."""
 from django.contrib.auth.models import User
 from django.utils import timezone
-from .models import Message
+from .models import Message, Chat
 from rides.models import Ride
 from accounts.public import update_last_activity
 from .public import user_has_chat_access
@@ -21,12 +21,45 @@ def format_message_for_api(message: Message) -> dict:
         'date': message.created_at.strftime('%Y-%m-%d')
     }
 
-def get_messages_for_ride(ride: Ride) -> list:
+def get_messages_for_chat(chat: Chat) -> list:
     """
-    Obtiene todos los mensajes de un viaje formateados para la API.
+    Obtiene todos los mensajes de un chat formateados para la API.
     """
-    messages = ride.messages.all().order_by('created_at')
+    messages = chat.messages.all().order_by('created_at')
     return [format_message_for_api(msg) for msg in messages]
+
+def can_send_message(chat: Chat) -> bool:
+    """
+    Verifica si un chat está activo para enviar mensajes.
+    Para chats de viaje, depende del estado del viaje.
+    Para chats directos, siempre es True.
+    """
+    if hasattr(chat, 'ride'):
+        return chat.ride.is_active
+    return True
+
+def can_access_chat(user: User, chat_id: int) -> bool:
+    """
+    Verifica si un usuario tiene acceso a un chat por ID.
+    """
+    try:
+        chat = Chat.objects.get(id=chat_id)
+        return user_has_chat_access(user, chat)
+    except Chat.DoesNotExist:
+        return False
+
+def save_chat_message(user: User, chat_id: int, message_content: str) -> Message:
+    """
+    Guarda un mensaje en un chat y actualiza la actividad del usuario.
+    """
+    chat = Chat.objects.get(id=chat_id)
+    message = Message.objects.create(
+        chat=chat,
+        sender=user,
+        content=message_content
+    )
+    update_last_activity(user)
+    return message
 
 def get_chat_participants(ride: Ride) -> list:
     """
@@ -36,42 +69,30 @@ def get_chat_participants(ride: Ride) -> list:
     participants.append(ride.driver)
     return participants
 
-def can_send_message(ride: Ride) -> bool:
-    """
-    Verifica si un chat está activo para enviar mensajes.
-    """
-    return ride.is_active
-
-def can_access_chat(user: User, ride_id: int) -> bool:
-    """
-    Verifica si un usuario tiene acceso al chat de un viaje por ID.
-    """
-    try:
-        ride = Ride.objects.get(id=ride_id)
-        return user_has_chat_access(user, ride)
-    except Ride.DoesNotExist:
-        return False
-
-def save_chat_message(user: User, ride_id: int, message_content: str) -> Message:
-    """
-    Guarda un mensaje de chat y actualiza la actividad del usuario.
-    """
-    ride = Ride.objects.get(id=ride_id)
-    message = Message.objects.create(
-        ride=ride,
-        sender=user,
-        content=message_content
-    )
-    update_last_activity(user)
-    return message
-
 def format_message_for_websocket(message: str, sender: User) -> dict:
     """
-    Formatea un mensaje para ser enviado por WebSocket.
+    Formatea un mensaje para enviar por WebSocket.
     """
+    now = timezone.now()
     return {
-        'type': MESSAGE_TYPE_CHAT,
-        'message': message,
+        'content': message,
         'sender': sender.username,
-        'timestamp': timezone.now().strftime('%H:%M')
+        'sender_id': sender.id,
+        'timestamp': now.strftime('%H:%M'),
+        'date': now.strftime('%Y-%m-%d'),
+        'is_read': False
     }
+
+def synchronize_chat_participants(ride):
+    """
+    Función de utilidad para sincronizar participantes del chat con los de un viaje
+    """
+    if not hasattr(ride, 'chat') or not ride.chat:
+        return
+        
+    # Añadir el conductor
+    ride.chat.participants.add(ride.driver)
+    
+    # Añadir todos los pasajeros
+    for passenger in ride.passengers.all():
+        ride.chat.participants.add(passenger)

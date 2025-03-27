@@ -10,10 +10,11 @@ URL_RIDES_LIST = 'rides:ride_list'
 
 # Plantillas
 TEMPLATE_CHAT = 'chat/chat.html'
-TEMPLATE_MY_CHATS = 'chat/my_chats.html'
+TEMPLATE_MY_CHATS = 'chat/chat.html'
 
 # Contexto
 CONTEXT_CHATS_DATA = 'chats_data'
+CONTEXT_SELECTED_CHAT = 'selected_chat' 
 CONTEXT_SELECTED_RIDE = 'selected_ride'
 CONTEXT_USER = 'user'
 CONTEXT_MESSAGES = 'messages'

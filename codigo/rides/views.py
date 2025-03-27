@@ -80,25 +80,17 @@ def ride_detail(request, ride_id):
 
 @login_required
 def book_ride(request, ride_id):
-    update_last_activity(request.user)
-    
-    ride = get_ride_by_id(ride_id)
-    if not ride:
-        return redirect(RIDE_LIST_URL)
+    ride = get_object_or_404(Ride, id=ride_id)
     
     if not user_can_book_ride(request.user, ride):
-        if ride.passengers.filter(id=request.user.id).exists():
-            messages.warning(request, RIDE_ALREADY_BOOKED_ERROR)
-        elif request.user == ride.driver:
-            messages.warning(request, RIDE_OWN_ERROR)
-        else:
-            messages.error(request, RIDE_FULL_ERROR)
-        return redirect(RIDE_DETAIL_URL, ride_id=ride.id)
+        messages.error(request, "No puedes reservar este viaje.")
+        return redirect('rides:ride_detail', ride_id=ride.id)
     
-    if add_passenger_to_ride(request.user, ride):
-        messages.success(request, RIDE_BOOKED_SUCCESS)
+    # Esta línea activará la señal m2m_changed
+    ride.passengers.add(request.user)
     
-    return redirect(RIDE_DETAIL_URL, ride_id=ride.id)
+    messages.success(request, f"Has reservado un asiento en el viaje de {ride.origin} a {ride.destination}.")
+    return redirect('rides:ride_detail', ride_id=ride.id)
 
 @login_required
 def create_ride(request):
