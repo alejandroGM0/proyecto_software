@@ -8,3 +8,7 @@ class ChatConfig(AppConfig):
     def ready(self):
         print("¡ChatConfig.ready() llamado - cargando signals!")
         import chat.signals  # Importar señales cuando la app esté lista
+    
+    def ready(self):
+        print("¡ChatConfig.ready() llamado - cargando signals!")
+        import chat.signals  # Importar señales cuando la app esté lista
