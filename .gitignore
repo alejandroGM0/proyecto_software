@@ -9,6 +9,8 @@ env/
 venv/
 ENV/
 
+# Archivos de entorno
+.env
 
 # Python cache files
 **/__pycache__/
@@ -24,6 +26,13 @@ db.sqlite3-journal
 media/
 media/*
 /media/
+
+# Migrations
+**/migrations/__pycache__/
+**/migrations/*.pyc
+# Las siguientes líneas ignoran todas las migraciones excepto __init__.py
+**/migrations/*.py
+!**/migrations/__init__.py
 
 # IDE
 .vscode/

@@ -1,9 +1,16 @@
 import stripe
 from django.conf import settings
 from django.urls import reverse
+from rides.models import Ride
 
-# Clave secreta de Stripe
+print(f"Configurando Stripe con clave: {settings.STRIPE_SECRET_KEY[:5]}...")
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+try:
+    stripe.PaymentMethod.list(limit=1)
+    print("Conexión con Stripe establecida correctamente")
+except Exception as e:
+    print(f"ERROR conectando con Stripe: {str(e)}")
 
 def create_checkout_session(payment, request):
     """
@@ -35,28 +42,33 @@ def create_checkout_session(payment, request):
     else:
         description = f"Pago #{payment.id}"
     
-    try:
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[
-                {
-                    'price_data': {
-                        'currency': 'eur',
-                        'product_data': {
-                            'name': description,
-                            'metadata': metadata,
-                        },
-                        'unit_amount': int(payment.amount * 100),  # En céntimos
+    checkout_params = {
+        'payment_method_types': ['card', 'paypal', 'sepa_debit', 'sofort'],
+        'line_items': [
+            {
+                'price_data': {
+                    'currency': 'eur',
+                    'product_data': {
+                        'name': description,
+                        'metadata': metadata,
                     },
-                    'quantity': 1,
-                }
-            ],
-            metadata=metadata,
-            mode='payment',
-            success_url=success_url + '?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=cancel_url,
-            customer_email=payment.payer.email,
-        )
+                    'unit_amount': int(payment.amount * 100),  # En céntimos
+                },
+                'quantity': 1,
+            }
+        ],
+        'metadata': metadata,
+        'mode': 'payment',
+        'success_url': success_url + '?session_id={CHECKOUT_SESSION_ID}',
+        'cancel_url': cancel_url,
+    }
+    
+    # Añadir el email solo si existe
+    if payment.payer.email:
+        checkout_params['customer_email'] = payment.payer.email
+    
+    try:
+        checkout_session = stripe.checkout.Session.create(**checkout_params)
         
         payment.stripe_payment_intent_id = checkout_session.id
         payment.save(update_fields=['stripe_payment_intent_id'])
@@ -164,14 +176,16 @@ def validate_cancel_permission(payment, user):
 def format_payment_description(payment):
     """
     Genera una descripción formateada para el pago.
-    
-    Args:
-        payment: Objeto Payment
-        
-    Returns:
-        str: Descripción del pago
     """
-    if payment.ride:
-        return f"Pago de viaje: {payment.ride.origin} → {payment.ride.destination}"
-    else:
-        return f"Pago #{payment.id}"
+    try:
+        from rides.models import Ride
+        
+        if isinstance(payment, Ride):
+            return f"Pago de viaje: {payment.origin} → {payment.destination}"
+        elif hasattr(payment, 'ride') and payment.ride:
+            return f"Pago de viaje: {payment.ride.origin} → {payment.ride.destination}"
+        else:
+            return f"Pago #{payment.id}"
+    except Exception as e:
+        print(f"Error en format_payment_description: {str(e)}")
+        return "Pago de viaje"

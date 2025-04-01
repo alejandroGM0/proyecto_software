@@ -12,11 +12,13 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv  # Importar dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+# Cargar variables de entorno desde .env
+load_dotenv(BASE_DIR.parent / '.env')  
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -59,9 +61,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'blablacar.urls'
 
-# Stripe configuration
-STRIPE_PUBLIC_KEY = 'pk_test_51R3ZmNIYHTFQ1lylb4g6zz53qwvgHnIGPlK4axRXOxU08GLHFj1Brx943V6H5LsLukTZ76Nih7NHS27MlAfT9ZO7006Bks3yPP'
-STRIPE_SECRET_KEY = 'sk_test_51R3ZmNIYHTFQ1lylkVolMJBTawNPBJ6yEoKzCzUXrc148GcLXdbf2EWxVfckMs4UfhPUGG54yqcv5qMsgP1jL2KA00gErm8hXD'
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', '')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
 
 TEMPLATES = [
     {

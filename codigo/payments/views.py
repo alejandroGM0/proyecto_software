@@ -42,7 +42,6 @@ def payment_detail(request, pk):
     """
     payment = get_object_or_404(Payment, pk=pk)
     
-    # Verificar que el usuario tenga permiso para ver este pago
     if not _utils.validate_payment_access(payment, request.user):
         messages.error(request, ERROR_PERMISSION_DENIED)
         return redirect('payments:payment_list')
@@ -83,17 +82,14 @@ def create_payment(request, ride_id):
     """
     ride = get_object_or_404(Ride, pk=ride_id)
     
-    # Verificar que el usuario no es el conductor
     if ride.driver == request.user:
         messages.error(request, ERROR_OWN_RIDE_PAYMENT)
         return redirect('rides:ride_detail', ride_id=ride_id) 
     
-    # Verificar si el viaje tiene asientos disponibles
     if hasattr(ride, 'seats_available') and ride.seats_available <= 0:
         messages.error(request, "Este viaje está completo, no hay asientos disponibles.")
         return redirect('rides:ride_detail', ride_id=ride_id)
     
-    # Verificar si ya hay un pago pendiente o completado para este usuario y viaje
     existing_payment = Payment.objects.filter(
         payer=request.user,
         ride=ride,
@@ -120,12 +116,14 @@ def create_payment(request, ride_id):
                 concept=_utils.format_payment_description(ride)
             )
             
-            # Crear sesión de checkout de Stripe
             checkout_url = _utils.create_checkout_session(payment, request)
+            print(f"URL de checkout: {checkout_url}")
             
             if checkout_url:
+                print(f"Redirigiendo a: {checkout_url}")
                 return redirect(checkout_url)
             else:
+                print("No se pudo crear la URL de checkout")
                 payment.status = PAYMENT_STATUS_FAILED
                 payment.save()
                 messages.error(request, ERROR_PAYMENT_PROCESSING)
@@ -148,7 +146,6 @@ def payment_success(request, pk):
     session_id = request.GET.get('session_id')
     
     if session_id:
-        # Verificar el estado del pago en Stripe
         status = _utils.get_payment_status(session_id)
         
         if status == 'succeeded':
@@ -167,7 +164,6 @@ def payment_cancel(request, pk):
     """
     payment = get_object_or_404(Payment, pk=pk)
     
-    # Solo actualizar si está pendiente
     if payment.status == PAYMENT_STATUS_PENDING:
         payment.status = PAYMENT_STATUS_CANCELLED
         payment.save()
