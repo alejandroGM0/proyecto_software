@@ -2,6 +2,10 @@
 {% load static %}
 
 {% block title %}{% if selected_chat %}Chat{% else %}Mensajes{% endif %}{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/pages/chat.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
 
 {% block content %}
 <div class="chat-container">
@@ -98,6 +102,10 @@
                 const chatForm = document.getElementById('chat-form');
                 const messageInput = document.getElementById('message-input');
                 
+                // Add debugging to check if elements are found
+                console.log("Chat form:", chatForm);
+                console.log("Message input:", messageInput);
+                
                 // Cargar mensajes iniciales
                 loadMessages();
                 
@@ -105,6 +113,15 @@
                 const chatSocket = new WebSocket(
                     'ws://' + window.location.host + '/ws/chat/' + chatId + '/'
                 );
+                
+                chatSocket.onopen = function(e) {
+                    console.log("WebSocket connection established");
+                    // Enable the input field explicitly
+                    if (messageInput) {
+                        messageInput.disabled = false;
+                        messageInput.focus();
+                    }
+                };
                 
                 chatSocket.onmessage = function(e) {
                     const data = JSON.parse(e.data);
@@ -156,7 +173,7 @@
                 function addMessage(message) {
                     // Crear elemento de mensaje
                     const messageElement = document.createElement('div');
-                    messageElement.classList.add('message');
+                    messageElement.classList.add('chat-message');  // Change from 'message' to 'chat-message'
                     messageElement.classList.add(message.sender === username ? 'sent' : 'received');
                     
                     // Contenido del mensaje

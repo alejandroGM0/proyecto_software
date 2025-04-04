@@ -2,108 +2,340 @@
 
 {% block title %}Detalles del pago - BlaBlaCar{% endblock %}
 
+{% block extra_styles %}
+<style>
+    :root {
+        --apple-bg: #f5f5f7;
+        --apple-card: #ffffff;
+        --apple-text: #1d1d1f;
+        --apple-secondary-text: #86868b;
+        --apple-border: #d2d2d7;
+        --apple-blue: #0071e3;
+        --apple-green: #34c759;
+        --apple-yellow: #ffd60a;
+        --apple-red: #ff3b30;
+        --apple-teal: #5ac8fa;
+    }
+
+    body {
+        background-color: var(--apple-bg);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+        color: var(--apple-text);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .payment-detail-container {
+        max-width: 960px;
+        margin: 40px auto;
+        padding: 0 20px;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .payment-detail-card {
+        background-color: var(--apple-card);
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+        border: 1px solid var(--apple-border);
+        margin-bottom: 30px;
+    }
+
+    .card-header {
+        background-color: var(--apple-blue);
+        color: white;
+        padding: 20px 24px;
+    }
+
+    .card-header h1 {
+        font-weight: 600;
+        font-size: 24px;
+        letter-spacing: -0.02em;
+        margin: 0;
+    }
+
+    .card-content {
+        padding: 24px;
+    }
+
+    .message-alert {
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-size: 15px;
+        background-color: rgba(52, 199, 89, 0.1);
+        color: var(--apple-green);
+    }
+
+    .message-alert.alert-warning {
+        background-color: rgba(255, 214, 10, 0.1);
+        color: #b8860b;
+    }
+
+    .message-alert.alert-danger {
+        background-color: rgba(255, 59, 48, 0.1);
+        color: var(--apple-red);
+    }
+
+    .message-alert.alert-info {
+        background-color: rgba(90, 200, 250, 0.1);
+        color: var(--apple-teal);
+    }
+
+    .info-section {
+        margin-bottom: 32px;
+    }
+
+    .section-title {
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--apple-secondary-text);
+        margin-bottom: 16px;
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border: 1px solid var(--apple-border);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--apple-border);
+        font-size: 15px;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-item span:first-child {
+        color: var(--apple-secondary-text);
+    }
+
+    .info-item strong {
+        font-weight: 600;
+    }
+
+    .badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    .bg-completed {
+        background-color: rgba(52, 199, 89, 0.1);
+        color: var(--apple-green);
+    }
+
+    .bg-pending {
+        background-color: rgba(255, 214, 10, 0.1);
+        color: #b8860b;
+    }
+
+    .bg-failed {
+        background-color: rgba(255, 59, 48, 0.1);
+        color: var(--apple-red);
+    }
+
+    .bg-refunded {
+        background-color: rgba(90, 200, 250, 0.1);
+        color: var(--apple-teal);
+    }
+
+    .flex-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+    }
+
+    .flex-column {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .button {
+        padding: 10px 20px;
+        border-radius: 22px;
+        font-size: 15px;
+        font-weight: 500;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        white-space: nowrap;
+        display: inline-block;
+        border: none;
+        margin-right: 8px;
+        margin-bottom: 8px;
+    }
+
+    .button-primary {
+        background-color: var(--apple-blue);
+        color: white;
+        box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+    }
+
+    .button-warning {
+        background-color: var(--apple-yellow);
+        color: var(--apple-text);
+        box-shadow: 0 2px 8px rgba(255, 214, 10, 0.2);
+    }
+
+    .button-info {
+        background-color: var(--apple-teal);
+        color: white;
+        box-shadow: 0 2px 8px rgba(90, 200, 250, 0.2);
+    }
+
+    .button-secondary {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--apple-text);
+    }
+
+    .button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .actions-container {
+        margin-top: 30px;
+    }
+
+    .monospace {
+        font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 13px;
+    }
+
+    @media (max-width: 768px) {
+        .payment-detail-container {
+            margin: 20px auto;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h1 class="h3 mb-0">Detalles del Pago</h1>
+<div class="payment-detail-container">
+    <div class="payment-detail-card">
+        <div class="card-header">
+            <h1>Detalles del Pago</h1>
         </div>
-        <div class="card-body">
+        <div class="card-content">
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                    <div class="message-alert alert-{{ message.tags }}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
             
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <h5 class="text-muted">Información del Pago</h5>
-                    <ul class="list-group">
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Estado:</span>
-                            <span class="badge bg-{{ payment.status|lower }}">{{ payment.get_status_display }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Importe:</span>
-                            <strong>{{ payment.amount }}€</strong>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Método:</span>
-                            <span>{{ payment.get_payment_method_display }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Fecha:</span>
-                            <span>{{ payment.created_at|date:"d/m/Y H:i" }}</span>
-                        </li>
-                        {% if payment.concept %}
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Concepto:</span>
-                            <span>{{ payment.concept }}</span>
-                        </li>
-                        {% endif %}
-                        
-                        <!-- Mostrar IDs de Stripe solo a administradores -->
-                        {% if is_admin %}
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>ID Transacción Stripe:</span>
-                            <span class="text-monospace">{{ payment.stripe_payment_intent_id|default:"-" }}</span>
-                        </li>
-                        {% if payment.stripe_refund_id %}
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>ID Reembolso Stripe:</span>
-                            <span class="text-monospace">{{ payment.stripe_refund_id }}</span>
-                        </li>
-                        {% endif %}
-                        {% endif %}
-                    </ul>
+            <div class="flex-container">
+                <div class="flex-column">
+                    <div class="info-section">
+                        <h2 class="section-title">Información del Pago</h2>
+                        <ul class="info-list">
+                            <li class="info-item">
+                                <span>Estado:</span>
+                                <span class="badge bg-{{ payment.status|lower }}">{{ payment.get_status_display }}</span>
+                            </li>
+                            <li class="info-item">
+                                <span>Importe:</span>
+                                <strong>{{ payment.amount }}€</strong>
+                            </li>
+                            <li class="info-item">
+                                <span>Método:</span>
+                                <span>{{ payment.get_payment_method_display }}</span>
+                            </li>
+                            <li class="info-item">
+                                <span>Fecha:</span>
+                                <span>{{ payment.created_at|date:"d/m/Y H:i" }}</span>
+                            </li>
+                            {% if payment.concept %}
+                            <li class="info-item">
+                                <span>Concepto:</span>
+                                <span>{{ payment.concept }}</span>
+                            </li>
+                            {% endif %}
+                            
+                            <!-- Mostrar IDs de Stripe solo a administradores -->
+                            {% if is_admin %}
+                            <li class="info-item">
+                                <span>ID Transacción Stripe:</span>
+                                <span class="monospace">{{ payment.stripe_payment_intent_id|default:"-" }}</span>
+                            </li>
+                            {% if payment.stripe_refund_id %}
+                            <li class="info-item">
+                                <span>ID Reembolso Stripe:</span>
+                                <span class="monospace">{{ payment.stripe_refund_id }}</span>
+                            </li>
+                            {% endif %}
+                            {% endif %}
+                        </ul>
+                    </div>
                 </div>
                 
-                <div class="col-md-6">
-                    <h5 class="text-muted">Información de las Partes</h5>
-                    <ul class="list-group">
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Pagador:</span>
-                            <span>{{ payment.payer.get_full_name|default:payment.payer.username }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Destinatario:</span>
-                            <span>{{ payment.recipient.get_full_name|default:payment.recipient.username }}</span>
-                        </li>
-                    </ul>
+                <div class="flex-column">
+                    <div class="info-section">
+                        <h2 class="section-title">Información de las Partes</h2>
+                        <ul class="info-list">
+                            <li class="info-item">
+                                <span>Pagador:</span>
+                                <span>{{ payment.payer.get_full_name|default:payment.payer.username }}</span>
+                            </li>
+                            <li class="info-item">
+                                <span>Destinatario:</span>
+                                <span>{{ payment.recipient.get_full_name|default:payment.recipient.username }}</span>
+                            </li>
+                        </ul>
+                    </div>
                     
                     {% if payment.ride %}
-                    <h5 class="text-muted mt-4">Información del Viaje</h5>
-                    <ul class="list-group">
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Ruta:</span>
-                            <span>{{ payment.ride.origin }} → {{ payment.ride.destination }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Fecha:</span>
-                            <span>{{ payment.ride.departure_time|date:"d/m/Y H:i" }}</span>
-                        </li>
-                        <li class="list-group-item">
-                            <a href="{% url 'rides:ride_detail' payment.ride.id %}" class="btn btn-sm btn-outline-primary">Ver Detalles del Viaje</a>
-                        </li>
-                    </ul>
+                    <div class="info-section">
+                        <h2 class="section-title">Información del Viaje</h2>
+                        <ul class="info-list">
+                            <li class="info-item">
+                                <span>Ruta:</span>
+                                <span>{{ payment.ride.origin }} → {{ payment.ride.destination }}</span>
+                            </li>
+                            <li class="info-item">
+                                <span>Fecha:</span>
+                                <span>{{ payment.ride.departure_time|date:"d/m/Y H:i" }}</span>
+                            </li>
+                            <li class="info-item" style="justify-content: center;">
+                                <a href="{% url 'rides:ride_detail' payment.ride.id %}" class="button button-secondary">Ver Detalles del Viaje</a>
+                            </li>
+                        </ul>
+                    </div>
                     {% endif %}
                 </div>
             </div>
             
             <!-- Acciones disponibles según el estado y rol del usuario -->
-            <div class="mt-4">
+            <div class="actions-container">
                 {% if payment.status == 'PENDING' and user == payment.payer %}
                     <form action="{% url 'payments:cancel_payment' payment.id %}" method="post" style="display: inline-block">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-warning" onclick="return confirm('¿Estás seguro de cancelar este pago?')">Cancelar Pago</button>
+                        <button type="submit" class="button button-warning" onclick="return confirm('¿Estás seguro de cancelar este pago?')">Cancelar Pago</button>
                     </form>
                 {% endif %}
                 
                 {% if payment.status == 'COMPLETED' and user == payment.recipient %}
-                    <a href="{% url 'payments:refund_payment' payment.id %}" class="btn btn-info">Reembolsar Pago</a>
+                    <a href="{% url 'payments:refund_payment' payment.id %}" class="button button-info">Reembolsar Pago</a>
                 {% endif %}
                 
-                <a href="{% url 'payments:payment_list' %}" class="btn btn-secondary">Volver a Mis Pagos</a>
+                <a href="{% url 'payments:payment_list' %}" class="button button-secondary">Volver a Mis Pagos</a>
             </div>
         </div>
     </div>

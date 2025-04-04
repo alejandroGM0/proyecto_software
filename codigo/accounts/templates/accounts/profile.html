@@ -22,81 +22,37 @@
                         {{ user.username.0|upper }}
                     </div>
                 {% endif %}
-                <h1 class="profile-title">{{ user.username }}</h1>
-                <p class="profile-subtitle">Miembro desde {{ user.date_joined|date:"F Y" }}</p>
-                
-                {% if user_profile.get_age %}
-                <p>{{ user_profile.get_age }} años</p>
-                {% endif %}
-                
-                {% if user_profile.location %}
-                <p>{{ user_profile.location }}</p>
-                {% endif %}
-                
-                {% if user_profile.last_active %}
-                <p>{{ user_profile.get_activity_status }}</p>
-                {% endif %}
-                
-                {% if user_profile.bio %}
-                <div>
-                    <p>{{ user_profile.bio|linebreaksbr }}</p>
-                </div>
-                {% endif %}
             </div>
+            <h1 class="profile-title">{{ user.username }}</h1>
+            <p class="profile-subtitle">Miembro desde {{ user.date_joined|date:"F Y" }}</p>
 
             <div class="stats-container">
-                <h3 class="stats-heading">Estadísticas</h3>
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-car-side"></i></div>
                         <div class="stat-number">{{ total_rides }}</div>
-                        <div class="stat-label">Viajes Totales</div>
+                        <div class="stat-label">Total</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-road"></i></div>
                         <div class="stat-number">{{ active_rides_as_driver.count }}</div>
-                        <div class="stat-label">Como Conductor</div>
+                        <div class="stat-label">Conductor</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-user"></i></div>
                         <div class="stat-number">{{ rides_as_passenger.count }}</div>
-                        <div class="stat-label">Como Pasajero</div>
+                        <div class="stat-label">Pasajero</div>
                     </div>
                 </div>
             </div>
-            
-            {% if user_profile.has_vehicle %}
-            <div>
-                <h3>Mi Vehículo</h3>
-                <div>
-                    <p><strong>Modelo:</strong> {{ user_profile.vehicle_model }} ({{ user_profile.vehicle_year }})</p>
-                    <p><strong>Color:</strong> {{ user_profile.vehicle_color }}</p>
-                    {% if user_profile.vehicle_features %}
-                    <p><strong>Características:</strong> {{ user_profile.vehicle_features }}</p>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
-            
+
             <div class="profile-actions">
-                {% if is_own_profile %}
                 <a href="{% url 'rides:create_ride' %}" class="button button-primary">
                     <i class="fas fa-plus"></i> Crear Viaje
                 </a>
-               
                 <a href="{% url 'accounts:settings' %}" class="button button-secondary">
                     <i class="fas fa-cog"></i> Configuración
                 </a>
-                
-                
                 <a href="{% url 'reviews:list' %}" class="button button-secondary">
-                    <i class="fas fa-star"></i> Mis Valoraciones
+                    <i class="fas fa-star"></i> Valoraciones
                 </a>
-                {% else %}
-                <a href="{% url 'chat:create_direct_chat' user.id %}" class="button button-primary">
-                    <i class="fas fa-envelope"></i> Enviar Mensaje
-                </a>
-                {% endif %}
             </div>
         </div>
         

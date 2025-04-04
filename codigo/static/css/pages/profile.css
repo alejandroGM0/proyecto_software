@@ -42,17 +42,19 @@ body {
 
 .profile-sidebar {
     background-color: var(--card-background);
-    padding: 1rem; 
+    padding: 1.5rem 1rem;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-    z-index: 2;
-    border-right: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
-    max-height: 100vh;
+    align-items: center;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 280px;
+    margin: 1rem auto;
+    height: fit-content; 
+}
+
+.profile-sidebar:last-child {
+    margin-bottom: 0; 
 }
 
 .profile-sidebar::-webkit-scrollbar {
@@ -74,51 +76,47 @@ body {
 }
 
 .profile-avatar-container {
-    text-align: center;
-    padding: 1rem 0; 
+    margin-bottom: 1rem;
 }
 
 .profile-avatar {
-    width: 75px; 
-    height: 75px; 
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background: linear-gradient(145deg, var(--primary-color), #5ac8fa);
-    margin: 0 auto 0.75rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.75rem;
+    font-size: 2rem;
     color: white;
     box-shadow: 0 4px 12px rgba(0, 120, 255, 0.2);
     border: 3px solid white;
-    position: relative;
-    overflow: hidden; 
+    overflow: hidden;
 }
 
 .profile-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
 }
 
 .profile-title {
-    font-size: 1.2rem; 
+    font-size: 1.5rem;
     font-weight: 600;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
 }
 
 .profile-subtitle {
-    font-size: 0.85rem; 
+    font-size: 0.9rem;
     color: var(--text-secondary);
-    margin-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
 }
 
 .stats-container {
-    margin-top: 0.75rem; 
-    margin-bottom: 0.75rem; 
+    width: 100%;
+    margin-bottom: 1.5rem;
 }
 
 .stats-heading {
@@ -131,21 +129,16 @@ body {
 
 .stats-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem; 
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
 }
 
 .stat-card {
-    background: var(--card-background);
-    border-radius: 8px; 
-    padding: 0.75rem; 
+    background: var(--background-color);
+    border-radius: 8px;
+    padding: 0.75rem 0.5rem;
     text-align: center;
     box-shadow: 0 1px 3px var(--shadow);
-    transition: var(--transition);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-left: 2px solid var(--primary-color);
 }
 
 .stat-card:hover {
@@ -165,38 +158,37 @@ body {
 }
 
 .stat-number {
-    font-size: 1.2rem; 
+    font-size: 1.2rem;
     font-weight: 600;
-    color: var (--text-secondary); 
-    margin-bottom: 0.15rem;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
 }
 
 .stat-label {
-    font-size: 0.8rem; 
+    font-size: 0.8rem;
     color: var(--text-secondary);
 }
 
 .profile-actions {
-    margin-top: auto; 
-    padding-top: 0.75rem; 
     display: flex;
     flex-direction: column;
-    gap: 0.35rem; 
+    gap: 0.75rem;
+    width: 100%;
+    margin-top: 1rem; /* Espacio entre estadísticas y botones */
+    margin-bottom: 0; /* Elimina el margen inferior */
 }
 
 .profile-actions .button {
-    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.6rem 0.75rem; 
+    padding: 0.75rem;
     border-radius: 8px;
     font-weight: 500;
-    font-size: 0.85rem; 
-    cursor: pointer;
-    transition: var (--transition);
+    font-size: 0.9rem;
     text-decoration: none;
+    transition: var(--transition);
 }
 
 .profile-actions .button span {
@@ -215,9 +207,7 @@ body {
 }
 
 .button-primary:hover {
-    background-color: #0071e3;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+    background-color: #005bb5;
 }
 
 .button-primary:active {
@@ -225,14 +215,13 @@ body {
 }
 
 .button-secondary {
-    background-color: rgba(0, 122, 255, 0.1);
+    background-color: var(--background-color);
     color: var(--primary-color);
-    border: 1px solid rgba(0, 122, 255, 0.3);
+    border: 1px solid var(--primary-color);
 }
 
 .button-secondary:hover {
-    background-color: rgba(0, 122, 255, 0.15);
-    transform: translateY(-1px);
+    background-color: rgba(0, 122, 255, 0.1);
 }
 
 .profile-content {
@@ -642,7 +631,7 @@ body {
     }
 }
 
-/* Añadir estos estilos al final del archivo */
+
 .pagination-container {
     display: flex;
     justify-content: center;
