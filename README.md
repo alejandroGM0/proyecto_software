@@ -39,13 +39,9 @@ CharlaCar es una plataforma que permite viajar de manera barata. Permite conecta
 
 ## Desarrollo
 
-Los siguientes diagramas muestran la planificación del proyecto:
+El siguiente diagrama muestran la planificación del proyecto:
 
-![Diagrama gantt - Fase 1](documentacion/diagrama_gantt_1.png)
-![Diagrama gantt - Fase 2](documentacion/diagrama_gantt_2.png)
-![Diagrama gantt - Fase 3](documentacion/diagrama_gantt_3.png)
-![Diagrama gantt - Fase 4](documentacion/diagrama_gantt_4.png)
-
+![Diagrama gantt - Fase 1](documentacion/diagrama_gantt.png)
 
 ## Instalación
 
