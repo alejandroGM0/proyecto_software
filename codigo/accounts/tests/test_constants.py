@@ -1,3 +1,6 @@
+# ==========================================
+# Autor: Alejandro Gasca Mediel
+# ==========================================
 """
 Fichero de constantes compartidas para los tests de la aplicación accounts.
 """

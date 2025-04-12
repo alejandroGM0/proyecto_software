@@ -1,3 +1,6 @@
+# ==========================================
+# Autor: Alejandro Gasca Mediel
+# ==========================================
 # Descripción: Constantes utilizadas en la aplicación de cuentas de usuario.
 # Tipos de configuraciones
 ACCOUNT_SETTINGS = 'account'

@@ -1,3 +1,6 @@
+# ==========================================
+# Autor: Alejandro Gasca Mediel
+# ==========================================
 """
 Constantes utilizadas en la aplicación de viajes (rides).
 """
@@ -32,6 +35,11 @@ IS_PASSENGER_KEY = 'is_passenger'
 AVAILABLE_SEATS_KEY = 'available_seats'
 EDIT_MODE_KEY = 'edit_mode'
 PAGE_KEY = 'page'
+
+# Estado de viajes
+RIDE_STATUS_ACTIVE = 'ACTIVE'
+RIDE_STATUS_COMPLETED = 'COMPLETED'
+RIDE_STATUS_CANCELLED = 'CANCELLED'
 
 # Mensajes
 RIDE_CREATED_SUCCESS = '¡Viaje creado con éxito!'

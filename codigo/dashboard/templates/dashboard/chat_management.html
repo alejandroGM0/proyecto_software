@@ -1,0 +1,473 @@
+<!-- ========================================== -->
+<!-- Autor: Alejandro Gasca Mediel -->
+<!-- ========================================== -->
+ 
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+
+{% block dashboard_title %}Gestión de Chats{% endblock %}
+
+{% block dashboard_heading %}Gestión de Chats{% endblock %}
+
+{% block dashboard_content %}
+<div class="ride-management-container">
+    <!-- Filtros de búsqueda -->
+    <section class="filters-section">
+        <div class="filters-header">
+            <h2 class="filters-title">Filtros</h2>
+        </div>
+        <form class="filters-form" method="get">
+            <div class="form-group">
+                <label class="form-label" for="search">Búsqueda</label>
+                <input type="text" id="search" name="search" class="form-control" placeholder="Nombre de usuario..." value="{{ filters.search }}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="chat_type">Tipo de chat</label>
+                <select id="chat_type" name="chat_type" class="form-control">
+                    <option value="all" {% if filters.chat_type == 'all' %}selected{% endif %}>Todos</option>
+                    <option value="ride" {% if filters.chat_type == 'ride' %}selected{% endif %}>Viajes</option>
+                    <option value="direct" {% if filters.chat_type == 'direct' %}selected{% endif %}>Directos</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="from_date">Fecha desde</label>
+                <input type="date" id="from_date" name="from_date" class="form-control" value="{{ filters.from_date }}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="to_date">Fecha hasta</label>
+                <input type="date" id="to_date" name="to_date" class="form-control" value="{{ filters.to_date }}">
+            </div>
+            
+            <div class="form-actions">
+                <button type="reset" class="btn btn-reset">Limpiar filtros</button>
+                <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+            </div>
+        </form>
+    </section>
+    
+    <!-- Tabla de chats -->
+    <section class="rides-section">
+        <div class="rides-header">
+            <h2 class="rides-title">Chats</h2>
+            <span class="rides-count">{{ chats.paginator.count }} chat{{ chats.paginator.count|pluralize }}</span>
+        </div>
+        
+        {% if chats %}
+        <div class="table-responsive">
+            <table class="rides-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Participantes</th>
+                        <th>Tipo</th>
+                        <th>Mensajes</th>
+                        <th>Fecha de creación</th>
+                        <th>Último mensaje</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for chat_data in chats %}
+                    <tr>
+                        <td>#{{ chat_data.chat.id }}</td>
+                        <td>
+                            {% for participant in chat_data.chat.participants.all|slice:":3" %}
+                            {{ participant.username }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                            {% if chat_data.chat.participants.count > 3 %}...{% endif %}
+                        </td>
+                        <td>
+                            {% if chat_data.is_ride_chat %}
+                            <span class="status-in-progress">Chat de viaje</span>
+                            {% else %}
+                            <span class="status-completed">Chat directo</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ chat_data.messages_count }}</td>
+                        <td>{{ chat_data.chat.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            {% if chat_data.last_message %}
+                                {{ chat_data.last_message.created_at|date:"d/m/Y H:i" }}
+                            {% else %}
+                                Sin mensajes
+                            {% endif %}
+                        </td>
+                        <td class="action-cell">
+                            <a href="#" class="action-btn action-btn-view chat-view-btn" title="Ver chat" data-id="{{ chat_data.chat.id }}" onclick="showChatDetail({{ chat_data.chat.id }}, event)">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button type="button" class="action-btn action-btn-delete" title="Eliminar chat" onclick="showDeleteConfirmation({{ chat_data.chat.id }})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginación -->
+        {% if chats.paginator.num_pages > 1 %}
+        <ul class="pagination">
+            {% if chats.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if filters.search %}&search={{ filters.search }}{% endif %}{% if filters.chat_type %}&chat_type={{ filters.chat_type }}{% endif %}{% if filters.from_date %}&from_date={{ filters.from_date }}{% endif %}{% if filters.to_date %}&to_date={{ filters.to_date }}{% endif %}">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ chats.previous_page_number }}{% if filters.search %}&search={{ filters.search }}{% endif %}{% if filters.chat_type %}&chat_type={{ filters.chat_type }}{% endif %}{% if filters.from_date %}&from_date={{ filters.from_date }}{% endif %}{% if filters.to_date %}&to_date={{ filters.to_date }}{% endif %}">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-angle-left"></i></span>
+            </li>
+            {% endif %}
+            
+            {% for num in chats.paginator.page_range %}
+                {% if chats.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > chats.number|add:'-3' and num < chats.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if filters.search %}&search={{ filters.search }}{% endif %}{% if filters.chat_type %}&chat_type={{ filters.chat_type }}{% endif %}{% if filters.from_date %}&from_date={{ filters.from_date }}{% endif %}{% if filters.to_date %}&to_date={{ filters.to_date }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if chats.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ chats.next_page_number }}{% if filters.search %}&search={{ filters.search }}{% endif %}{% if filters.chat_type %}&chat_type={{ filters.chat_type }}{% endif %}{% if filters.from_date %}&from_date={{ filters.from_date }}{% endif %}{% if filters.to_date %}&to_date={{ filters.to_date }}{% endif %}">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ chats.paginator.num_pages }}{% if filters.search %}&search={{ filters.search }}{% endif %}{% if filters.chat_type %}&chat_type={{ filters.chat_type }}{% endif %}{% if filters.from_date %}&from_date={{ filters.from_date }}{% endif %}{% if filters.to_date %}&to_date={{ filters.to_date }}{% endif %}">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-angle-right"></i></span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
+            </li>
+            {% endif %}
+        </ul>
+        {% endif %}
+        
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h3 class="empty-state-title">No se encontraron chats</h3>
+            <p class="empty-state-text">Intenta con otros filtros o espera a que se generen nuevos chats.</p>
+            <a href="{% url 'dashboard:chat_management' %}" class="btn btn-primary">Ver todos los chats</a>
+        </div>
+        {% endif %}
+    </section>
+    
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h4 class="modal-title">Confirmar eliminación</h4>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este chat? Esta acción no se puede deshacer y se eliminarán todos los mensajes.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-reset" onclick="hideDeleteConfirmation()">Cancelar</button>
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="delete_chat" value="1">
+                    <input type="hidden" name="chat_id" id="deleteChatId">
+                    <button type="submit" class="btn btn-primary">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="chatDetailModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h4 class="modal-title">Mensajes del chat</h4>
+                <button type="button" class="modal-close" onclick="hideChatDetail()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="chatMessages" class="chat-messages-container">
+                    <div class="loading-messages">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Cargando mensajes...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-reset" onclick="hideChatDetail()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block dashboard_extra_scripts %}
+<script>
+    Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif";
+    Chart.defaults.color = '#86868b';
+    
+    const dailyMessagesData = JSON.parse('{{ chart_data.daily_messages|escapejs }}');
+    const chatDistributionData = JSON.parse('{{ chart_data.chat_distribution|escapejs }}');
+    
+    const hasDailyData = dailyMessagesData && dailyMessagesData.length > 0;
+    
+    toggleNoDataMessage('dailyMessagesChart', !hasDailyData);
+    
+    if (hasDailyData) {
+        const dailyMessagesChart = new Chart(
+            document.getElementById('dailyMessagesChart'),
+            {
+                type: 'line',
+                data: {
+                    labels: dailyMessagesData.map(item => item.date),
+                    datasets: [{
+                        label: 'Mensajes por día',
+                        data: dailyMessagesData.map(item => item.count),
+                        backgroundColor: 'rgba(52, 199, 89, 0.1)',
+                        borderColor: '#34c759',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#34c759',
+                        pointBorderColor: '#fff',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#1D1D1F',
+                            bodyColor: '#1D1D1F',
+                            borderColor: 'rgba(0, 0, 0, 0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.raw} mensajes`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            }
+        );
+    }
+    
+    const hasDistributionData = chatDistributionData && chatDistributionData.length > 0;
+    
+    toggleNoDataMessage('chatDistributionChart', !hasDistributionData);
+    
+    if (hasDistributionData) {
+        const chatDistributionChart = new Chart(
+            document.getElementById('chatDistributionChart'),
+            {
+                type: 'doughnut',
+                data: {
+                    labels: chatDistributionData.map(item => item.type),
+                    datasets: [{
+                        data: chatDistributionData.map(item => item.count),
+                        backgroundColor: ['#007aff', '#ff9500'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    cutout: '50%'
+                }
+            }
+        );
+    }
+    
+    function toggleNoDataMessage(chartId, showNoData) {
+        const noDataContainer = document.getElementById(chartId + 'NoData');
+        if (noDataContainer) {
+            if (showNoData) {
+                noDataContainer.classList.add('visible');
+            } else {
+                noDataContainer.classList.remove('visible');
+            }
+        }
+    }
+    
+    function showDeleteConfirmation(chatId) {
+        document.getElementById('deleteChatId').value = chatId;
+        document.getElementById('deleteModal').classList.add('active');
+    }
+    
+    function hideDeleteConfirmation() {
+        document.getElementById('deleteModal').classList.remove('active');
+    }
+    
+    function showChatDetail(chatId, event) {
+        event.preventDefault();
+        
+        document.getElementById('chatDetailModal').classList.add('active');
+        document.getElementById('chatMessages').innerHTML = '<div class="loading-messages"><i class="fas fa-spinner fa-spin"></i><span>Cargando mensajes...</span></div>';
+        
+        fetch(`/dashboard/api/chat/${chatId}/messages/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('No se pudo cargar el chat');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const messages = data.messages;
+                const participants = data.participants;
+                
+                if (messages.length === 0) {
+                    document.getElementById('chatMessages').innerHTML = `
+                        <div class="empty-chat-state">
+                            <i class="fas fa-comments"></i>
+                            <p>No hay mensajes en este chat.</p>
+                            <p>Participantes: ${participants.join(', ')}</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let messagesHTML = '<div class="chat-messages-viewer">';
+                let currentDate = '';
+                
+                messages.forEach((message, index) => {
+                    if (message.date !== currentDate) {
+                        currentDate = message.date;
+                        messagesHTML += `<div class="date-separator"><span>${message.date}</span></div>`;
+                    }
+                    
+                    const isSameUserAsPrevious = index > 0 && 
+                                               messages[index - 1].sender === message.sender && 
+                                               messages[index - 1].date === message.date;
+                    
+                    const bubbleGroupClass = isSameUserAsPrevious ? 'same-user-message' : '';
+
+                    const messageClass = "received";
+                    
+                    messagesHTML += `
+                        <div class="chat-message ${messageClass} ${bubbleGroupClass}">
+                            <div class="message-content">
+                                <div class="message-sender">${message.sender}</div>
+                                <div class="message-text">${message.content}</div>
+                                <div class="message-timestamp">${message.timestamp}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                messagesHTML += '</div>';
+                
+                document.getElementById('chatMessages').innerHTML = messagesHTML;
+                
+                const chatContainer = document.getElementById('chatMessages');
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('chatMessages').innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error al cargar los mensajes: ${error.message}</p>
+                    </div>
+                `;
+            });
+    }
+    
+    function hideChatDetail() {
+        document.getElementById('chatDetailModal').classList.remove('active');
+    }
+    
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideDeleteConfirmation();
+        }
+    });
+    
+    document.getElementById('chatDetailModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideChatDetail();
+        }
+    });
+    
+    document.querySelector('.btn-reset').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.value = '';
+        });
+        document.getElementById('chat_type').value = 'all';
+    });
+    
+    const formControls = document.querySelectorAll('.form-control');
+    formControls.forEach(control => {
+        control.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        control.addEventListener('blur', function() {
+            this.parentElement.classList.remove('focused');
+        });
+        
+        if (control.value) {
+            control.parentElement.classList.add('has-value');
+        }
+        
+        control.addEventListener('input', function() {
+            if (this.value) {
+                this.parentElement.classList.add('has-value');
+            } else {
+                this.parentElement.classList.remove('has-value');
+            }
+        });
+    });
+</script>
+{% endblock %}

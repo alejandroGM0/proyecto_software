@@ -1,3 +1,6 @@
+# ==========================================
+# Autor: Alejandro Gasca Mediel
+# ==========================================
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -13,6 +16,7 @@ class Ride(models.Model):
     total_seats = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=7, decimal_places=2)
     chat = models.OneToOneField(Chat, on_delete=models.SET_NULL, null=True, related_name='ride')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def get_formatted_price(self):
         return f"{settings.CURRENCY_SYMBOL}{self.price}"

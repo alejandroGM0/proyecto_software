@@ -1,3 +1,6 @@
+# ==========================================
+# Autor: Alejandro Gasca Mediel
+# ==========================================
 """
 Funciones de utilidad interna para la aplicación de cuentas (accounts).
 """

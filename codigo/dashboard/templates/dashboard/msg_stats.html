@@ -1,0 +1,154 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+
+{% block dashboard_title %}Gestión de Mensajes{% endblock %}
+
+{% block dashboard_heading %}Gestión de Mensajes{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-overview">
+    <p>Supervisa la actividad de mensajería entre usuarios y el rendimiento del sistema de chat.</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-header">
+            <h3 class="stat-title">Mensajes Totales</h3>
+            <span class="stat-icon"><i class="fas fa-comments"></i></span>
+        </div>
+        <p class="stat-value">{{ msg_data.total }}</p>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <h3 class="stat-title">Media Diaria</h3>
+            <span class="stat-icon"><i class="fas fa-chart-line"></i></span>
+        </div>
+        <p class="stat-value">{{ msg_data.avg_per_day }}</p>
+    </div>
+</div>
+
+<div class="chart-container">
+    <div class="chart-header">
+        <h3 class="chart-title">Actividad de mensajes</h3>
+    </div>
+    <div class="chart-body">
+        <canvas id="messagesChart"></canvas>
+        <div id="messagesChartNoData" class="no-data-container">
+            <div class="no-data-message">
+                <i class="fas fa-chart-bar"></i>
+                <span>No hay datos disponibles</span>
+                <p>No hay mensajes registrados en el período seleccionado.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="action-container">
+    <a href="{% url 'dashboard:chat_management' %}" class="action-button">
+        <i class="fas fa-comments"></i>
+        Ver Chats
+        <i class="fas fa-chevron-right"></i>
+    </a>
+</div>
+{% endblock %}
+
+{% block dashboard_extra_scripts %}
+<script>
+    Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif";
+    Chart.defaults.color = '#86868b';
+    
+    const msgData = JSON.parse('{{ msg_data_json|escapejs }}');
+    
+    const currentPeriod = msgData.period;
+    
+    function toggleNoDataMessage(chartId, showNoData) {
+        const noDataContainer = document.getElementById(chartId + 'NoData');
+        if (noDataContainer) {
+            if (showNoData) {
+                noDataContainer.classList.add('visible');
+            } else {
+                noDataContainer.classList.remove('visible');
+            }
+        }
+    }
+    
+    function getChartTitle() {
+        switch (currentPeriod) {
+            case 'today':
+                return 'Mensajes por hora';
+            case 'week':
+                return 'Mensajes por día';
+            case 'month':
+                return 'Mensajes por día';
+            case 'year':
+                return 'Mensajes por mes';
+            case 'all':
+                return 'Mensajes por mes';
+            default:
+                return 'Mensajes';
+        }
+    }
+    
+    const hasData = msgData.labels && msgData.data && 
+                 msgData.data.some(count => count > 0);
+    
+    toggleNoDataMessage('messagesChart', !hasData);
+    
+    const messagesChart = new Chart(
+        document.getElementById('messagesChart'),
+        {
+            type: 'line',
+            data: {
+                labels: msgData.labels || [],
+                datasets: [{
+                    label: getChartTitle(),
+                    data: msgData.data || [],
+                    backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                    borderColor: '#007aff',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#007aff',
+                    pointBorderColor: '#fff',
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#1D1D1F',
+                        bodyColor: '#1D1D1F',
+                        borderColor: 'rgba(0, 0, 0, 0.1)',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxPadding: 6,
+                        usePointStyle: true,
+                        callbacks: {
+                            label: function(context) {
+                                return ' Mensajes: ' + context.raw;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        }
+    );
+</script>
+{% endblock %}

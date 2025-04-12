@@ -1,0 +1,350 @@
+<!-- ========================================== -->
+<!-- Autor: Alejandro Gasca Mediel -->
+<!-- ========================================== -->
+ 
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+
+{% block dashboard_title %}Estadísticas de Viajes{% endblock %}
+
+{% block dashboard_heading %}Estadísticas de Viajes{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/pages/dashboard_shared.css' %}">
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-overview">
+    <p>Supervisa la actividad de viajes en la plataforma y analiza las tendencias.</p>
+</div>
+
+<div class="stats-grid" style="margin-bottom: 2rem;">
+    <div class="stat-card">
+        <div class="stat-header">
+            <h3 class="stat-title">Viajes Publicados {{ trip_data.period_text }}</h3>
+            <span class="stat-icon"><i class="fas fa-car-side"></i></span>
+        </div>
+        <p class="stat-value">{{ trip_data.published_in_period }}</p>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <h3 class="stat-title">Viajes Activos</h3>
+            <span class="stat-icon"><i class="fas fa-calendar"></i></span>
+        </div>
+        <p class="stat-value">{{ trip_data.active_rides }}</p>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <h3 class="stat-title">Viajes Completados</h3>
+            <span class="stat-icon"><i class="fas fa-check-circle"></i></span>
+        </div>
+        <p class="stat-value">{{ trip_data.completed_rides }}</p>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <h3 class="stat-title">Precio Promedio</h3>
+            <span class="stat-icon"><i class="fas fa-euro-sign"></i></span>
+        </div>
+        <p class="stat-value">{{ trip_data.avg_price|floatformat:2 }}€</p>
+    </div>
+</div>
+
+<div class="chart-container main-chart-container">
+    <div class="chart-header">
+        <h3 class="chart-title">Actividad de Viajes</h3>
+    </div>
+    <div class="chart-body">
+        <canvas id="mainTripChart"></canvas>
+        <div class="no-data-container" id="mainTripChartNoData">
+            <div class="no-data-message">
+                <i class="fas fa-car-side"></i>
+                <span>No hay datos disponibles</span>
+                <p>Aún no se han registrado viajes en este periodo</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="chart-row">
+    <div class="chart-container half-width">
+        <div class="chart-header">
+            <h3 class="chart-title">Orígenes Populares</h3>
+        </div>
+        <div class="chart-body">
+            <canvas id="originChart"></canvas>
+            <div class="no-data-container" id="originChartNoData">
+                <div class="no-data-message">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>No hay datos disponibles</span>
+                    <p>No se encontraron orígenes de viajes para mostrar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="chart-container half-width">
+        <div class="chart-header">
+            <h3 class="chart-title">Destinos Populares</h3>
+        </div>
+        <div class="chart-body">
+            <canvas id="destinationChart"></canvas>
+            <div class="no-data-container" id="destinationChartNoData">
+                <div class="no-data-message">
+                    <i class="fas fa-map-pin"></i>
+                    <span>No hay datos disponibles</span>
+                    <p>No se encontraron destinos de viajes para mostrar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="action-container">
+    <a href="{% url 'dashboard:ride_management' %}" class="action-button">
+        <i class="fas fa-tasks"></i>
+        Gestionar Viajes
+        <i class="fas fa-chevron-right"></i>
+    </a>
+</div>
+
+{% endblock %}
+
+{% block dashboard_extra_scripts %}
+<script>
+    Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif";
+    Chart.defaults.color = '#86868b';
+    
+    const chartColors = [
+        '#007aff', '#34c759', '#5ac8fa', '#ff9500', '#ff3b30',
+        '#af52de', '#a2845e', '#ff2d55', '#28cd41', '#64d2ff'
+    ];
+    
+    // Usar datos serializados JSON para evitar problemas de formato
+    const tripData = JSON.parse('{{ trip_data_json|escapejs }}');
+    
+    // Obtener el tipo de periodo (hourly, daily, monthly, yearly)
+    const periodType = tripData.period || 'daily';
+    
+    // Verificar si hay datos de viajes
+    const hasTripData = tripData.datasets && tripData.datasets[0] && 
+                      tripData.datasets[0].data && 
+                      tripData.datasets[0].data.some(count => count > 0);
+    
+    toggleNoDataMessage('mainTripChart', !hasTripData);
+    
+    // Verificar si hay orígenes populares
+    const hasOrigins = tripData.top_origins && tripData.top_origins.length > 0;
+    toggleNoDataMessage('originChart', !hasOrigins);
+    
+    // Verificar si hay destinos populares
+    const hasDestinations = tripData.top_destinations && tripData.top_destinations.length > 0;
+    toggleNoDataMessage('destinationChart', !hasDestinations);
+    
+    // Obtener título del gráfico según el tipo de periodo
+    function getChartTitle() {
+        switch (periodType) {
+            case 'hourly':
+                return 'Viajes por hora';
+            case 'daily':
+                return 'Viajes por día';
+            case 'monthly':
+                return 'Viajes por mes';
+            case 'yearly':
+                return 'Viajes por año';
+            default:
+                return 'Viajes';
+        }
+    }
+    
+    // Crear gráficos con tamaño optimizado
+    window.addEventListener('DOMContentLoaded', function() {
+        // Gráfico principal de viajes
+        const mainTripCtx = document.getElementById('mainTripChart').getContext('2d');
+        const mainTripChart = new Chart(
+            mainTripCtx,
+            {
+                type: 'line',
+                data: {
+                    labels: tripData.labels || [],
+                    datasets: [{
+                        label: getChartTitle(),
+                        data: tripData.datasets && tripData.datasets[0] ? tripData.datasets[0].data : [],
+                        backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                        borderColor: '#007aff',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#007aff',
+                        pointBorderColor: '#fff',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#1D1D1F',
+                            bodyColor: '#1D1D1F',
+                            borderColor: 'rgba(0, 0, 0, 0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6,
+                            usePointStyle: true,
+                            titleFont: {
+                                weight: '600',
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return ' Viajes: ' + context.raw;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: periodType === 'monthly' ? 45 : 0,
+                                minRotation: periodType === 'monthly' ? 45 : 0,
+                                font: {
+                                    size: periodType === 'monthly' ? 10 : 12
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        );
+        
+        // Gráfico de orígenes populares
+        if (hasOrigins) {
+            const originLabels = [];
+            const originCounts = [];
+    
+            tripData.top_origins.forEach(item => {
+                originLabels.push(item[0]);
+                originCounts.push(item[1]);
+            });
+            
+            const originCtx = document.getElementById('originChart').getContext('2d');
+            const originChart = new Chart(
+                originCtx,
+                {
+                    type: 'bar',
+                    data: {
+                        labels: originLabels,
+                        datasets: [{
+                            label: 'Viajes',
+                            data: originCounts,
+                            backgroundColor: chartColors[0],
+                            borderWidth: 0,
+                            borderRadius: 4,
+                            maxBarThickness: 50
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                }
+            );
+        }
+        
+        // Gráfico de destinos populares
+        if (hasDestinations) {
+            const destLabels = [];
+            const destCounts = [];
+    
+            tripData.top_destinations.forEach(item => {
+                destLabels.push(item[0]);
+                destCounts.push(item[1]);
+            });
+            
+            const destinationCtx = document.getElementById('destinationChart').getContext('2d');
+            const destinationChart = new Chart(
+                destinationCtx,
+                {
+                    type: 'bar',
+                    data: {
+                        labels: destLabels,
+                        datasets: [{
+                            label: 'Viajes',
+                            data: destCounts,
+                            backgroundColor: chartColors[1],
+                            borderWidth: 0,
+                            borderRadius: 4,
+                            maxBarThickness: 50
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                }
+            );
+        }
+    });
+    
+    // Manejar el redimensionamiento de la ventana
+    window.addEventListener('resize', function() {
+        Chart.instances.forEach((chart) => {
+            chart.resize();
+        });
+    });
+</script>
+{% endblock %}

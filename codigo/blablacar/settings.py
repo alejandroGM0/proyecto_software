@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'reviews',
     'channels',
     'reports',
+    'dashboard.apps.DashboardConfig',  # New dashboard app
 ]
 
 MIDDLEWARE = [

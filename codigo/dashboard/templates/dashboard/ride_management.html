@@ -1,0 +1,392 @@
+<!-- ========================================== -->
+<!-- Autor: Alejandro Gasca Mediel -->
+<!-- ========================================== -->
+ 
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+
+{% block dashboard_title %}Gestión de Viajes{% endblock %}
+
+{% block dashboard_heading %}Gestión de Viajes{% endblock %}
+
+{% block dashboard_content %}
+<div class="ride-management-container">
+    <section class="filters-section">
+        <div class="filters-header">
+            <h2 class="filters-title">Filtros</h2>
+        </div>
+        <form class="filters-form" method="get">
+            <div class="form-group">
+                <label class="form-label" for="search">Búsqueda</label>
+                <input type="text" id="search" name="search" class="form-control" placeholder="Nombre, conductor, ID..." value="{{ filters.search }}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="status">Estado</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="all" {% if filters.status == 'all' %}selected{% endif %}>Todos</option>
+                    <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Activos</option>
+                    <option value="completed" {% if filters.status == 'completed' %}selected{% endif %}>Completados</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="origin">Origen</label>
+                <input type="text" id="origin" name="origin" class="form-control" placeholder="Ciudad de origen" value="{{ filters.origin }}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="destination">Destino</label>
+                <input type="text" id="destination" name="destination" class="form-control" placeholder="Ciudad de destino" value="{{ filters.destination }}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="date_from">Fecha desde</label>
+                <input type="date" id="date_from" name="date_from" class="form-control" value="{{ filters.date_from }}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="date_to">Fecha hasta</label>
+                <input type="date" id="date_to" name="date_to" class="form-control" value="{{ filters.date_to }}">
+            </div>
+            
+            <div class="form-actions">
+                <button type="reset" class="btn btn-reset">Limpiar filtros</button>
+                <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+            </div>
+        </form>
+    </section>
+    
+    <section class="rides-section">
+        <div class="rides-header">
+            <h2 class="rides-title">Viajes</h2>
+            <span class="rides-count">{{ rides.paginator.count }} viaje{{ rides.paginator.count|pluralize }}</span>
+        </div>
+        
+        {% if rides %}
+        <div class="table-responsive">
+            <table class="rides-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Origen</th>
+                        <th>Destino</th>
+                        <th>Conductor</th>
+                        <th>Fecha</th>
+                        <th>Asientos (Disp/Total)</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ride in rides %}
+                    <tr>
+                        <td>#{{ ride.id }}</td>
+                        <td>{{ ride.origin }}</td>
+                        <td>{{ ride.destination }}</td>
+                        <td>{{ ride.driver.username }}</td>
+                        <td>{{ ride.departure_time|date:"d/m/Y H:i"}}</td>
+                        <td>
+                            <div class="seats-container">
+                                {% if ride.seats_available == 0 %}
+                                <span class="seats-full">{{ ride.seats_available }}</span>
+                                {% elif ride.seats_available <= 2 %}
+                                <span class="seats-low">{{ ride.seats_available }}</span>
+                                {% else %}
+                                <span class="seats-available">{{ ride.seats_available }}</span>
+                                {% endif %}
+                                <span class="seats-divider">/</span>
+                                <span class="seats-total">{{ ride.total_seats }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if ride.is_active %}
+                            <span class="status-active">Activo</span>
+                            {% else %}
+                            <span class="status-completed">Completado</span>
+                            {% endif %}
+                        </td>
+                        <td class="action-cell">
+                            <a href="{% url 'rides:ride_detail' ride.id %}" class="action-btn action-btn-view" title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button type="button" class="action-btn action-btn-delete" title="Eliminar viaje" onclick="showDeleteConfirmation({{ ride.id }})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if rides.paginator.num_pages > 1 %}
+        <ul class="pagination">
+            {% if rides.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if filters.search %}&search={{ filters.search }}{% endif %}{% if filters.status %}&status={{ filters.status }}{% endif %}{% if filters.origin %}&origin={{ filters.origin }}{% endif %}{% if filters.destination %}&destination={{ filters.destination }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ rides.previous_page_number }}{% if filters.search %}&search={{ filters.search }}{% endif %}{% if filters.status %}&status={{ filters.status }}{% endif %}{% if filters.origin %}&origin={{ filters.origin }}{% endif %}{% if filters.destination %}&destination={{ filters.destination }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-angle-left"></i></span>
+            </li>
+            {% endif %}
+            
+            {% for num in rides.paginator.page_range %}
+                {% if rides.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > rides.number|add:'-3' and num < rides.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if filters.search %}&search={{ filters.search }}{% endif %}{% if filters.status %}&status={{ filters.status }}{% endif %}{% if filters.origin %}&origin={{ filters.origin }}{% endif %}{% if filters.destination %}&destination={{ filters.destination }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if rides.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ rides.next_page_number }}{% if filters.search %}&search={{ filters.search }}{% endif %}{% if filters.status %}&status={{ filters.status }}{% endif %}{% if filters.origin %}&origin={{ filters.origin }}{% endif %}{% if filters.destination %}&destination={{ filters.destination }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ rides.paginator.num_pages }}{% if filters.search %}&search={{ filters.search }}{% endif %}{% if filters.status %}&status={{ filters.status }}{% endif %}{% if filters.origin %}&origin={{ filters.origin }}{% endif %}{% if filters.destination %}&destination={{ filters.destination }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-angle-right"></i></span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
+            </li>
+            {% endif %}
+        </ul>
+        {% endif %}
+        
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-car"></i>
+            </div>
+            <h3 class="empty-state-title">No se encontraron viajes</h3>
+            <p class="empty-state-text">Intenta con otros filtros o espera a que se publiquen nuevos viajes.</p>
+            <a href="{% url 'dashboard:ride_management' %}" class="btn btn-primary">Ver todos los viajes</a>
+        </div>
+        {% endif %}
+    </section>
+    
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h4 class="modal-title">Confirmar eliminación</h4>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este viaje? Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-reset" onclick="hideDeleteConfirmation()">Cancelar</button>
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="delete_ride" value="1">
+                    <input type="hidden" name="ride_id" id="deleteRideId">
+                    <button type="submit" class="btn btn-primary">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block dashboard_extra_scripts %}
+<script>
+    Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif";
+    Chart.defaults.color = '#86868b';
+    
+    const chartData = JSON.parse('{{ chart_data|escapejs }}');
+    
+    const topDestinations = JSON.parse(chartData.top_destinations || '[]');
+    const hasDestinationsData = topDestinations && topDestinations.length > 0;
+    
+    toggleNoDataMessage('destinationsChart', !hasDestinationsData);
+    
+    if (hasDestinationsData) {
+        const destinationsChart = new Chart(
+            document.getElementById('destinationsChart'),
+            {
+                type: 'bar',
+                data: {
+                    labels: topDestinations.map(item => item.destination),
+                    datasets: [{
+                        label: 'Número de viajes',
+                        data: topDestinations.map(item => item.count),
+                        backgroundColor: '#007aff',
+                        borderRadius: 6,
+                        barThickness: 24,
+                        maxBarThickness: 24
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#1D1D1F',
+                            bodyColor: '#1D1D1F',
+                            borderColor: 'rgba(0, 0, 0, 0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.raw} viajes`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            }
+        );
+    }
+    
+    const topOrigins = JSON.parse(chartData.top_origins || '[]');
+    const hasOriginsData = topOrigins && topOrigins.length > 0;
+    
+    toggleNoDataMessage('originsChart', !hasOriginsData);
+    
+    if (hasOriginsData) {
+        const originsChart = new Chart(
+            document.getElementById('originsChart'),
+            {
+                type: 'bar',
+                data: {
+                    labels: topOrigins.map(item => item.origin),
+                    datasets: [{
+                        label: 'Número de viajes',
+                        data: topOrigins.map(item => item.count),
+                        backgroundColor: '#5ac8fa',
+                        borderRadius: 6,
+                        barThickness: 24,
+                        maxBarThickness: 24
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#1D1D1F',
+                            bodyColor: '#1D1D1F',
+                            borderColor: 'rgba(0, 0, 0, 0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.raw} viajes`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            }
+        );
+    }
+    
+    function showDeleteConfirmation(rideId) {
+        document.getElementById('deleteRideId').value = rideId;
+        document.getElementById('deleteModal').classList.add('active');
+    }
+    
+    function hideDeleteConfirmation() {
+        document.getElementById('deleteModal').classList.remove('active');
+    }
+    
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideDeleteConfirmation();
+        }
+    });
+    
+    document.querySelector('.btn-reset').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.value = '';
+        });
+        document.getElementById('status').value = 'all';
+    });
+    
+    const formControls = document.querySelectorAll('.form-control');
+    formControls.forEach(control => {
+        control.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        control.addEventListener('blur', function() {
+            this.parentElement.classList.remove('focused');
+        });
+        
+        if (control.value) {
+            control.parentElement.classList.add('has-value');
+        }
+        
+        control.addEventListener('input', function() {
+            if (this.value) {
+                this.parentElement.classList.add('has-value');
+            } else {
+                this.parentElement.classList.remove('has-value');
+            }
+        });
+    });
+</script>
+{% endblock %}

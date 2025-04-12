@@ -1,0 +1,308 @@
+<!-- ========================================== -->
+<!-- Autor: Alejandro Gasca Mediel -->
+<!-- ========================================== -->
+ 
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+
+{% block dashboard_title %}Panel de Control{% endblock %}
+
+{% block dashboard_heading %}Panel de Control{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-overview">
+    <p>Bienvenido al panel de control de CharlaCar. Aquí podrás monitorizar y gestionar todas las áreas de la plataforma.</p>
+</div>
+
+<div class="quick-access-section">
+    <div class="quick-access-grid">
+        <a href="{% url 'dashboard:trip_stats' %}" class="quick-card">
+            <div class="quick-card-header">
+                <div class="quick-card-icon">
+                    <i class="fas fa-car-side"></i>
+                </div>
+                <div class="quick-card-actions">
+                    <div class="quick-action-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+            <h3 class="quick-card-title">Viajes</h3>
+            <p class="quick-card-subtitle">Gestiona la actividad de viajes</p>
+        </a>
+        
+        <a href="{% url 'dashboard:msg_stats' %}" class="quick-card">
+            <div class="quick-card-header">
+                <div class="quick-card-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div class="quick-card-actions">
+                    <div class="quick-action-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+            <h3 class="quick-card-title">Mensajes</h3>
+            <p class="quick-card-subtitle">Supervisa las conversaciones</p>
+        </a>
+        
+        <a href="{% url 'dashboard:report_stats' %}" class="quick-card">
+            <div class="quick-card-header">
+                <div class="quick-card-icon">
+                    <i class="fas fa-flag"></i>
+                </div>
+                <div class="quick-card-actions">
+                    <div class="quick-action-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+            <h3 class="quick-card-title">Reportes</h3>
+            <p class="quick-card-subtitle">Atiende incidencias reportadas</p>
+        </a>
+        
+        <a href="{% url 'dashboard:user_stats' %}" class="quick-card">
+            <div class="quick-card-header">
+                <div class="quick-card-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="quick-card-actions">
+                    <div class="quick-action-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+            <h3 class="quick-card-title">Usuarios</h3>
+            <p class="quick-card-subtitle">Administra los usuarios</p>
+        </a>
+    </div>
+</div>
+
+<hr class="section-divider">
+
+<div class="status-section">
+    <div class="status-grid">
+        <div class="status-card">
+            <h3 class="status-card-title">
+                <i class="fas fa-server"></i>
+                Estado del Sistema
+            </h3>
+            <div class="system-status-list">
+                <div class="system-status-item">
+                    <div class="status-name">
+                        <i class="fas fa-database"></i>
+                        Base de datos
+                    </div>
+                    <div class="status-value {{ system_status.database.status }}">
+                        <span class="status-indicator {{ system_status.database.status }}"></span>
+                        {{ system_status.database.message }}
+                    </div>
+                </div>
+                <div class="system-status-item">
+                    <div class="status-name">
+                        <i class="fas fa-network-wired"></i>
+                        Conexiones WebSocket
+                    </div>
+                    <div class="status-value {{ system_status.websocket.status }}">
+                        <span class="status-indicator {{ system_status.websocket.status }}"></span>
+                        {{ system_status.websocket.message }}
+                    </div>
+                </div>
+                <div class="system-status-item">
+                    <div class="status-name">
+                        <i class="fas fa-credit-card"></i>
+                        Sistema de Pagos
+                    </div>
+                    <div class="status-value {{ system_status.payments.status }}">
+                        <span class="status-indicator {{ system_status.payments.status }}"></span>
+                        {{ system_status.payments.message }}
+                    </div>
+                </div>
+                <div class="system-status-item">
+                    <div class="status-name">
+                        <i class="fas fa-chart-line"></i>
+                        Rendimiento del Servidor
+                    </div>
+                    <div class="status-value {{ system_status.performance.status }}">
+                        <span class="status-indicator {{ system_status.performance.status }}"></span>
+                        {{ system_status.performance.message }}
+                    </div>
+                </div>
+                <div class="system-status-item">
+                    <div class="status-name">
+                        <i class="fas fa-hdd"></i>
+                        Almacenamiento
+                    </div>
+                    <div class="status-value {{ system_status.storage.status }}">
+                        <span class="status-indicator {{ system_status.storage.status }}"></span>
+                        {{ system_status.storage.message }}
+                    </div>
+                </div>
+                <div class="system-status-item">
+                    <div class="status-name">
+                        <i class="fas fa-memory"></i>
+                        Memoria
+                    </div>
+                    <div class="status-value {{ system_status.memory.status }}">
+                        <span class="status-indicator {{ system_status.memory.status }}"></span>
+                        {{ system_status.memory.message }}
+                    </div>
+                </div>
+                <div class="system-status-item">
+                    <div class="status-name">
+                        <i class="fas fa-clock"></i>
+                        Tiempo de actividad
+                    </div>
+                    <div class="status-value {{ system_status.uptime.status }}">
+                        {{ system_status.uptime.message }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-card">
+            <h3 class="status-card-title">
+                <i class="fas fa-user-circle"></i>
+                Usuarios Activos
+            </h3>
+            <div class="online-users">
+                <div class="online-users-header">
+                    <h4 class="online-users-title">Actualmente conectados</h4>
+                    <span class="online-users-count">{{ active_users|length }}</span>
+                </div>
+                <div class="online-users-list">
+                    {% for user in active_users|slice:":5" %}
+                    <div class="online-user {% if user.is_staff %}admin{% endif %}">
+                        <div class="online-user-avatar">{{ user.username|first|upper }}</div>
+                        <span>{{ user.username }}</span>
+                    </div>
+                    {% empty %}
+                    <div class="online-user admin">
+                        <div class="online-user-avatar">A</div>
+                        <span>admin</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="activity-timeline">
+                <h4 class="online-users-title">Actividad reciente de usuarios</h4>
+                {% for activity in recent_activities|slice:":3" %}
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fas {{ activity.icon }}"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">{{ activity.title }}</div>
+                        <div class="timeline-description">{{ activity.description }}</div>
+                        <div class="timeline-meta">
+                            <i class="fas fa-clock"></i> {{ activity.time_ago }}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Nuevo registro de usuario</div>
+                        <div class="timeline-description">No hay actividad reciente de usuarios</div>
+                        <div class="timeline-meta">
+                            <i class="fas fa-clock"></i> -
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="status-section">
+    <div class="status-grid">
+        <div class="status-card">
+            <h3 class="status-card-title">
+                <i class="fas fa-car-side"></i>
+                Actividad de Viajes
+            </h3>
+            <div class="activity-timeline">
+                <h4 class="online-users-title">Viajes recientemente publicados</h4>
+                {% for ride in recently_published_rides|slice:":3" %}
+                <div class="timeline-item">
+                    <div class="timeline-icon ride-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">{{ ride.origin }} → {{ ride.destination }}</div>
+                        <div class="timeline-description">{{ ride.seats_available }} plazas disponibles</div>
+                        <div class="timeline-meta">
+                            <i class="fas fa-clock"></i> 
+                            {{ride.created_at|date:"j/m/Y, H:i" }}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="timeline-item">
+                    <div class="timeline-icon ride-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">No hay viajes recientes</div>
+                        <div class="timeline-description">No se han publicado viajes recientemente</div>
+                        <div class="timeline-meta">
+                            <i class="fas fa-clock"></i> -
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="status-card">
+            <h3 class="status-card-title">
+                <i class="fas fa-credit-card"></i>
+                Transacciones Recientes
+            </h3>
+            <div class="recent-items-list">
+                {% for payment in recent_payments|slice:":4" %}
+                <div class="recent-item">
+                    <div class="recent-item-main">
+                        <div class="recent-item-title">{{ payment.status_display }}</div>
+                        <div class="recent-item-subtitle">De: {{ payment.payer.username }} → Para: {{ payment.recipient.username }}</div>
+                        <div class="recent-item-meta">
+                            <i class="fas fa-calendar"></i> {{ payment.created_at }}
+                        </div>
+                    </div>
+                    <div class="recent-item-price {{ payment.status }}">
+                        {% if payment.status == 'refunded' %}-{% endif %}{{ payment.amount }}€
+                    </div>
+                </div>
+                {% empty %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block dashboard_extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Dashboard cargado completamente');
+        
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        const dateString = now.toLocaleDateString('es-ES', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    });
+</script>
+{% endblock %}

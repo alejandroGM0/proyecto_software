@@ -1,0 +1,89 @@
+<!-- ========================================== -->
+<!-- Autor: Alejandro Gasca Mediel -->
+<!-- ========================================== -->
+ 
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% block dashboard_title %}Panel de Control{% endblock %} - CharlaCar{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/pages/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/pages/dashboard_shared.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% block dashboard_extra_styles %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-nav">
+        <a href="{% url 'dashboard:dashboard' %}" class="nav-item {% if active_section == 'main' %}active{% endif %}">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Panel General</span>
+        </a>
+        <a href="{% url 'dashboard:trip_stats' %}" class="nav-item {% if active_section == 'trips' %}active{% endif %}">
+            <i class="fas fa-car-side"></i>
+            <span>Viajes</span>
+        </a>
+        <a href="{% url 'dashboard:msg_stats' %}" class="nav-item {% if active_section == 'messages' %}active{% endif %}">
+            <i class="fas fa-comments"></i>
+            <span>Mensajes</span>
+        </a>
+        <a href="{% url 'dashboard:report_stats' %}" class="nav-item {% if active_section == 'reports' %}active{% endif %}">
+            <i class="fas fa-flag"></i>
+            <span>Reportes</span>
+        </a>
+        <a href="{% url 'dashboard:user_stats' %}" class="nav-item {% if active_section == 'users' %}active{% endif %}">
+            <i class="fas fa-users"></i>
+            <span>Usuarios</span>
+        </a>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="dashboard-heading">
+            <h1>{% block dashboard_heading %}Panel de Control{% endblock %}</h1>
+            {% if active_section != 'main' and active_section != 'ride_management' %}
+            <div class="period-dropdown">
+                <button class="period-select-button">
+                    <span class="period-label">Periodo: <span class="selected-period">
+                        {% if time_period == 'today' %}Hoy{% endif %}
+                        {% if time_period == 'week' %}Semana{% endif %}
+                        {% if time_period == 'month' %}Mes{% endif %}
+                        {% if time_period == 'year' %}Año{% endif %}
+                        {% if time_period == 'all' %}Todo{% endif %}
+                    </span></span>
+                    <i class="fas fa-chevron-down period-arrow"></i>
+                </button>
+                <div class="period-dropdown-menu">
+                    <a href="?period=today" class="period-option {% if time_period == 'today' %}active-period{% endif %}">Hoy</a>
+                    <a href="?period=week" class="period-option {% if time_period == 'week' %}active-period{% endif %}">Semana</a>
+                    <a href="?period=month" class="period-option {% if time_period == 'month' %}active-period{% endif %}">Mes</a>
+                    <a href="?period=year" class="period-option {% if time_period == 'year' %}active-period{% endif %}">Año</a>
+                    <a href="?period=all" class="period-option {% if time_period == 'all' %}active-period{% endif %}">Todo</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        {% block dashboard_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script>
+    function toggleNoDataMessage(chartId, showNoData) {
+        const noDataContainer = document.getElementById(chartId + 'NoData');
+        if (noDataContainer) {
+            if (showNoData) {
+                noDataContainer.classList.add('visible');
+            } else {
+                noDataContainer.classList.remove('visible');
+            }
+        }
+    }
+</script>
+{% block dashboard_extra_scripts %}{% endblock %}
+{% endblock %}

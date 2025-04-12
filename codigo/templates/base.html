@@ -18,6 +18,9 @@
                     <a href="{% url 'rides:create_ride' %}" class="nav-link">Crear Viaje</a>
                     <a href="{% url 'chat:my_chats' %}" class="nav-link">Mensajes</a>
                     <a href="{% url 'accounts:profile' %}" class="nav-link">Mi Perfil</a>
+                    {% if user.is_staff or user.is_superuser %}
+                    <a href="{% url 'dashboard:dashboard' %}" class="nav-link">Panel de Control</a>
+                    {% endif %}
                     <a href="{% url 'accounts:logout' %}" class="nav-link">Cerrar Sesión</a>
                 {% else %}
                     <a href="{% url 'accounts:login' %}" class="nav-link">Iniciar Sesión</a>
@@ -40,5 +43,7 @@
 
         {% block content %}{% endblock %}
     </main>
+    
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

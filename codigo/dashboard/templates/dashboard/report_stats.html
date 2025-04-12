@@ -1,0 +1,300 @@
+<!-- ========================================== -->
+<!-- Autor: Alejandro Gasca Mediel -->
+<!-- ========================================== -->
+ 
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+
+{% block dashboard_title %}Gestión de Reportes{% endblock %}
+
+{% block dashboard_heading %}Gestión de Reportes{% endblock %}
+
+{% block dashboard_content %}
+<div class="ride-management-container">
+    <div class="dashboard-overview">
+        <p>Supervisa y responde a todos los reportes generados por los usuarios en la plataforma.</p>
+    </div>
+
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Reportes {{ report_data.period_text }}</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-flag"></i>
+                    </div>
+                </div>
+                <p class="stat-value">{{ report_data.created_in_period }}</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">No Leídos</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                </div>
+                <p class="stat-value">{{ report_data.unread_reports }}</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Sin Respuesta</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+                <p class="stat-value">{{ report_data.without_response }}</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Respondidos</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <p class="stat-value">{{ report_data.with_response }}%</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="rides-section">
+        <div class="rides-header">
+            <h2 class="rides-title">Reportes</h2>
+        </div>
+        <div class="chart-body">
+            <canvas id="reportsChart"></canvas>
+            <div class="no-data-container" id="reportsChartNoData">
+                <div class="no-data-message">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>No hay datos disponibles</span>
+                    <p>Aún no se han registrado reportes en este periodo</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="charts-section">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2 class="chart-title">Reportes por importancia</h2>
+            </div>
+            <div class="chart-body">
+                <canvas id="reportImportanceChart"></canvas>
+                <div class="no-data-container" id="reportImportanceChartNoData">
+                    <div class="no-data-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>No hay datos disponibles</span>
+                        <p>No se encontraron reportes clasificados por importancia</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2 class="chart-title">Reportes por estado</h2>
+            </div>
+            <div class="chart-body">
+                <canvas id="reportStatusChart"></canvas>
+                <div class="no-data-container" id="reportStatusChartNoData">
+                    <div class="no-data-message">
+                        <i class="fas fa-check-circle"></i>
+                        <span>No hay datos disponibles</span>
+                        <p>No se encontraron reportes clasificados por estado</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="action-container">
+        <a href="{% url 'reports:report_list' %}" class="action-button">
+            <i class="fas fa-tasks"></i>
+            Gestionar Reportes
+            <i class="fas fa-chevron-right"></i>
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block dashboard_extra_scripts %}
+<script>
+    Chart.defaults.font.family = "var(--chart-font-family)";
+    Chart.defaults.color = "var(--chart-color-text)";
+    
+    const chartColors = [
+        'var(--chart-color-primary)', 
+        'var(--chart-color-success)', 
+        'var(--chart-color-secondary)', 
+        'var(--chart-color-warning)', 
+        'var(--chart-color-danger)',
+        'var(--chart-color-purple)', 
+        'var(--chart-color-brown)', 
+        'var(--chart-color-pink)', 
+        'var(--chart-color-green-light)', 
+        'var(--chart-color-blue-light)'
+    ];
+    
+    const reportData = JSON.parse('{{ report_data_json|escapejs }}');
+    
+    const currentPeriod = reportData.period;
+    
+    function toggleNoDataMessage(chartId, showNoData) {
+        const noDataContainer = document.getElementById(chartId + 'NoData');
+        if (showNoData) {
+            noDataContainer.classList.add('visible');
+        } else {
+            noDataContainer.classList.remove('visible');
+        }
+    }
+    
+    function getChartTitle() {
+        switch (currentPeriod) {
+            case 'today':
+                return 'Reportes por hora';
+            case 'week':
+                return 'Reportes por día';
+            case 'month':
+                return 'Reportes por día';
+            case 'year':
+                return 'Reportes por mes';
+            case 'all':
+                return 'Reportes por mes';
+            default:
+                return 'Reportes';
+        }
+    }
+    
+    const hasReportData = reportData.datasets && reportData.datasets[0] && 
+                          reportData.datasets[0].data && 
+                          reportData.datasets[0].data.some(count => count > 0);
+    
+    toggleNoDataMessage('reportsChart', !hasReportData);
+    
+    const hasImportanceData = reportData.importance_counts && reportData.importance_counts.some(count => count > 0);
+    toggleNoDataMessage('reportImportanceChart', !hasImportanceData);
+    
+    const hasStatusData = reportData.total_reports > 0;
+    toggleNoDataMessage('reportStatusChart', !hasStatusData);
+    
+    const reportsChart = new Chart(
+        document.getElementById('reportsChart'),
+        {
+            type: 'line',
+            data: {
+                labels: reportData.labels || [],
+                datasets: [{
+                    label: getChartTitle(),
+                    data: reportData.datasets && reportData.datasets[0] ? reportData.datasets[0].data : [],
+                    backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                    borderColor: '#007aff',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#007aff',
+                    pointBorderColor: '#fff',
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#1D1D1F',
+                        bodyColor: '#1D1D1F',
+                        borderColor: 'rgba(0, 0, 0, 0.1)',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        }
+    );
+    
+    const reportImportanceChart = new Chart(
+        document.getElementById('reportImportanceChart'),
+        {
+            type: 'doughnut',
+            data: {
+                labels: ['Normal', 'Importante', 'Urgente'],
+                datasets: [{
+                    data: reportData.importance_counts || [0, 0, 0],
+                    backgroundColor: [
+                        '#34c759', 
+                        '#ff9500', 
+                        '#ff3b30'  
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    );
+    
+    const reportStatusChart = new Chart(
+        document.getElementById('reportStatusChart'),
+        {
+            type: 'doughnut',
+            data: {
+                labels: ['No leídos', 'Sin respuesta', 'Respondidos'],
+                datasets: [{
+                    data: [
+                        reportData.unread_reports,
+                        reportData.without_response - reportData.unread_reports,
+                        reportData.total_reports - reportData.without_response
+                    ],
+                    backgroundColor: [
+                        '#ff3b30', 
+                        '#ff9500', 
+                        '#34c759'  
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    );
+</script>
+{% endblock %}

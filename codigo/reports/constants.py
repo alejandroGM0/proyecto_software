@@ -50,6 +50,10 @@ PAYMENT_TYPE = 'payment'
 RIDE_TYPE = 'ride'
 USER_TYPE = 'user'
 SYSTEM_TYPE = 'system'
+USER_REPORT = 'user'
+RIDE_REPORT = 'ride'
+PAYMENT_REPORT = 'payment'
+SYSTEM_REPORT = 'system'
 
 # Niveles de importancia
 NORMAL_IMPORTANCE = 'normal'
@@ -61,8 +65,8 @@ REPORT_CREATED_SUCCESS = 'Reporte enviado exitosamente.'
 REPORT_UPDATED_SUCCESS = 'Reporte actualizado exitosamente.'
 REPORT_DELETED_SUCCESS = 'Reporte eliminado exitosamente.'
 RESPONSE_SENT_SUCCESS = 'Respuesta enviada correctamente.'
-REPORT_MARKED_READ = 'Reporte marcado como leído.'
-REPORT_MARKED_UNREAD = 'Reporte marcado como no leído.'
+REPORT_MARKED_READ = True
+REPORT_MARKED_UNREAD = False
 REPORT_ALREADY_RESPONDED_ERROR = 'No puedes editar un reporte que ya ha sido respondido.'
 NO_PERMISSION_ERROR = 'No tienes permiso para realizar esta acción.'
 NO_VIEW_PERMISSION_ERROR = 'No tienes permiso para ver este reporte.'
