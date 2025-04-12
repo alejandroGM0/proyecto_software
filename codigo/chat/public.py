@@ -1,12 +1,13 @@
-
-
-
+# ==========================================
+# Autor: Alejandro Gasca Mediel
+# ==========================================
 """
 API pública para la aplicación de chat.
 """
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models import Q, Count
+from django.db.models import Count, Max, Subquery, OuterRef, F
 
 from .models import Chat, Message
 from accounts.public import update_last_activity
@@ -158,6 +159,67 @@ def filter_chats_by_criteria(search=None, chat_type=None, from_date=None, to_dat
     return sorted(result, 
                 key=lambda x: x['last_message'].created_at if x['last_message'] else chat.created_at,
                 reverse=True)
+
+def filter_chats_by_criteria_optimized(search=None, chat_type=None, from_date=None, to_date=None):
+    """
+    Versión optimizada de filter_chats_by_criteria que no carga todos los mensajes
+    sino solo datos esenciales para mostrar en la lista.
+    """    
+    
+    chats_query = Chat.objects.all()
+    
+    
+    if search:
+        matching_users = User.objects.filter(username__icontains=search)
+        chats_query = chats_query.filter(participants__in=matching_users).distinct()
+    
+    
+    if chat_type == 'ride':
+        chats_query = chats_query.filter(ride__isnull=False)
+    elif chat_type == 'direct':
+        chats_query = chats_query.filter(ride__isnull=True)
+    
+    
+    if from_date:
+        chats_query = chats_query.filter(created_at__gte=from_date)
+    if to_date:
+        chats_query = chats_query.filter(created_at__lte=to_date)
+    
+    
+    chats_query = chats_query.annotate(
+        messages_count=Count('messages', distinct=True),
+        has_ride=Count('ride', distinct=True)
+    )
+    
+    
+    last_message_subquery = Message.objects.filter(
+        chat=OuterRef('pk')
+    ).order_by('-created_at').values('id', 'created_at')[:1]
+    
+    chats_query = chats_query.annotate(
+        last_message_id=Subquery(last_message_subquery.values('id')),
+        last_message_date=Subquery(last_message_subquery.values('created_at'))
+    )
+    
+    
+    chats_query = chats_query.order_by('-last_message_date', '-created_at')
+    
+    
+    result = []
+    for chat in chats_query:
+        
+        last_message = None
+        if chat.last_message_id:
+            last_message = Message.objects.get(id=chat.last_message_id)
+        
+        result.append({
+            'chat': chat,
+            'messages_count': chat.messages_count,
+            'last_message': last_message,
+            'is_ride_chat': chat.has_ride > 0
+        })
+    
+    return result
 
 def get_chat_stats():
     """

@@ -2,7 +2,8 @@
 # Autor: Alejandro Gasca Mediel
 # ==========================================
 """
-Funciones de utilidad interna para la aplicación de chat."""
+Utilidades para la aplicación de chat.
+"""
 from django.contrib.auth.models import User
 from django.utils import timezone
 from .models import Message, Chat
@@ -24,12 +25,30 @@ def format_message_for_api(message: Message) -> dict:
         'date': message.created_at.strftime('%Y-%m-%d')
     }
 
-def get_messages_for_chat(chat: Chat) -> list:
+def get_messages_for_chat(chat):
     """
-    Obtiene todos los mensajes de un chat formateados para la API.
+    Obtiene los mensajes de un chat formateados para la API.
+    Solo se llama cuando se visualiza un chat específico.
     """
-    messages = chat.messages.all().order_by('created_at')
-    return [format_message_for_api(msg) for msg in messages]
+    messages = Message.objects.filter(chat=chat).order_by('created_at')
+    messages_data = []
+    
+    for message in messages:
+        # Format date as day/month/year
+        date_str = message.created_at.strftime('%d/%m/%Y')
+        # Format time as hour:minute
+        time_str = message.created_at.strftime('%H:%M')
+        
+        messages_data.append({
+            'id': message.id,
+            'sender': message.sender.username,
+            'content': message.content,
+            'timestamp': time_str,
+            'date': date_str,
+            'is_read': message.is_read,
+        })
+    
+    return messages_data
 
 def can_send_message(chat: Chat) -> bool:
     """

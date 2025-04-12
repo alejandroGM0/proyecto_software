@@ -1,6 +1,8 @@
 # ==========================================
 # Autor: Alejandro Gasca Mediel
 # ==========================================
+
+
 """
 Utilidades para la aplicación de dashboard
 """
@@ -11,16 +13,14 @@ from django.db.models import Count, Sum, Avg, Q
 from django.db.models.functions import TruncDate, TruncMonth, ExtractHour
 from django.utils import timezone
 
-
+    
 from rides.public import get_rides_in_period, get_ride_stats_for_dashboard, get_recently_published_rides
 from chat.public import get_messages_in_period
 from reports.public import get_reports_in_period
 from accounts.public import get_users_in_period, get_active_users
 from payments.public import get_payments_in_period
-from chat.public import filter_chats_by_criteria, get_chat_stats
+from chat.public import filter_chats_by_criteria_optimized, get_chat_stats
 from django.core.paginator import Paginator
-import json
-from django.core.serializers.json import DjangoJSONEncoder
 from reports.public import (
         get_hourly_report_counts, 
         get_daily_report_counts, 
@@ -296,7 +296,7 @@ def get_messages_data(period=DEFAULT_PERIOD):
         'total': total_messages,
         'labels': labels,
         'data': data,
-        'avg_per_day': round(total_messages / max(1, days_in_period)),  # Redondear a entero, sin el segundo parámetro
+        'avg_per_day': round(total_messages / max(1, days_in_period)),  
         'period': period,
         'period_text': period_text
     }
@@ -1027,7 +1027,8 @@ def get_chat_management_context(request):
         'to_date': request.GET.get('to_date', ''),
     }
     
-    chats_data = filter_chats_by_criteria(
+    
+    chats_data = filter_chats_by_criteria_optimized(
         search=filters['search'],
         chat_type=filters['chat_type'],
         from_date=filters['from_date'],
@@ -1044,10 +1045,20 @@ def get_chat_management_context(request):
     
     stats = get_chat_stats()
     
+    
+    chart_data = {
+        'daily_messages': json.dumps(stats['daily_messages'], cls=DjangoJSONEncoder),
+        'chat_distribution': json.dumps([
+            {'type': 'Chats de viaje', 'count': stats['ride_chats']},
+            {'type': 'Chats directos', 'count': stats['direct_chats']}
+        ], cls=DjangoJSONEncoder)
+    }
+    
     return {
         'chats': chats,
         'filters': filters,
         'stats': stats,
+        'chart_data': chart_data,
         'active_section': 'chats',
         'now': timezone.now()
     }
