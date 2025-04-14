@@ -1,11 +1,47 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Perfil - {{ user.username }}{% endblock %}
+{% block title %}Perfil de {{ user.username }}{% endblock %}
 
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Estilos específicos para la biografía */
+    .user-bio {
+        margin-top: 2.5rem;
+        padding: 1.5rem;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        border: 1px solid #eaeaea;
+        transition: all 0.3s ease;
+    }
+
+    .user-bio:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .user-bio h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1d1d1f;
+        border-bottom: 1px solid #eaeaea;
+        padding-bottom: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .user-bio p {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #666;
+        white-space: pre-wrap;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -44,21 +80,23 @@
             </div>
 
             <div class="profile-actions">
-                <a href="{% url 'rides:create_ride' %}" class="button button-primary">
-                    <i class="fas fa-plus"></i> Crear Viaje
-                </a>
-                <a href="{% url 'accounts:settings' %}" class="button button-secondary">
-                    <i class="fas fa-cog"></i> Configuración
-                </a>
-                <a href="{% url 'reviews:list' %}" class="button button-secondary">
+                <a href="{% url 'reviews:list' %}?user={{ user.username }}" class="button button-secondary">
                     <i class="fas fa-star"></i> Valoraciones
                 </a>
-                {% if not is_own_profile %}
                 <a href="{% url 'reports:create_report' %}?user_id={{ user.id }}" class="button button-secondary">
                     <i class="fas fa-flag"></i> Reportar
                 </a>
-                {% endif %}
+                <a href="javascript:history.back()" class="button button-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
             </div>
+            
+            {% if user_profile.bio %}
+            <div class="user-bio">
+                <h3>Biografía</h3>
+                <p>{{ user_profile.bio }}</p>
+            </div>
+            {% endif %}
         </div>
         
         <!-- Panel derecho: Viajes -->
@@ -93,17 +131,11 @@
                             <p><i class="fas fa-users info-icon"></i> {{ ride.passengers.count }}/{{ ride.total_seats }} pasajeros</p>
                             <p class="ride-price"><i class="fas fa-tag info-icon"></i> {{ ride.get_formatted_price }}</p>
                         </div>
-                        {% if is_own_profile %}
-                        <div class="card-actions">
-                            <a href="{% url 'rides:edit_ride' ride.id %}" class="button button-secondary">Editar</a>
-                        </div>
-                        {% endif %}
                     </div>
                     {% empty %}
                     <div class="empty-state">
                         <div class="empty-icon"><i class="fas fa-car-side"></i></div>
-                        <p>No tienes viajes activos como conductor</p>
-                        <a href="{% url 'rides:create_ride' %}" class="button button-primary">Crear tu primer viaje</a>
+                        <p>Este usuario no tiene viajes activos como conductor</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -123,7 +155,7 @@
                     {% empty %}
                     <div class="empty-state">
                         <div class="empty-icon"><i class="fas fa-history"></i></div>
-                        <p>No tienes viajes finalizados como conductor</p>
+                        <p>Este usuario no tiene viajes finalizados como conductor</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -158,8 +190,7 @@
                     {% empty %}
                     <div class="empty-state">
                         <div class="empty-icon"><i class="fas fa-user-friends"></i></div>
-                        <p>No tienes viajes activos como pasajero</p>
-                        <a href="{% url 'rides:ride_list' %}" class="button button-primary">Buscar viajes</a>
+                        <p>Este usuario no tiene viajes activos como pasajero</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -179,7 +210,7 @@
                     {% empty %}
                     <div class="empty-state">
                         <div class="empty-icon"><i class="fas fa-history"></i></div>
-                        <p>No tienes viajes finalizados como pasajero</p>
+                        <p>Este usuario no tiene viajes finalizados como pasajero</p>
                     </div>
                     {% endfor %}
                 </div>

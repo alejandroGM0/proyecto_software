@@ -89,11 +89,7 @@ def book_ride(request, ride_id):
         messages.error(request, "No puedes reservar este viaje.")
         return redirect('rides:ride_detail', ride_id=ride.id)
     
-    # Esta línea activará la señal m2m_changed
-    ride.passengers.add(request.user)
-    
-    messages.success(request, f"Has reservado un asiento en el viaje de {ride.origin} a {ride.destination}.")
-    return redirect('rides:ride_detail', ride_id=ride.id)
+    return redirect('payments:create_payment', ride_id=ride.id)
 
 @login_required
 def create_ride(request):

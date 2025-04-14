@@ -8,7 +8,8 @@ from unittest.mock import patch, MagicMock
 from payments.models import Payment
 from rides.models import Ride
 from payments.tests.test_constants import *
-from payments.constants import ERROR_PAYMENT_PROCESSING
+from payments.constants import ERROR_PAYMENT_PROCESSING, PAYMENT_STATUS_COMPLETED, PAYMENT_STATUS_PENDING
+from accounts.models import UserProfile
 
 class PaymentViewsTests(TestCase):
     """
@@ -29,18 +30,21 @@ class PaymentViewsTests(TestCase):
             email=PAYER_EMAIL,
             password=PAYER_PASSWORD
         )
+        UserProfile.objects.create(user=self.payer)
         
         self.recipient = User.objects.create_user(
             username=RECIPIENT_USERNAME,
             email=RECIPIENT_EMAIL,
             password=RECIPIENT_PASSWORD
         )
+        UserProfile.objects.create(user=self.recipient)
         
         self.admin_user = User.objects.create_superuser(
             username=ADMIN_USERNAME,
             email=ADMIN_EMAIL,
             password=ADMIN_PASSWORD
         )
+        UserProfile.objects.create(user=self.admin_user)
         
         # Crear viaje
         self.future_date = timezone.now() + timedelta(days=RIDE_DAYS_FUTURE)
@@ -148,6 +152,7 @@ class PaymentViewsTests(TestCase):
         
         # Crear un tercer usuario que no tiene relación con el pago
         other_user = User.objects.create_user('otro', 'otro@example.com', 'contraseña123')
+        UserProfile.objects.create(user=other_user)
         self.client.login(username='otro', password='contraseña123')
         
         response = self.client.get(reverse(URL_PAYMENT_DETAIL, args=[self.completed_payment.id]))
@@ -168,6 +173,7 @@ class PaymentViewsTests(TestCase):
         
         # Iniciar sesión como tercer usuario (que no es ni pagador ni receptor en los pagos existentes)
         other_user = User.objects.create_user('nuevo', 'nuevo@example.com', 'contraseña123')
+        UserProfile.objects.create(user=other_user)
         self.client.login(username='nuevo', password='contraseña123')
         
         # Intentar pagar un viaje
@@ -334,6 +340,7 @@ class PaymentViewsTests(TestCase):
         
         # Añadir un pasajero para que esté lleno
         other_user = User.objects.create_user('another', 'another@example.com', 'contraseña123')
+        UserProfile.objects.create(user=other_user)
         full_ride.passengers.add(other_user)
         
         # Verificar si el modelo tiene la propiedad seats_available
@@ -358,7 +365,7 @@ class PaymentViewsTests(TestCase):
         
         # Usamos un usuario diferente para no tener pagos existentes
         other_user = User.objects.create_user('nuevo_error', 'nuevo_error@example.com', 'contraseña123')
-        self.client.login(username='nuevo_error', password='contraseña123')
+        UserProfile.objects.create(user=other_user)
         
         # Contar pagos antes
         payment_count_before = Payment.objects.count()
@@ -467,3 +474,48 @@ class PaymentViewsTests(TestCase):
         # El estado del pago no debería cambiar
         self.pending_payment.refresh_from_db()
         self.assertEqual(self.pending_payment.status, PAYMENT_STATUS_PENDING)
+
+
+class ReservaConPagoStripeTests(TestCase):
+    """
+    Pruebas para el flujo de reserva con pago y Stripe.
+    """
+    def setUp(self):
+        self.payer = User.objects.create_user('pagador', 'pagador@example.com', 'testpass')
+        UserProfile.objects.create(user=self.payer)
+        self.driver = User.objects.create_user('conductor', 'conductor@example.com', 'testpass')
+        UserProfile.objects.create(user=self.driver)
+        self.ride = Ride.objects.create(
+            driver=self.driver,
+            origin='Madrid',
+            destination='Barcelona',
+            departure_time=timezone.now() + timezone.timedelta(days=2),
+            price=25.0,
+            total_seats=2
+        )
+        self.client.login(username='pagador', password='testpass')
+
+    @patch('payments._utils.create_checkout_session')
+    def test_reserva_redirige_a_pago(self, mock_checkout):
+        mock_checkout.return_value = 'https://checkout.stripe.com/test-session'
+        response = self.client.post(reverse('payments:create_payment', args=[self.ride.id]), {'terms_accepted': 'on'})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, 'https://checkout.stripe.com/test-session')
+        self.ride.refresh_from_db()
+        self.assertNotIn(self.payer, self.ride.passengers.all())
+
+    @patch('payments._utils.get_payment_status')
+    def test_usuario_se_añade_tras_pago(self, mock_status):
+        # Simular pago completado
+        mock_status.return_value = 'succeeded'
+        payment = Payment.objects.create(
+            payer=self.payer,
+            recipient=self.driver,
+            amount=self.ride.price,
+            ride=self.ride,
+            status=PAYMENT_STATUS_PENDING
+        )
+        url = reverse('payments:payment_success', args=[payment.id]) + '?session_id=testsession'
+        response = self.client.get(url)
+        self.ride.refresh_from_db()
+        self.assertIn(self.payer, self.ride.passengers.all())

@@ -53,6 +53,7 @@ FORM_ERROR = 'Por favor corrige los errores.'
 LOGIN_TEMPLATE = 'accounts/login.html'
 REGISTER_TEMPLATE = 'accounts/register.html'
 PROFILE_TEMPLATE = 'accounts/profile.html'
+USER_PROFILE_TEMPLATE = 'accounts/user_profile.html'
 SETTINGS_TEMPLATE = 'accounts/settings.html'
 CHANGE_PASSWORD_TEMPLATE = 'accounts/change_password.html'
 

@@ -325,17 +325,26 @@
             <!-- Acciones disponibles según el estado y rol del usuario -->
             <div class="actions-container">
                 {% if payment.status == 'PENDING' and user == payment.payer %}
-                    <form action="{% url 'payments:cancel_payment' payment.id %}" method="post" style="display: inline-block">
-                        {% csrf_token %}
-                        <button type="submit" class="button button-warning" onclick="return confirm('¿Estás seguro de cancelar este pago?')">Cancelar Pago</button>
-                    </form>
+                    <a href="{% url 'payments:cancel_payment' payment.id %}" class="button button-secondary">
+                        <i class="fas fa-times"></i> Cancelar Pago
+                    </a>
                 {% endif %}
                 
                 {% if payment.status == 'COMPLETED' and user == payment.recipient %}
-                    <a href="{% url 'payments:refund_payment' payment.id %}" class="button button-info">Reembolsar Pago</a>
+                    <a href="{% url 'payments:refund_payment' payment.id %}" class="button button-warning">
+                        <i class="fas fa-undo"></i> Iniciar Reembolso
+                    </a>
                 {% endif %}
                 
-                <a href="{% url 'payments:payment_list' %}" class="button button-secondary">Volver a Mis Pagos</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'reports:create_report' %}?payment_id={{ payment.id }}" class="button button-secondary">
+                        <i class="fas fa-flag"></i> Reportar Problema
+                    </a>
+                {% endif %}
+                
+                <a href="{% url 'payments:payment_list' %}" class="button button-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a Mis Pagos
+                </a>
             </div>
         </div>
     </div>

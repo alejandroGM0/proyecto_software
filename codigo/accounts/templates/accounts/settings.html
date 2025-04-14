@@ -5,6 +5,85 @@
 
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'css/pages/settings.css' %}">
+<style>
+    /* Estilos para la sección de pagos */
+    #section-payment .payment-info {
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .status-info {
+        margin-bottom: 20px;
+    }
+    
+    .status-info h3 {
+        margin-bottom: 15px;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .status-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        margin-bottom: 8px;
+    }
+    
+    .status-item .icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+    }
+    
+    .status-item.success .icon {
+        background-color: rgba(52, 199, 89, 0.2);
+        color: #34c759;
+    }
+    
+    .status-item.error .icon {
+        background-color: rgba(255, 59, 48, 0.2);
+        color: #ff3b30;
+    }
+    
+    .status-item.warning .icon {
+        background-color: rgba(255, 214, 10, 0.2);
+        color: #b8860b;
+    }
+    
+    .payment-actions {
+        margin-top: 20px;
+    }
+    
+    .button.primary {
+        padding: 10px 20px;
+        background-color: #007aff;
+        color: white;
+        border-radius: 8px;
+        display: inline-block;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+    
+    .button.primary:hover {
+        background-color: #0062cc;
+    }
+    
+    .help-text {
+        margin-top: 10px;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .info-text {
+        color: #34c759;
+        font-weight: 500;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -195,6 +274,69 @@
                 <button type="submit">Guardar preferencias</button>
             </div>
         </form>
+    </div>
+    
+    <hr>
+    
+    <div id="section-payment">
+        <h2>Configuración de pagos</h2>
+        <div class="payment-info">
+            <div class="status-info">
+                <h3>Estado de tu cuenta de pagos</h3>
+                
+                {% if user_profile.stripe_customer_id %}
+                    <p class="status-item success">
+                        <span class="icon">✓</span>
+                        <span class="text">Cuenta de cliente Stripe: Configurada</span>
+                    </p>
+                {% else %}
+                    <p class="status-item error">
+                        <span class="icon">✕</span>
+                        <span class="text">Cuenta de cliente Stripe: No configurada</span>
+                    </p>
+                {% endif %}
+                
+                {% if user_profile.stripe_account_id %}
+                    <p class="status-item success">
+                        <span class="icon">✓</span>
+                        <span class="text">Cuenta para recibir pagos: Configurada</span>
+                    </p>
+                {% else %}
+                    <p class="status-item error">
+                        <span class="icon">✕</span>
+                        <span class="text">Cuenta para recibir pagos: No configurada</span>
+                    </p>
+                {% endif %}
+                
+                {% if user_profile.has_payment_method %}
+                    <p class="status-item success">
+                        <span class="icon">✓</span>
+                        <span class="text">Método de pago: Guardado</span>
+                    </p>
+                {% else %}
+                    <p class="status-item warning">
+                        <span class="icon">!</span>
+                        <span class="text">Método de pago: No guardado</span>
+                    </p>
+                {% endif %}
+            </div>
+            
+            <div class="payment-actions">
+                {% if not user_profile.stripe_customer_id or not user_profile.stripe_account_id %}
+                    <a href="{% url 'accounts:setup_payment_account' %}" class="button primary">Configurar cuenta de pagos</a>
+                    <p class="help-text">Configura tu cuenta para poder recibir pagos directamente de otros usuarios.</p>
+                {% else %}
+                    <p class="info-text">Tu cuenta de pagos está correctamente configurada.</p>
+                    {% if user_profile.stripe_account_id %}
+                        <a href="{% url 'accounts:complete_stripe_onboarding' %}" class="button primary">Completar configuración de Stripe</a>
+                        <p class="help-text">Acepta las condiciones de servicio y añade tu cuenta bancaria para recibir pagos.</p>
+                    {% endif %}
+                    {% if not user_profile.has_payment_method %}
+                        <p class="help-text">Para guardar un método de pago, realiza tu primer pago en la plataforma.</p>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
     </div>
     
     <hr>

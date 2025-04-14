@@ -24,6 +24,11 @@ class UserProfile(models.Model):
     vehicle_color = models.CharField(max_length=50, blank=True, null=True, verbose_name="Color del vehículo")
     vehicle_features = models.TextField(blank=True, null=True, verbose_name="Características adicionales")
     
+    # Información de Stripe
+    stripe_customer_id = models.CharField(max_length=255, blank=True, null=True, verbose_name="ID de Cliente de Stripe")
+    stripe_account_id = models.CharField(max_length=255, blank=True, null=True, verbose_name="ID de Cuenta Conectada de Stripe")
+    has_payment_method = models.BooleanField(default=False, verbose_name="Tiene método de pago")
+    
     # Preferencias de viaje
     MUSIC_CHOICES = [
         ('any', 'Cualquiera'),

@@ -4,6 +4,8 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.contrib.messages import get_messages
+from unittest.mock import patch, MagicMock
 
 from accounts.models import UserProfile
 from accounts.tests.test_constants import *
@@ -263,3 +265,49 @@ class SettingsViewTests(TestCase):
         self.assertEqual(self.profile.pref_talk, TEST_TALK_QUIET)
         self.assertTrue(self.profile.pref_pets)
         self.assertTrue(self.profile.pref_smoking)
+
+
+class StripeOnboardingViewTests(TestCase):
+    """
+    Pruebas para la vista de onboarding de Stripe Connect.
+    """
+    def setUp(self):
+        self.user = User.objects.create_user('testonboard', 'onboard@example.com', 'testpass')
+        UserProfile.objects.create(user=self.user)
+        self.user.profile.stripe_account_id = 'acct_test_123'
+        self.user.profile.save()
+        self.client.login(username='testonboard', password='testpass')
+
+    def test_onboarding_redirects_if_no_account(self):
+        self.user.profile.stripe_account_id = ''
+        self.user.profile.save()
+        response = self.client.get(reverse('accounts:complete_stripe_onboarding'))
+        self.assertRedirects(response, reverse('accounts:settings'))
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("configurar tu cuenta de pagos" in str(m) for m in messages))
+
+    @patch('accounts._utils.create_stripe_onboarding_link')
+    def test_onboarding_redirects_to_stripe(self, mock_link):
+        """
+        Prueba que la vista de onboarding redirige a Stripe con el enlace generado.
+        """
+        # Configurar el mock para que devuelva una URL específica
+        mock_url = 'https://onboarding.stripe.test/account/123'
+        mock_link.return_value = mock_url
+        
+        response = self.client.get(reverse('accounts:complete_stripe_onboarding'))
+        
+        # Verificar que la función mock fue llamada con el usuario correcto
+        mock_link.assert_called_once_with(self.user)
+        
+        # Verificar la redirección a la URL de Stripe
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, mock_url)
+
+    @patch('accounts._utils.create_stripe_onboarding_link')
+    def test_onboarding_error_message(self, mock_link):
+        mock_link.return_value = None
+        response = self.client.get(reverse('accounts:complete_stripe_onboarding'))
+        self.assertRedirects(response, reverse('accounts:settings'))
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("No se pudo generar el enlace" in str(m) for m in messages))

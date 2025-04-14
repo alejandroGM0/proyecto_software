@@ -10,6 +10,7 @@ from decimal import Decimal
 from rides.models import Ride
 from unittest import skip
 from rides.tests.test_constants import *
+from accounts.models import UserProfile
 
 
 class RideViewsTests(TestCase):
@@ -21,12 +22,14 @@ class RideViewsTests(TestCase):
             email=DRIVER_EMAIL,
             password=DRIVER_PASSWORD
         )
+        UserProfile.objects.create(user=self.user)
 
         self.passenger = User.objects.create_user(
             username=PASSENGER_USERNAME,
             email=PASSENGER_EMAIL,
             password=PASSENGER_PASSWORD
         )
+        UserProfile.objects.create(user=self.passenger)
 
         self.future_date = timezone.now() + timedelta(days=FUTURE_DAYS)
         self.ride = Ride.objects.create(

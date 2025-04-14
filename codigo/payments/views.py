@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 
 from rides.models import Ride
 from .models import Payment
-from .forms import PaymentInitForm
+from .forms import PaymentInitForm, PaymentForm
 from . import _utils
 from .constants import (
     PAYMENT_STATUS_PENDING, PAYMENT_STATUS_COMPLETED, 
@@ -84,9 +84,9 @@ def create_payment(request, ride_id):
     
     if ride.driver == request.user:
         messages.error(request, ERROR_OWN_RIDE_PAYMENT)
-        return redirect('rides:ride_detail', ride_id=ride_id) 
+        return redirect('rides:ride_detail', ride_id=ride_id)
     
-    if hasattr(ride, 'seats_available') and ride.seats_available <= 0:
+    if ride.seats_available <= 0:
         messages.error(request, "Este viaje está completo, no hay asientos disponibles.")
         return redirect('rides:ride_detail', ride_id=ride_id)
     
@@ -99,43 +99,39 @@ def create_payment(request, ride_id):
     if existing_payment:
         if existing_payment.status == PAYMENT_STATUS_COMPLETED:
             messages.info(request, ERROR_ALREADY_PAID)
+            return redirect('rides:ride_detail', ride_id=ride_id)
         else:
             messages.info(request, ERROR_PAYMENT_PENDING)
-        return redirect('payments:payment_detail', pk=existing_payment.pk)
+            return redirect('rides:ride_detail', ride_id=ride_id)
     
     if request.method == 'POST':
-        form = PaymentInitForm(request.POST)
+        form = PaymentForm(request.POST)
         if form.is_valid():
-            payment = Payment.objects.create(
+            payment = Payment(
                 payer=request.user,
                 recipient=ride.driver,
                 amount=ride.price,
                 ride=ride,
-                status=PAYMENT_STATUS_PENDING,
-                payment_method=PAYMENT_METHOD_STRIPE,
-                concept=_utils.format_payment_description(ride)
+                status=PAYMENT_STATUS_PENDING
             )
+            payment.save()
             
             checkout_url = _utils.create_checkout_session(payment, request)
-            print(f"URL de checkout: {checkout_url}")
             
             if checkout_url:
-                print(f"Redirigiendo a: {checkout_url}")
                 return redirect(checkout_url)
             else:
-                print("No se pudo crear la URL de checkout")
+                messages.error(request, ERROR_PAYMENT_PROCESSING)
                 payment.status = PAYMENT_STATUS_FAILED
                 payment.save()
-                messages.error(request, ERROR_PAYMENT_PROCESSING)
+                return redirect('rides:ride_detail', ride_id=ride_id)
     else:
-        form = PaymentInitForm()
+        form = PaymentForm()
     
-    context = {
+    return render(request, 'payments/create_payment.html', {
         'form': form,
         'ride': ride
-    }
-    
-    return render(request, 'payments/create_payment.html', context)
+    })
 
 @login_required
 def payment_success(request, pk):
@@ -151,6 +147,14 @@ def payment_success(request, pk):
         if status == 'succeeded':
             payment.status = PAYMENT_STATUS_COMPLETED
             payment.save()
+            
+            if payment.ride:
+                from rides.public import add_passenger_to_ride
+                if add_passenger_to_ride(payment.payer, payment.ride):
+                    messages.success(request, "¡Has reservado tu asiento con éxito!")
+                else:
+                    messages.warning(request, "El pago fue exitoso, pero no se pudo reservar el asiento. Por favor, contacta con soporte.")
+            
             messages.success(request, SUCCESS_PAYMENT_COMPLETED)
         else:
             messages.warning(request, INFO_PAYMENT_VERIFYING)

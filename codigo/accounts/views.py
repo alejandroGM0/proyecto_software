@@ -29,6 +29,10 @@ def login_view(request):
                 login(request, user)
                 messages.success(request, LOGIN_SUCCESS.format(username))
                 return redirect(RIDE_LIST_URL)
+            else:
+                messages.error(request, "Credenciales incorrectas. Por favor, inténtalo de nuevo.")
+        else:
+            messages.error(request, "Credenciales incorrectas. Por favor, inténtalo de nuevo.")
     else:
         form = AuthenticationForm()
     return render(request, LOGIN_TEMPLATE, {FORM_KEY: form})
@@ -43,6 +47,12 @@ def register_view(request):
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
+            
+            # Crear cuentas de Stripe para el usuario
+            customer_id, account_id = associate_stripe_accounts_to_user(user)
+            if customer_id:
+                messages.success(request, "Tu cuenta de pagos ha sido configurada correctamente.")
+            
             login(request, user)
             messages.success(request, REGISTRATION_SUCCESS)
             return redirect(RIDE_LIST_URL)
@@ -113,7 +123,10 @@ def profile_view(request, username):
         'expired_passenger_page_obj': expired_passenger_page_obj,
     }
     
-    return render(request, PROFILE_TEMPLATE, context)
+    # Seleccionamos la plantilla adecuada según si el usuario está viendo su propio perfil u otro
+    template = PROFILE_TEMPLATE if request.user == user else USER_PROFILE_TEMPLATE
+    
+    return render(request, template, context)
 
 @login_required
 def profile(request):
@@ -157,3 +170,50 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     
     return render(request, CHANGE_PASSWORD_TEMPLATE, {FORM_KEY: form})
+
+@login_required
+def setup_payment_account(request):
+    """
+    Configura cuentas de Stripe para el usuario actual si no las tiene.
+    """
+    user_profile = request.user.profile
+    
+    if user_profile.stripe_customer_id and user_profile.stripe_account_id:
+        messages.info(request, "Ya tienes configurada tu cuenta de pagos.")
+        return redirect(SETTINGS_URL)
+    
+    if not request.user.email or request.user.email.strip() == '':
+        messages.error(request, "Para configurar tu cuenta de pagos necesitas añadir un correo electrónico válido en tu perfil.")
+        return redirect(SETTINGS_URL)
+    
+    customer_id, account_id = associate_stripe_accounts_to_user(request.user)
+    
+    if customer_id and account_id:
+        messages.success(request, "Tu cuenta de pagos ha sido configurada correctamente.")
+    elif customer_id:
+        messages.warning(request, "Se ha creado tu cuenta de cliente, pero hubo un problema al crear tu cuenta para recibir pagos.")
+    elif account_id:
+        messages.warning(request, "Se ha creado tu cuenta para recibir pagos, pero hubo un problema al crear tu cuenta de cliente.")
+    else:
+        messages.error(request, "Ha ocurrido un error al configurar tu cuenta de pagos. Por favor, inténtalo de nuevo.")
+    
+    return redirect(SETTINGS_URL)
+
+@login_required
+def complete_stripe_onboarding(request):
+    """
+    Redirige al usuario al flujo de onboarding de Stripe Connect.
+    """
+    user_profile = request.user.profile
+    
+    if not user_profile.stripe_account_id:
+        messages.warning(request, "Primero debes configurar tu cuenta de pagos.")
+        return redirect(SETTINGS_URL)
+    
+    onboarding_url = create_stripe_onboarding_link(request.user)
+    
+    if onboarding_url:
+        return redirect(onboarding_url)
+    else:
+        messages.error(request, "No se pudo generar el enlace para completar tu cuenta de Stripe. Por favor, inténtalo más tarde.")
+        return redirect(SETTINGS_URL)

@@ -15,6 +15,7 @@ except Exception as e:
 def create_checkout_session(payment, request):
     """
     Crea una sesión de checkout en Stripe para redireccionar al usuario.
+    Utiliza Stripe Connect para transferir el dinero directamente al destinatario.
     
     Args:
         payment: Objeto modelo Payment que se va a procesar
@@ -42,6 +43,20 @@ def create_checkout_session(payment, request):
     else:
         description = f"Pago #{payment.id}"
     
+    # Comprobar si el destinatario tiene cuenta de Stripe Connect
+    recipient_profile = payment.recipient.profile
+    if not recipient_profile.stripe_account_id:
+        print(f"El destinatario {payment.recipient.username} no tiene cuenta de Stripe Connect")
+        return None
+    
+    # Comprobar si el pagador tiene cuenta de cliente de Stripe
+    payer_profile = payment.payer.profile
+    
+    # Calcular comisión de la plataforma
+    # 10% para la plataforma
+    from decimal import Decimal
+    platform_fee = int(payment.amount * Decimal('100') * Decimal('0.10'))  # En céntimos
+    
     checkout_params = {
         'payment_method_types': ['card', 'paypal', 'sepa_debit', 'sofort'],
         'line_items': [
@@ -61,10 +76,17 @@ def create_checkout_session(payment, request):
         'mode': 'payment',
         'success_url': success_url + '?session_id={CHECKOUT_SESSION_ID}',
         'cancel_url': cancel_url,
+        'payment_intent_data': {
+            'application_fee_amount': platform_fee,
+            'transfer_data': {
+                'destination': recipient_profile.stripe_account_id,
+            },
+        },
     }
     
-    # Añadir el email solo si existe
-    if payment.payer.email:
+    if payer_profile.stripe_customer_id:
+        checkout_params['customer'] = payer_profile.stripe_customer_id
+    elif payment.payer.email:
         checkout_params['customer_email'] = payment.payer.email
     
     try:
@@ -72,6 +94,11 @@ def create_checkout_session(payment, request):
         
         payment.stripe_payment_intent_id = checkout_session.id
         payment.save(update_fields=['stripe_payment_intent_id'])
+        
+        # Marcar que el usuario tiene método de pago
+        if not payer_profile.has_payment_method and checkout_session.payment_status == "paid":
+            payer_profile.has_payment_method = True
+            payer_profile.save(update_fields=['has_payment_method'])
         
         return checkout_session.url
         
@@ -97,7 +124,8 @@ def get_payment_status(checkout_session_id):
 
 def process_refund(payment):
     """
-    Procesa un reembolso para un pago
+    Procesa un reembolso para un pago.
+    Compatible con el sistema de pagos directo entre usuarios.
     """
     try:
         if not payment.stripe_payment_intent_id:

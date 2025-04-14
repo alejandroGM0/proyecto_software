@@ -692,3 +692,34 @@ body {
     font-size: 1.1rem;
     color: var(--primary-color);
 }
+
+.user-bio {
+    margin-top: 2rem;
+    padding: 1.25rem;
+    background-color: var(--card-background);
+    border-radius: 10px;
+    box-shadow: 0 1px 3px var(--shadow);
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+.user-bio:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.user-bio h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.user-bio p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
