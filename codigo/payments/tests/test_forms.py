@@ -1,4 +1,6 @@
 from django.test import TestCase
+from django.contrib.auth.models import User
+from payments.tests.test_constants import *
 from payments.forms import PaymentInitForm
 
 class PaymentFormsTests(TestCase):

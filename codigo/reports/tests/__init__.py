@@ -7,3 +7,4 @@ from reports.tests.test_views import ReportViewsTests
 from reports.tests.test_forms import ReportFormTests
 from reports.tests.test_public import ReportPublicAPITests
 from reports.tests.test_utils import ReportUtilsTests
+from reports.tests.test_endpoint_security import ReportEndpointSecurityTests

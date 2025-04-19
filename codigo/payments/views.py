@@ -168,6 +168,11 @@ def payment_cancel(request, pk):
     """
     payment = get_object_or_404(Payment, pk=pk)
     
+    # Verificar que el usuario tiene permiso para cancelar el pago
+    if payment.payer != request.user:
+        messages.error(request, ERROR_PERMISSION_DENIED)
+        return redirect('payments:payment_list')
+    
     if payment.status == PAYMENT_STATUS_PENDING:
         payment.status = PAYMENT_STATUS_CANCELLED
         payment.save()

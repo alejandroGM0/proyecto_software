@@ -40,6 +40,9 @@ media/*
 *.swp
 *.swo
 
+# Ignorar archivos generados por VSCodeCounter
+.VSCodeCounter/
+
 # OS generated files
 .DS_Store
 .DS_Store?

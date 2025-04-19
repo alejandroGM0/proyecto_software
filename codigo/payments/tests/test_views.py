@@ -367,6 +367,9 @@ class PaymentViewsTests(TestCase):
         other_user = User.objects.create_user('nuevo_error', 'nuevo_error@example.com', 'contraseña123')
         UserProfile.objects.create(user=other_user)
         
+        # Iniciar sesión con el nuevo usuario
+        self.client.login(username='nuevo_error', password='contraseña123')
+        
         # Contar pagos antes
         payment_count_before = Payment.objects.count()
         

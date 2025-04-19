@@ -6,6 +6,7 @@ from unittest.mock import patch, MagicMock
 
 from payments.models import Payment
 from rides.models import Ride
+from accounts.models import UserProfile
 from payments import _utils
 from payments.tests.test_constants import *
 
@@ -29,10 +30,22 @@ class PaymentUtilsTests(TestCase):
             password=PAYER_PASSWORD
         )
         
+        # Crear perfil para el pagador
+        self.payer_profile = UserProfile.objects.create(
+            user=self.payer,
+            has_payment_method=False
+        )
+        
         self.recipient = User.objects.create_user(
             username=RECIPIENT_USERNAME,
             email=RECIPIENT_EMAIL,
             password=RECIPIENT_PASSWORD
+        )
+        
+        # Crear perfil para el receptor con cuenta de Stripe
+        self.recipient_profile = UserProfile.objects.create(
+            user=self.recipient,
+            stripe_account_id="acct_test_12345"
         )
         
         # Crear viaje
