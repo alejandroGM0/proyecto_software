@@ -1,6 +1,7 @@
 # ==========================================
 # Autor: Alejandro Gasca Mediel
 # ==========================================
+
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -286,21 +287,21 @@ class StripeOnboardingViewTests(TestCase):
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(any("configurar tu cuenta de pagos" in str(m) for m in messages))
 
-    @patch('accounts._utils.create_stripe_onboarding_link')
+    @patch('accounts.views.create_stripe_onboarding_link')
     def test_onboarding_redirects_to_stripe(self, mock_link):
         """
         Prueba que la vista de onboarding redirige a Stripe con el enlace generado.
         """
-        # Configurar el mock para que devuelva una URL específica
+        
         mock_url = 'https://onboarding.stripe.test/account/123'
         mock_link.return_value = mock_url
         
+        self.user.profile.stripe_account_id = 'acct_test_123'
+        self.user.profile.save()
         response = self.client.get(reverse('accounts:complete_stripe_onboarding'))
         
-        # Verificar que la función mock fue llamada con el usuario correcto
         mock_link.assert_called_once_with(self.user)
         
-        # Verificar la redirección a la URL de Stripe
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, mock_url)
 

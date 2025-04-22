@@ -38,15 +38,19 @@ class ChatRideIntegrationTests(TestCase):
 
         self.ride.passengers.add(self.passenger)
 
+        self.ride.refresh_from_db()
+        chat = self.ride.chat
+        chat.participants.add(self.passenger)
+
         Message.objects.create(
-            ride=self.ride,
+            chat=chat,
             sender=self.driver,
             content=DRIVER_MESSAGE,
             is_read=True
         )
 
         Message.objects.create(
-            ride=self.ride,
+            chat=chat,
             sender=self.passenger,
             content=PASSENGER_MESSAGE,
             is_read=False

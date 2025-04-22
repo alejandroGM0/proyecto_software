@@ -266,6 +266,24 @@ def report_detail(request, pk):
     
     return render(request, TEMPLATE_REPORT_DETAIL, context)
 
+@login_required
+@user_passes_test(is_admin)
+def mark_report(request, pk):
+    """
+    Vista para marcar un reporte como leído/no leído
+    """
+    from reports.public import toggle_report_read_status
+    
+    report = get_report_by_id(pk)
+    
+    if not report:
+        messages.error(request, "Reporte no encontrado")
+    else:
+        new_status = toggle_report_read_status(report)
+        status_text = "leído" if new_status else "no leído"
+        messages.success(request, f"Reporte marcado como {status_text}")
+    
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard:report_stats'))
 
 @login_required
 @user_passes_test(is_admin)

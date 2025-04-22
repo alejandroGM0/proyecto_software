@@ -18,58 +18,65 @@ from .test_constants import *
 import pytest
 
 class ChatConsumerTests(TestCase):
+    @database_sync_to_async
+    def get_ride_and_chat(self, ride_id):
+        from rides.models import Ride
+        ride = Ride.objects.get(id=ride_id)
+        chat = ride.chat
+        return ride, chat
+
     async def test_chat_consumer_connection(self):
         """Prueba la conexión del consumidor de chat"""
         driver = await self.create_user(DRIVER_USERNAME, DRIVER_PASSWORD)
         passenger = await self.create_user(PASSENGER_USERNAME, PASSENGER_PASSWORD)
         ride = await self.create_ride(driver, passenger)
-        
+        ride, chat = await self.get_ride_and_chat(ride.id)
         communicator = WebsocketCommunicator(
             ChatConsumer.as_asgi(),
-            WS_CHAT_PATH.format(ride.id)
+            WS_CHAT_PATH.format(chat.id)
         )
         communicator.scope["user"] = driver
-        communicator.scope["url_route"] = {"kwargs": {"ride_id": str(ride.id)}}
-        
+        communicator.scope["url_route"] = {"kwargs": {"chat_id": str(chat.id)}}
         connected, _ = await communicator.connect()
         self.assertTrue(connected)
-        
         await communicator.disconnect()
-    
+
+    @database_sync_to_async
+    def ensure_passenger_in_chat(self, ride, passenger):
+        chat = ride.chat
+        chat.participants.add(passenger)
+        chat.save()
+
     async def test_chat_consumer_receive_message(self):
         """Prueba el envío y recepción de mensajes en el consumidor"""
         driver = await self.create_user(DRIVER_USERNAME, DRIVER_PASSWORD)
         passenger = await self.create_user(PASSENGER_USERNAME, PASSENGER_PASSWORD)
         ride = await self.create_ride(driver, passenger)
-        
+        ride, chat = await self.get_ride_and_chat(ride.id)
         driver_comm = WebsocketCommunicator(
             ChatConsumer.as_asgi(),
-            WS_CHAT_PATH.format(ride.id)
+            WS_CHAT_PATH.format(chat.id)
         )
         driver_comm.scope["user"] = driver
-        driver_comm.scope["url_route"] = {"kwargs": {"ride_id": str(ride.id)}}
-        
+        driver_comm.scope["url_route"] = {"kwargs": {"chat_id": str(chat.id)}}
         passenger_comm = WebsocketCommunicator(
             ChatConsumer.as_asgi(),
-            WS_CHAT_PATH.format(ride.id)
+            WS_CHAT_PATH.format(chat.id)
         )
         passenger_comm.scope["user"] = passenger
-        passenger_comm.scope["url_route"] = {"kwargs": {"ride_id": str(ride.id)}}
-        
+        passenger_comm.scope["url_route"] = {"kwargs": {"chat_id": str(chat.id)}}
+        await self.ensure_passenger_in_chat(ride, passenger)
         await driver_comm.connect()
         await passenger_comm.connect()
-        
         await driver_comm.send_json_to({
             'message': DRIVER_MESSAGE
         })
-        
         response = await passenger_comm.receive_json_from()
-        self.assertEqual(response['content'], DRIVER_MESSAGE)
-        self.assertEqual(response['sender'], DRIVER_USERNAME)
-        
+        self.assertEqual(response['message']['content'], DRIVER_MESSAGE)
+        self.assertEqual(response['message']['sender'], DRIVER_USERNAME)
         await driver_comm.disconnect()
         await passenger_comm.disconnect()
-    
+
     @database_sync_to_async
     def create_user(self, username, password):
         """Utilidad para crear usuarios de forma asíncrona"""
@@ -78,7 +85,7 @@ class ChatConsumerTests(TestCase):
             email=f'{username}@example.com',
             password=password
         )
-    
+
     @database_sync_to_async
     def create_ride(self, driver, passenger):
         """Utilidad para crear viajes de forma asíncrona"""

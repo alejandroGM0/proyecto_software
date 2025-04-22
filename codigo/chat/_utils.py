@@ -1,6 +1,8 @@
 # ==========================================
 # Autor: Alejandro Gasca Mediel
 # ==========================================
+
+
 """
 Utilidades para la aplicación de chat.
 """
@@ -34,9 +36,9 @@ def get_messages_for_chat(chat):
     messages_data = []
     
     for message in messages:
-        # Format date as day/month/year
+        
         date_str = message.created_at.strftime('%d/%m/%Y')
-        # Format time as hour:minute
+        
         time_str = message.created_at.strftime('%H:%M')
         
         messages_data.append({
@@ -112,9 +114,9 @@ def synchronize_chat_participants(ride):
     if not hasattr(ride, 'chat') or not ride.chat:
         return
         
-    # Añadir el conductor
+    
     ride.chat.participants.add(ride.driver)
     
-    # Añadir todos los pasajeros
+    
     for passenger in ride.passengers.all():
         ride.chat.participants.add(passenger)

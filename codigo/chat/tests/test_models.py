@@ -35,19 +35,25 @@ class MessageModelTests(TestCase):
             total_seats=RIDE_TOTAL_SEATS,
             price=RIDE_PRICE
         )
-        
+        self.ride.refresh_from_db()
+        if not hasattr(self.ride, 'chat') or self.ride.chat is None:
+            from chat.models import Chat
+            chat = Chat.objects.create()
+            self.ride.chat = chat
+            self.ride.save()
+        self.ride.refresh_from_db()
         self.ride.passengers.add(self.passenger)
 
     def test_message_creation(self):
         """Prueba la creación de mensajes"""
+        chat = self.ride.chat
         message = Message.objects.create(
-            ride=self.ride,
+            chat=chat,
             sender=self.driver,
             content=DRIVER_MESSAGE,
             is_read=False
         )
-        
-        self.assertEqual(message.ride, self.ride)
+        self.assertEqual(message.chat, chat)
         self.assertEqual(message.sender, self.driver)
         self.assertEqual(message.content, DRIVER_MESSAGE)
         self.assertFalse(message.is_read)
@@ -55,12 +61,12 @@ class MessageModelTests(TestCase):
 
     def test_message_string_representation(self):
         """Prueba la representación en cadena del mensaje"""
+        chat = self.ride.chat
         message = Message.objects.create(
-            ride=self.ride,
+            chat=chat,
             sender=self.driver,
             content=DRIVER_MESSAGE,
             is_read=False
         )
-        
         expected = DRIVER_MESSAGE
         self.assertEqual(str(message), expected)

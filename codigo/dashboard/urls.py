@@ -21,11 +21,14 @@ urlpatterns = [
     path('user-management/', views.user_management, name='user_management'),
     path('chat-management/', views.chat_management, name='chat_management'),
     
-    # API endpoints para AJAX
-    path('api/trips/', views.get_trip_data_json, name='api_trips'),
-    path('api/messages/', views.get_message_data_json, name='api_messages'),
-    path('api/reports/', views.get_report_data_json, name='api_reports'),
-    path('api/users/', views.get_user_data_json, name='api_users'),
-    path('api/payments/', views.get_payment_data_json, name='api_payments'),
+    path('api/trips/', views.get_trip_data_json, name='get_trip_data_json'),
+    path('api/messages/', views.get_message_data_json, name='get_message_data_json'),
+    path('api/reports/', views.get_report_data_json, name='get_report_data_json'),
+    path('api/users/', views.get_user_data_json, name='get_user_data_json'),
+    path('api/payments/', views.get_payment_data_json, name='get_payment_data_json'),
+    path('api/data/', views.dashboard_data_api, name='dashboard_data_api'),
     path('api/chat/<int:chat_id>/messages/', views.get_chat_messages, name='get_chat_messages'),
+    
+    path('reports/<int:pk>/', views.report_detail, name='report_detail'),
+    path('mark-report/<int:pk>/', views.mark_report, name='mark_report'),
 ]

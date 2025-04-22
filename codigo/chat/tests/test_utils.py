@@ -10,7 +10,7 @@ from decimal import Decimal
 from chat.models import Message
 from rides.models import Ride
 from chat.public import user_has_chat_access, get_user_chats
-from chat._utils import format_message_for_api, get_messages_for_ride, can_send_message
+from chat._utils import format_message_for_api, can_send_message
 from .test_constants import *
 
 class ChatUtilsTests(TestCase):
@@ -45,28 +45,28 @@ class ChatUtilsTests(TestCase):
         )
         
         self.ride.passengers.add(self.passenger)
-        
+        self.ride.refresh_from_db()
+        chat = self.ride.chat
+        chat.participants.add(self.passenger)  # Asegura que el pasajero está en el chat
         Message.objects.create(
-            ride=self.ride,
+            chat=chat,
             sender=self.driver,
             content=DRIVER_MESSAGE,
             is_read=True
         )
-        
         Message.objects.create(
-            ride=self.ride,
+            chat=chat,
             sender=self.passenger,
             content=PASSENGER_MESSAGE,
             is_read=False
         )
+        self.chat = chat
 
     def test_user_has_chat_access(self):
         """Prueba que verifica quién tiene acceso al chat"""
-        self.assertTrue(user_has_chat_access(self.driver, self.ride))
-        
-        self.assertTrue(user_has_chat_access(self.passenger, self.ride))
-        
-        self.assertFalse(user_has_chat_access(self.other_user, self.ride))
+        self.assertTrue(user_has_chat_access(self.driver, self.chat))
+        self.assertTrue(user_has_chat_access(self.passenger, self.chat))
+        self.assertFalse(user_has_chat_access(self.other_user, self.chat))
 
     def test_get_user_chats_for_driver(self):
         """Prueba obtener los chats del conductor"""

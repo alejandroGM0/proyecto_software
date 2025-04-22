@@ -84,11 +84,10 @@ def ride_detail(request, ride_id):
 @login_required
 def book_ride(request, ride_id):
     ride = get_object_or_404(Ride, id=ride_id)
-    
     if not user_can_book_ride(request.user, ride):
         messages.error(request, "No puedes reservar este viaje.")
         return redirect('rides:ride_detail', ride_id=ride.id)
-    
+    add_passenger_to_ride(request.user, ride)
     return redirect('payments:create_payment', ride_id=ride.id)
 
 @login_required
