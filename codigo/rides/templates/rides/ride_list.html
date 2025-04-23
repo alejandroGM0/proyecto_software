@@ -162,7 +162,7 @@
     <div class="container">
         <div class="rides-grid">
             {% for ride in rides %}
-            <div class="profile-ride-card {% if not ride.is_active %}expired{% endif %}">
+            <div class="profile-ride-card {% if not ride.is_active %}expired{% endif %}" onclick="window.location.href='{% url 'rides:ride_detail' ride.id %}';" style="cursor: pointer;">
                 {% if not ride.is_active %}
                 <div class="expired-badge">
                     <i class="fas fa-history"></i> Finalizado
@@ -190,16 +190,13 @@
                 </p>
                 
                 <div class="card-actions">
-                    <a href="{% url 'rides:ride_detail' ride.id %}" class="button button-primary">
-                        Ver detalles
-                    </a>
-                    
                     {% if user.is_authenticated and user != ride.driver and ride.is_active %}
                         <form method="post" action="{% url 'rides:book_ride' ride.id %}">
                             {% csrf_token %}
                             <button type="submit" 
                                     class="button button-secondary" 
-                                    {% if ride.seats_available == 0 or user in ride.passengers.all %}disabled{% endif %}>
+                                    {% if ride.seats_available == 0 or user in ride.passengers.all %}disabled{% endif %}
+                                    onclick="event.stopPropagation();">
                                 {% if user in ride.passengers.all %}
                                     <i class="fas fa-check-circle"></i> Ya reservado
                                 {% elif ride.seats_available == 0 %}

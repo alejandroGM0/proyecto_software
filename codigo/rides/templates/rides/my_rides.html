@@ -23,7 +23,7 @@
         <h2 class="section-title">Viajes Publicados</h2>
         <div class="rides-grid">
             {% for ride in rides_as_driver %}
-            <div class="ride-card {% if not ride.is_active %}inactive{% endif %}">
+            <div class="ride-card {% if not ride.is_active %}inactive{% endif %}" onclick="window.location.href='{% url 'rides:ride_detail' ride.id %}';" style="cursor: pointer;">
                 <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
                 <div class="ride-info">
                     <p>Fecha: {{ ride.departure_time|date:"j F Y, H:i" }}</p>
@@ -32,9 +32,8 @@
                 <p class="ride-price">{{ ride.get_formatted_price }}</p>
                 <div class="card-actions">
                     {% if ride.is_active %}
-                        <a href="{% url 'rides:edit_ride' ride.id %}" class="button">Editar</a>
+                        <a href="{% url 'rides:edit_ride' ride.id %}" class="button" onclick="event.stopPropagation();">Editar</a>
                     {% endif %}
-                    <a href="{% url 'rides:ride_detail' ride.id %}" class="button">Ver detalles</a>
                 </div>
             </div>
             {% empty %}
@@ -48,16 +47,13 @@
         <h2 class="section-title">Viajes Reservados</h2>
         <div class="rides-grid">
             {% for ride in rides_as_passenger %}
-            <div class="ride-card {% if not ride.is_active %}inactive{% endif %}">
+            <div class="ride-card {% if not ride.is_active %}inactive{% endif %}" onclick="window.location.href='{% url 'rides:ride_detail' ride.id %}';" style="cursor: pointer;">
                 <h3 class="ride-title">{{ ride.origin }} → {{ ride.destination }}</h3>
                 <div class="ride-info">
                     <p>Fecha: {{ ride.departure_time|date:"j F Y, H:i" }}</p>
                     <p>Conductor: {{ ride.driver.username }}</p>
                 </div>
                 <p class="ride-price">{{ ride.get_formatted_price }}</p>
-                <div class="card-actions">
-                    <a href="{% url 'rides:ride_detail' ride.id %}" class="button">Ver detalles</a>
-                </div>
             </div>
             {% empty %}
             <p class="empty-state">No te has unido a ningún viaje como pasajero.</p>

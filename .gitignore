@@ -51,3 +51,4 @@ media/*
 .Trashes
 ehthumbs.db
 Thumbs.db
+.coverage
