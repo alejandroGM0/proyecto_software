@@ -54,6 +54,65 @@
                 <div class="price-label">Precio por asiento</div>
                 <div class="price-value">{{ ride.get_formatted_price }}</div>
             </div>
+            <div class="driver-preferences">
+                <div class="preferences-header">Preferencias del conductor</div>
+                <div class="preferences-items">
+                    <div class="preference-item">
+                        <i class="fas fa-music"></i>
+                        <span>
+                            {% if ride.driver.profile.pref_music == 'any' %}
+                                Cualquiera
+                            {% elif ride.driver.profile.pref_music == 'pop' %}
+                                Pop
+                            {% elif ride.driver.profile.pref_music == 'rock' %}
+                                Rock
+                            {% elif ride.driver.profile.pref_music == 'electronic' %}
+                                Electrónica
+                            {% elif ride.driver.profile.pref_music == 'classical' %}
+                                Clásica
+                            {% elif ride.driver.profile.pref_music == 'none' %}
+                                Prefiero silencio
+                            {% else %}
+                                Cualquiera
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="preference-item">
+                        <i class="fas fa-comment"></i>
+                        <span>
+                            {% if ride.driver.profile.pref_talk == 'chatty' %}
+                                Me gusta conversar
+                            {% elif ride.driver.profile.pref_talk == 'quiet' %}
+                                Prefiero silencio
+                            {% elif ride.driver.profile.pref_talk == 'depends' %}
+                                Depende del momento
+                            {% else %}
+                                Depende del momento
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="preference-item">
+                        <i class="fas fa-smoking{% if not ride.driver.profile.pref_smoking %}-ban{% endif %}"></i>
+                        <span>
+                            {% if ride.driver.profile.pref_smoking %}
+                                Permitido
+                            {% else %}
+                                No permitido
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="preference-item">
+                        <i class="fas fa-paw"></i>
+                        <span>
+                            {% if ride.driver.profile.pref_pets %}
+                                Permitido
+                            {% else %}
+                                No permitido
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
             {% if user.is_authenticated and user != ride.driver and ride.is_active and user in ride.passengers.all %}
                 <div class="reservation-confirmed">
                     <i class="fas fa-check-circle"></i> Ya reservado

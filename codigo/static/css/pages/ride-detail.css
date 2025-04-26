@@ -180,48 +180,74 @@ body {
     color: var(--text-primary);
 }
 
+/* Estilos para las preferencias del conductor */
 .price-reservation-wrapper {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
+    align-items: flex-start;
     justify-content: space-between;
     margin: 0 1.25rem;
     padding-bottom: 0.75rem;
+    gap: 1rem;
 }
 
-.detail-price {
-    padding: 0.5rem 1rem;
-    background-color: rgba(0, 122, 255, 0.08);
+.driver-preferences {
+    flex: 1;
+    min-width: 200px;
+    background-color: rgba(0, 122, 255, 0.05);
     border-radius: 8px;
-    display: inline-block;
+    padding: 0.75rem;
     border-left: 3px solid var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.price-label {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.15rem;
-}
-
-.price-value {
-    font-size: 1.5rem;
+.preferences-header {
+    font-size: 0.85rem;
     color: var(--primary-color);
-    font-weight: 600;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
 }
 
-.reservation-confirmed {
+.preferences-items {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.preference-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-weight: 500;
-    color: var(--primary-color);
-    font-size: 0.9rem;
-    background-color: rgba(0, 122, 255, 0.1);
-    padding: 0.5rem 0.75rem;
-    border-radius: 8px;
+    font-size: 0.85rem;
 }
 
-.reservation-confirmed i {
+.preference-item i {
+    color: var(--primary-color);
+    width: 16px;
+    text-align: center;
     font-size: 1rem;
+}
+
+.preference-item span {
+    color: var(--text-primary);
+    font-weight: 400;
+    flex: 1;
+}
+
+/* Ajuste para pantallas pequeñas */
+@media (max-width: 576px) {
+    .price-reservation-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .detail-price, .driver-preferences, .reservation-confirmed {
+        width: 100%;
+    }
+    
+    .preferences-items {
+        grid-template-columns: 1fr;
+    }
 }
 
 .detail-actions {
