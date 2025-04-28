@@ -72,15 +72,31 @@ El siguiente diagrama muestran la planificación del proyecto:
    pip install -r requirements.txt
    ```
 
-4. Realizar migraciones:
+4. Crear migraciones:
    ```
    python codigo/manage.py migrate
    ```
 
+5. Realizar migraciones:
+   ```
+   python codigo/manage.py makemigrations
+   ```
 5. Crear superusuario:
    ```
    python codigo/manage.py createsuperuser
    ```
+5. Ejecutar:
+```
+   python -m daphne -p 8000 blablacar.asgi:application
+```
+
+## Configuración de variables de entorno
+
+Antes de ejecutar el proyecto, copia el archivo `.env.example` como `.env` en la raíz del proyecto y personaliza los valores según tu entorno:
+
+```bash
+cp .env.example .env
+```
 
 ## Flujo de desarrollo recomendado
 
@@ -166,6 +182,7 @@ charlacar/
 │   ├── payments/       # Procesamiento de pagos
 │   ├── reports/        # Generación de informes
 │   ├── reviews/        # Sistema de valoraciones
+│   ├── dashboard/      # Panel de administración
 │   ├── rides/          # Gestión de viajes
 │   ├── static/         # Archivos estáticos
 │   ├── templates/      # Plantillas HTML globales
