@@ -53,6 +53,12 @@
                 <a href="{% url 'reviews:list' %}" class="button button-secondary">
                     <i class="fas fa-star"></i> Valoraciones
                 </a>
+                <a href="{% url 'reports:my_reports' %}" class="button button-secondary">
+                    <i class="fas fa-flag"></i> Mis Reportes
+                </a>
+                <a href="{% url 'payments:payment_list' %}" class="button button-secondary">
+                    <i class="fas fa-money-bill"></i> Mis Pagos
+                </a>
                 {% if not is_own_profile %}
                 <a href="{% url 'reports:create_report' %}?user_id={{ user.id }}" class="button button-secondary">
                     <i class="fas fa-flag"></i> Reportar

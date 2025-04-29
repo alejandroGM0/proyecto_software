@@ -17,48 +17,50 @@
         </div>
     </div>
     
+    <!-- Mover los filtros fuera del bloque if reports para que siempre sean visibles -->
+    <div class="filter-container">
+        <h3>Filtrar reportes</h3>
+        <form method="get" class="filter-form">
+            <div class="form-group">
+                <label for="report_type">Tipo de reporte</label>
+                <select name="report_type" id="report_type">
+                    <option value="">Todos los tipos</option>
+                    <option value="payment" {% if request.GET.report_type == 'payment' %}selected{% endif %}>Pago</option>
+                    <option value="ride" {% if request.GET.report_type == 'ride' %}selected{% endif %}>Viaje</option>
+                    <option value="user" {% if request.GET.report_type == 'user' %}selected{% endif %}>Usuario</option>
+                    <option value="system" {% if request.GET.report_type == 'system' %}selected{% endif %}>Sistema</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="importance">Importancia</label>
+                <select name="importance" id="importance">
+                    <option value="">Todas las importancias</option>
+                    <option value="normal" {% if request.GET.importance == 'normal' %}selected{% endif %}>Normal</option>
+                    <option value="important" {% if request.GET.importance == 'important' %}selected{% endif %}>Importante</option>
+                    <option value="urgent" {% if request.GET.importance == 'urgent' %}selected{% endif %}>Urgente</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="status">Estado</label>
+                <select name="status" id="status">
+                    <option value="">Todos los estados</option>
+                    <option value="unread" {% if request.GET.status == 'unread' %}selected{% endif %}>No leídos</option>
+                    <option value="read" {% if request.GET.status == 'read' %}selected{% endif %}>Leídos</option>
+                    <option value="responded" {% if request.GET.status == 'responded' %}selected{% endif %}>Respondidos</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="search">Buscar</label>
+                <input type="text" name="search" id="search" placeholder="Buscar por título, descripción..." value="{{ request.GET.search }}">
+            </div>
+            <div class="form-group" style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <button type="submit" class="button button-primary" style="width: 48%;">Filtrar</button>
+                <a href="{% url 'reports:report_list' %}" class="button button-secondary" style="width: 48%;">Restablecer</a>
+            </div>
+        </form>
+    </div>
+    
     {% if reports %}
-        <div class="filter-container">
-            <h3>Filtrar reportes</h3>
-            <form method="get" class="filter-form">
-                <div class="form-group">
-                    <label for="report_type">Tipo de reporte</label>
-                    <select name="report_type" id="report_type">
-                        <option value="">Todos los tipos</option>
-                        <option value="payment" {% if request.GET.report_type == 'payment' %}selected{% endif %}>Pago</option>
-                        <option value="ride" {% if request.GET.report_type == 'ride' %}selected{% endif %}>Viaje</option>
-                        <option value="user" {% if request.GET.report_type == 'user' %}selected{% endif %}>Usuario</option>
-                        <option value="system" {% if request.GET.report_type == 'system' %}selected{% endif %}>Sistema</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="importance">Importancia</label>
-                    <select name="importance" id="importance">
-                        <option value="">Todas las importancias</option>
-                        <option value="1" {% if request.GET.importance == '1' %}selected{% endif %}>Normal</option>
-                        <option value="2" {% if request.GET.importance == '2' %}selected{% endif %}>Importante</option>
-                        <option value="3" {% if request.GET.importance == '3' %}selected{% endif %}>Urgente</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="status">Estado</label>
-                    <select name="status" id="status">
-                        <option value="">Todos los estados</option>
-                        <option value="unread" {% if request.GET.status == 'unread' %}selected{% endif %}>No leídos</option>
-                        <option value="read" {% if request.GET.status == 'read' %}selected{% endif %}>Leídos</option>
-                        <option value="responded" {% if request.GET.status == 'responded' %}selected{% endif %}>Respondidos</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="search">Buscar</label>
-                    <input type="text" name="search" id="search" placeholder="Buscar por título, descripción..." value="{{ request.GET.search }}">
-                </div>
-                <div class="form-group" style="display: flex; align-items: flex-end;">
-                    <button type="submit" class="button button-primary" style="width: 100%;">Filtrar</button>
-                </div>
-            </form>
-        </div>
-        
         <div class="reports-list">
             {% for report in page_obj %}
                 <div class="report-card {% if not report.read %}unread{% endif %} {% if report.response %}responded{% endif %}">
@@ -134,7 +136,7 @@
         
     {% else %}
         <div class="no-reports">
-            <p>No se encontraron reportes. Crea uno nuevo haciendo clic en el botón "Crear nuevo reporte".</p>
+            <p>No se encontraron reportes con los criterios de filtrado actuales.</p>
         </div>
     {% endif %}
 </div>
