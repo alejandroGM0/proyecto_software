@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mis Valoraciones{% endblock %}
+{% block title %}{% if viewing_own %}Mis Valoraciones{% else %}Valoraciones de {{ target_user.username }}{% endif %}{% endblock %}
 
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
@@ -151,13 +151,31 @@
 {% block content %}
 <div class="page-container">
     <div class="page-header">
-        <h1 class="page-title">Mis Valoraciones</h1>
+        <h1 class="page-title">
+            {% if viewing_own %}
+                Mis Valoraciones
+            {% else %}
+                Valoraciones de {{ target_user.username }}
+            {% endif %}
+        </h1>
     </div>
     
     <div class="tabs-container">
         <div class="tabs-header">
-            <button class="tab-button active" data-tab="given">Valoraciones dadas</button>
-            <button class="tab-button" data-tab="received">Valoraciones recibidas</button>
+            <button class="tab-button active" data-tab="given">
+                {% if viewing_own %}
+                    Valoraciones dadas
+                {% else %}
+                    Valoraciones dadas por {{ target_user.username }}
+                {% endif %}
+            </button>
+            <button class="tab-button" data-tab="received">
+                {% if viewing_own %}
+                    Valoraciones recibidas
+                {% else %}
+                    Valoraciones recibidas por {{ target_user.username }}
+                {% endif %}
+            </button>
         </div>
         
         <!-- Valoraciones dadas -->
@@ -186,9 +204,11 @@
                             <a href="{% url 'reviews:detail' review.id %}" class="button button-primary">
                                 <i class="fas fa-eye"></i> Ver
                             </a>
+                            {% if viewing_own %}
                             <a href="{% url 'reviews:delete' review.id %}" class="button button-secondary">
                                 <i class="fas fa-trash"></i> Eliminar
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                 {% endfor %}
@@ -198,7 +218,11 @@
                     <div class="empty-icon">
                         <i class="fas fa-star"></i>
                     </div>
-                    <p>No has dado ninguna valoración aún.</p>
+                    {% if viewing_own %}
+                        <p>No has dado ninguna valoración aún.</p>
+                    {% else %}
+                        <p>{{ target_user.username }} no ha dado ninguna valoración aún.</p>
+                    {% endif %}
                 </div>
             {% endif %}
         </div>
@@ -241,7 +265,11 @@
                     <div class="empty-icon">
                         <i class="fas fa-star"></i>
                     </div>
-                    <p>No has recibido ninguna valoración aún.</p>
+                    {% if viewing_own %}
+                        <p>No has recibido ninguna valoración aún.</p>
+                    {% else %}
+                        <p>{{ target_user.username }} no ha recibido ninguna valoración aún.</p>
+                    {% endif %}
                 </div>
             {% endif %}
         </div>

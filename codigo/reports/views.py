@@ -41,7 +41,6 @@ def report_list(request):
     if importance := request.GET.get("importance"):
         if importance:
             # Filtrar directamente con el valor exacto
-            print(f"Aplicando filtro de importancia: '{importance}'")
             reports = reports.filter(importance=importance)
 
     # Filtro de estado
@@ -92,7 +91,6 @@ def my_reports(request):
     if importance := request.GET.get("importance"):
         if importance:
             # Filtrar directamente con el valor exacto
-            print(f"Aplicando filtro de importancia: '{importance}'")
             reports = reports.filter(importance=importance)
 
     # Filtro de estado

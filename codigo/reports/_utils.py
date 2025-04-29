@@ -72,9 +72,6 @@ def filter_reports(request, reports):
     """
     filter_form = ReportFilterForm(request.GET)
 
-    # Guardar copia del queryset original para comparación
-    original_count = reports.count()
-
     if filter_form.is_valid():
         # Filtrar por tipo
         if report_type := request.GET.get("report_type"):
@@ -120,23 +117,6 @@ def filter_reports(request, reports):
             reports = reports.filter(
                 Q(title__icontains=search) | Q(description__icontains=search)
             )
-
-    # Registrar información sobre el filtrado para diagnóstico
-    filtered_count = reports.count()
-    if request.GET.get("importance"):
-        importance_value = request.GET.get("importance")
-        print(f"\n--- FILTRO DE IMPORTANCIA APLICADO ---")
-        print(f"Valor del filtro: '{importance_value}'")
-        print(f"Reportes antes: {original_count}, después: {filtered_count}")
-
-        # Mostrar las IMPORTANCE_CHOICES definidas en el modelo Report
-        print(
-            f"Valores de importancia definidos en el modelo: {Report.IMPORTANCE_CHOICES}"
-        )
-
-        # Imprimir valores de importancia de algunos reportes para diagnóstico
-        for report in Report.objects.all()[:3]:
-            print(f"Reporte ID {report.id}: importance='{report.importance}'")
 
     return reports, filter_form
 
