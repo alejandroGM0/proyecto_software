@@ -19,6 +19,15 @@ class CustomUserCreationForm(UserCreationForm):
             'unique': 'Este nombre de usuario ya está en uso.',
         }
     )
+    email = forms.EmailField(
+        label="Correo electrónico",
+        required=True,
+        help_text="Ingrese un correo electrónico válido.",
+        error_messages={
+            'required': 'Este campo es obligatorio.',
+            'invalid': 'Ingrese un correo electrónico válido.',
+        }
+    )
     password1 = forms.CharField(
         widget=forms.PasswordInput,
         label="Contraseña",  
@@ -38,7 +47,13 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'password1', 'password2')
+        fields = ('username', 'email', 'password1', 'password2')
+        
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('Este correo electrónico ya está registrado. Por favor, utilice otro.')
+        return email
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
