@@ -86,6 +86,9 @@
                 <a href="{% url 'reports:create_report' %}?user_id={{ user.id }}" class="button button-secondary">
                     <i class="fas fa-flag"></i> Reportar
                 </a>
+                <a href="{% url 'chat:create_direct_chat' user.id %}" class="button button-secondary">
+                    <i class="fas fa-envelope"></i> Enviar Mensaje
+                </a>
                 <a href="javascript:history.back()" class="button button-secondary">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
