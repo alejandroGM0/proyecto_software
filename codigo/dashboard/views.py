@@ -9,7 +9,8 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.utils import timezone
-from rides.public import get_rides_published_in_period
+from rides.public import get_rides_published_in_period, get_recently_published_rides
+
 from ._utils import (
     get_dashboard_data, get_rides_data, get_messages_data, 
     get_reports_data, get_users_data, get_payments_data,
@@ -63,6 +64,7 @@ def dashboard(request):
     context['recent_activities'] = get_recent_activities(include_rides=False)
     context['ride_activities'] = get_ride_activities()
     
+    context['recently_published_rides'] = get_recently_published_rides(limit=3)
     
     today = timezone.now().date()
     context['recent_payments'] = get_recent_payments(days=7, limit=5)
