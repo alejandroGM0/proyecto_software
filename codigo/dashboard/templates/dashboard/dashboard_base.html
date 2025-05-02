@@ -42,7 +42,7 @@
     <div class="dashboard-content">
         <div class="dashboard-heading">
             <h1>{% block dashboard_heading %}Panel de Control{% endblock %}</h1>
-            {% if active_section != 'main' and active_section != 'ride_management' %}
+            {% if active_section != 'main' and active_section != 'ride_management' and active_section != 'user_management' and active_section != 'chat_management' %}
             <div class="period-dropdown">
                 <button class="period-select-button">
                     <span class="period-label">Periodo: <span class="selected-period">
