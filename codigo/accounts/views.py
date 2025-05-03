@@ -48,7 +48,7 @@ def register_view(request):
             profile.user = user
             profile.save()
             
-            # Crear cuentas de Stripe para el usuario
+            
             customer_id, account_id = associate_stripe_accounts_to_user(user)
             if customer_id:
                 messages.success(request, "Tu cuenta de pagos ha sido configurada correctamente.")
@@ -73,58 +73,81 @@ def logout_view(request):
 @login_required
 def profile_view(request, username):
     user, user_profile = get_user_and_profile(request, username)
-    #Necesario en caso de buscar el perfil de otro usuario (no necesariamente el mismo que esta logueado)
+    
     if not user:
         return redirect(RIDE_LIST_URL)
     
-    # Primero obtenemos los datos de viajes
+    
+    is_own_profile = request.user == user
+    if not is_own_profile and not user_profile.profile_visible:
+        
+        context = {
+            USER_KEY: user,
+            USER_PROFILE_KEY: user_profile,
+            IS_OWN_PROFILE_KEY: False,
+            'profile_not_visible': True,
+        }
+        return render(request, USER_PROFILE_TEMPLATE, context)
+    
+    
     rides_data = get_user_rides_data(user)
     profile_data = get_user_profile_data(user)
     
-    # Extraemos las listas de viajes de rides_data
-    active_rides_as_driver = rides_data.get('active_rides_as_driver', [])
-    expired_rides_as_driver = rides_data.get('expired_rides_as_driver', [])
-    active_rides_as_passenger = rides_data.get('active_rides_as_passenger', [])
-    expired_rides_as_passenger = rides_data.get('expired_rides_as_passenger', [])
     
-    # Ahora creamos los paginadores con las listas obtenidas
-    # Paginación para viajes como conductor (activos)
-    paginator_driver_active = Paginator(active_rides_as_driver, 6)
-    driver_active_page = request.GET.get('page') if request.GET.get('tab') == 'driver' and request.GET.get('status') == 'active' else 1
-    active_driver_page_obj = paginator_driver_active.get_page(driver_active_page)
+    show_rides_history = is_own_profile or user_profile.show_rides_history
     
-    # Paginación para viajes como conductor (finalizados)
-    paginator_driver_expired = Paginator(expired_rides_as_driver, 6)
-    driver_expired_page = request.GET.get('page') if request.GET.get('tab') == 'driver' and request.GET.get('status') == 'expired' else 1
-    expired_driver_page_obj = paginator_driver_expired.get_page(driver_expired_page)
     
-    # Paginación para viajes como pasajero (activos)
-    paginator_passenger_active = Paginator(active_rides_as_passenger, 6)
-    passenger_active_page = request.GET.get('page') if request.GET.get('tab') == 'passenger' and request.GET.get('status') == 'active' else 1
-    active_passenger_page_obj = paginator_passenger_active.get_page(passenger_active_page)
+    if show_rides_history:
+        active_rides_as_driver = rides_data.get('active_rides_as_driver', [])
+        expired_rides_as_driver = rides_data.get('expired_rides_as_driver', [])
+        active_rides_as_passenger = rides_data.get('active_rides_as_passenger', [])
+        expired_rides_as_passenger = rides_data.get('expired_rides_as_passenger', [])
+        
+        
+        
+        paginator_driver_active = Paginator(active_rides_as_driver, 6)
+        driver_active_page = request.GET.get('page') if request.GET.get('tab') == 'driver' and request.GET.get('status') == 'active' else 1
+        active_driver_page_obj = paginator_driver_active.get_page(driver_active_page)
+        
+        
+        paginator_driver_expired = Paginator(expired_rides_as_driver, 6)
+        driver_expired_page = request.GET.get('page') if request.GET.get('tab') == 'driver' and request.GET.get('status') == 'expired' else 1
+        expired_driver_page_obj = paginator_driver_expired.get_page(driver_expired_page)
+        
+        
+        paginator_passenger_active = Paginator(active_rides_as_passenger, 6)
+        passenger_active_page = request.GET.get('page') if request.GET.get('tab') == 'passenger' and request.GET.get('status') == 'active' else 1
+        active_passenger_page_obj = paginator_passenger_active.get_page(passenger_active_page)
+        
+        
+        paginator_passenger_expired = Paginator(expired_rides_as_passenger, 6)
+        passenger_expired_page = request.GET.get('page') if request.GET.get('tab') == 'passenger' and request.GET.get('status') == 'expired' else 1
+        expired_passenger_page_obj = paginator_passenger_expired.get_page(passenger_expired_page)
+    else:
+        
+        active_driver_page_obj = []
+        expired_driver_page_obj = []
+        active_passenger_page_obj = []
+        expired_passenger_page_obj = []
     
-    # Paginación para viajes como pasajero (finalizados)
-    paginator_passenger_expired = Paginator(expired_rides_as_passenger, 6)
-    passenger_expired_page = request.GET.get('page') if request.GET.get('tab') == 'passenger' and request.GET.get('status') == 'expired' else 1
-    expired_passenger_page_obj = paginator_passenger_expired.get_page(passenger_expired_page)
     
-    # También necesitamos modificar el contexto para mostrar las versiones paginadas
     context = {
         USER_KEY: user,
         USER_PROFILE_KEY: user_profile,
-        IS_OWN_PROFILE_KEY: request.user == user,
-        # Incluimos los datos originales para mantener la compatibilidad con código existente
+        IS_OWN_PROFILE_KEY: is_own_profile,
+        'show_rides_history': show_rides_history,
+        
         **rides_data,
         **profile_data,
-        # Añadimos los objetos de paginación
+        
         'active_driver_page_obj': active_driver_page_obj,
         'expired_driver_page_obj': expired_driver_page_obj,
         'active_passenger_page_obj': active_passenger_page_obj,
         'expired_passenger_page_obj': expired_passenger_page_obj,
     }
     
-    # Seleccionamos la plantilla adecuada según si el usuario está viendo su propio perfil u otro
-    template = PROFILE_TEMPLATE if request.user == user else USER_PROFILE_TEMPLATE
+    
+    template = PROFILE_TEMPLATE if is_own_profile else USER_PROFILE_TEMPLATE
     
     return render(request, template, context)
 

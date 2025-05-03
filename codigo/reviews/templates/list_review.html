@@ -145,6 +145,31 @@
         color: var(--text-secondary);
         opacity: 0.7;
     }
+
+    .private-message {
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        margin: 1rem 0;
+    }
+    
+    .private-message i {
+        display: block;
+        font-size: 3rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+    
+    .private-message h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .private-message p {
+        color: var(--text-secondary);
+    }
 </style>
 {% endblock %}
 
@@ -180,7 +205,13 @@
         
         <!-- Valoraciones dadas -->
         <div id="given-tab" class="tab-content active">
-            {% if reviews_given %}
+            {% if profile_is_private %}
+                <div class="private-message">
+                    <i class="fas fa-lock"></i>
+                    <h3>Contenido Privado</h3>
+                    <p>Las valoraciones dadas por este usuario están configuradas como privadas.</p>
+                </div>
+            {% elif reviews_given %}
                 <div class="reviews-grid">
                 {% for review in reviews_given %}
                     <div class="review-card">

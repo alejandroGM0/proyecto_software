@@ -1,12 +1,54 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Perfil de {{ user.username }}{% endblock %}
+{% block title %}Perfil - {{ user.username }}{% endblock %}
 
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+    .private-message {
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        margin: 2rem 0;
+    }
+    
+    .private-message i {
+        display: block;
+        font-size: 3rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+    
+    .private-message h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .private-message p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+    
+    .limited-profile {
+        background-color: var(--card-background);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 500px;
+        margin: 3rem auto;
+    }
+    
+    .limited-profile .profile-avatar {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 1.5rem;
+    }
+
     /* Estilos específicos para la biografía */
     .user-bio {
         margin-top: 2.5rem;
@@ -45,6 +87,38 @@
 {% endblock %}
 
 {% block content %}
+{% if profile_not_visible %}
+    <div class="limited-profile">
+        <div class="profile-avatar-container">
+            <div class="profile-avatar">
+                {{ user.username|first|upper }}
+            </div>
+        </div>
+        <h1 class="profile-title">{{ user.username }}</h1>
+        <p class="profile-subtitle">Miembro desde {{ user.date_joined|date:"F Y" }}</p>
+        
+        <div class="private-message">
+            <i class="fas fa-lock"></i>
+            <h3>Perfil Privado</h3>
+            <p>Este usuario ha configurado su perfil como privado.</p>
+            
+            <div class="profile-actions">
+                <a href="{% url 'reviews:list' %}?user={{ user.username }}" class="button button-secondary">
+                    <i class="fas fa-star"></i> Ver Valoraciones
+                </a>
+                <a href="{% url 'reports:create_report' %}?user_id={{ user.id }}" class="button button-secondary">
+                    <i class="fas fa-flag"></i> Reportar
+                </a>
+                <a href="{% url 'chat:create_direct_chat' user.id %}" class="button button-secondary">
+                    <i class="fas fa-envelope"></i> Enviar Mensaje
+                </a>
+                <a href="javascript:history.back()" class="button button-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+{% else %}
 <div class="profile-container">
     <div class="profile-layout">
         <div class="profile-sidebar">
@@ -104,6 +178,13 @@
         
         <!-- Panel derecho: Viajes -->
         <div class="profile-content">
+            {% if not show_rides_history %}
+                <div class="private-message">
+                    <i class="fas fa-eye-slash"></i>
+                    <h3>Historial de Viajes Privado</h3>
+                    <p>Este usuario ha configurado su historial de viajes como privado.</p>
+                </div>
+            {% else %}
             <div class="rides-tabs">
                 <button class="tab-button active" data-tab="driver">Como Conductor</button>
                 <button class="tab-button" data-tab="passenger">Como Pasajero</button>
@@ -218,9 +299,11 @@
                     {% endfor %}
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>
+{% endif %}
 
 {% block extra_js %}
 <script>

@@ -21,6 +21,7 @@ from .public import (can_delete_review, can_review_ride, get_review_by_id,
                      get_reviews_by_user, get_reviews_received_by_user,
                      get_user_already_reviewed, ride_has_finished,
                      user_has_participation)
+from accounts.public import get_user_profile
 
 
 def get_review_or_404(review_id):
@@ -41,17 +42,17 @@ def check_review_permission(request, ride):
     """
     Verifica que el usuario tenga permiso para valorar un viaje.
     """
-    # Verificar que el usuario participó en el viaje (como conductor o pasajero)
+    
     if not user_has_participation(request.user, ride):
         messages.error(request, NO_PARTICIPATION_ERROR)
         return redirect("rides:ride_detail", ride_id=ride.id)
 
-    # Verificar que el viaje ya ha ocurrido
+    
     if not ride_has_finished(ride):
         messages.error(request, RIDE_NOT_FINISHED_ERROR)
         return redirect("rides:ride_detail", ride_id=ride.id)
 
-    # Verificar si el usuario ya ha dejado una valoración para este viaje
+    
     if get_user_already_reviewed(request.user, ride):
         messages.info(request, REVIEW_ALREADY_EXISTS_ERROR)
         return redirect("rides:ride_detail", ride_id=ride.id)
@@ -105,7 +106,7 @@ def prepare_review_list_context(request):
     """
     Prepara el contexto para la lista de valoraciones.
     """
-    # Verificar si se ha solicitado ver valoraciones de otro usuario
+    
     username = request.GET.get("user")
     target_user = None
 
@@ -117,21 +118,33 @@ def prepare_review_list_context(request):
         except User.DoesNotExist:
             pass
 
-    # Si no se encontró el usuario o no se proporcionó username, usar el usuario actual
+    
     if not target_user:
         target_user = request.user
 
-    # Determinar si estamos viendo nuestras propias valoraciones o las de otro usuario
+    
     viewing_own = target_user == request.user
-
-    reviews_given = get_reviews_by_user(target_user)
+    
+    
+    target_profile = get_user_profile(target_user)
+    
+    
+    profile_is_private = not viewing_own and not target_profile.profile_visible
+    
+    
     reviews_received = get_reviews_received_by_user(target_user)
+    
+    
+    reviews_given = []
+    if viewing_own or not profile_is_private:
+        reviews_given = get_reviews_by_user(target_user)
 
     return {
         REVIEWS_GIVEN_KEY: reviews_given,
         REVIEWS_RECEIVED_KEY: reviews_received,
         "target_user": target_user,
         "viewing_own": viewing_own,
+        "profile_is_private": profile_is_private
     }
 
 
@@ -153,9 +166,9 @@ def redirect_after_delete(review):
     """
     Redirecciona adecuadamente después de eliminar una valoración.
     """
-    # Si el viaje existe, redireccionar a la página de detalles del viaje
+    
     if review.ride:
         return redirect("rides:ride_detail", ride_id=review.ride.id)
 
-    # De lo contrario, redireccionar a la lista de valoraciones
+    
     return redirect(get_url_full(LIST_REVIEWS_NAME))

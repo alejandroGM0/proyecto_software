@@ -53,3 +53,12 @@ ehthumbs.db
 Thumbs.db
 .coverage
 documentacion/documents.md
+components_table.html
+api_components_table.html
+diagramas_modelos.html
+requirements.txt
+diagramas/components_files_table.html
+diagramas/chat_message_sequence.html
+diagramas/arquitectura_proyecto.html
+diagramas/api_components_table.html
+codigo/chat/mermaid_diagram.py

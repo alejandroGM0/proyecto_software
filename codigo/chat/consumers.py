@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from accounts.public import update_last_activity
 from .models import Chat
-from .constants import CHAT_GROUP_FORMAT, MESSAGE_TYPE_CHAT, MESSAGE_NO_PERMISSION
+from .constants import CHAT_GROUP_FORMAT, MESSAGE_TYPE_CHAT, MESSAGE_NO_PERMISSION, ERROR_PROCESSING_MESSAGE
 from ._utils import can_access_chat, format_message_for_api, save_chat_message, format_message_for_websocket
 
 class ChatConsumer(AsyncWebsocketConsumer):
