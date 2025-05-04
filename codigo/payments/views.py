@@ -125,11 +125,14 @@ def create_payment(request, ride_id):
         )
         return redirect("rides:ride_detail", ride_id=ride_id)
 
+    # Modificar esta consulta para buscar correctamente solo pagos activos o completados
     existing_payment = Payment.objects.filter(
         payer=request.user,
         ride=ride,
-        status__in=[PAYMENT_STATUS_PENDING, PAYMENT_STATUS_COMPLETED],
+    ).exclude(
+        status__in=[PAYMENT_STATUS_CANCELLED, PAYMENT_STATUS_FAILED, PAYMENT_STATUS_REFUNDED]
     ).first()
+    
 
     if existing_payment:
         if existing_payment.status == PAYMENT_STATUS_COMPLETED:
@@ -148,6 +151,7 @@ def create_payment(request, ride_id):
                 amount=ride.price,
                 ride=ride,
                 status=PAYMENT_STATUS_PENDING,
+                payment_method=PAYMENT_METHOD_STRIPE,
             )
             payment.save()
 

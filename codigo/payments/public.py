@@ -8,7 +8,7 @@ from decimal import Decimal
 from datetime import timedelta
 
 from .models import Payment
-from .constants import PAYMENT_STATUS_COMPLETED
+from .constants import PAYMENT_STATUS_COMPLETED, PAYMENT_STATUS_REFUNDED
 
 # Clave pública de Stripe para usar en el frontend
 STRIPE_PUBLIC_KEY = getattr(settings, 'STRIPE_PUBLIC_KEY', '')
@@ -83,7 +83,26 @@ def get_recent_payments(days=7, limit=5):
     """
     Obtiene los pagos más recientes realizados en los últimos días especificados.
     """
-    recent_date = timezone.now() - timedelta(days=days)
+    recent_date = timezone.now() - timedelta(days=7)
     return Payment.objects.filter(
         created_at__gte=recent_date
     ).order_by('-created_at')[:limit]
+    
+def update_payments_on_booking_cancel(user, ride):
+    """
+    Actualiza el estado de los pagos asociados a un usuario y un viaje cuando
+    se cancela una reserva de viaje.
+
+    """
+    payments = Payment.objects.filter(
+        payer=user,
+        ride=ride,
+    )
+    
+    count = 0
+    for payment in payments:
+        payment.status = PAYMENT_STATUS_REFUNDED
+        payment.save()
+        count += 1
+        
+    return count

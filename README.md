@@ -46,7 +46,7 @@ El siguiente diagrama muestran la planificación del proyecto:
 ## Instalación
 
 ### Requisitos previos
-- Python 3.8+
+- Python 3.13.3 (en caso de otra versión los paquetes de requirements.txt podrían usar versiones diferentes).
 - pip
 - Virtualenv (recomendado)
 
@@ -54,8 +54,7 @@ El siguiente diagrama muestran la planificación del proyecto:
 
 1. Clonar el repositorio:
    ```
-   git clone https://github.com/tu-usuario/charlacar.git
-   cd charlacar
+   git clone https://github.com/alejandroGM0proyecto_software.git
    ```
 
 2. Crear y activar entorno virtual:

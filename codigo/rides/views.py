@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from payments.public import update_payments_on_booking_cancel
 
 from ._utils import filter_rides_complex, get_ride_context, paginate_rides, process_search_params
 from .constants import (AVAILABLE_SEATS_KEY, DATE_KEY, DESTINATION_KEY,
@@ -152,7 +153,6 @@ def edit_ride(request, ride_id):
     return render(request, RIDE_FORM_TEMPLATE, {FORM_KEY: form, EDIT_MODE_KEY: True})
 
 
-#DEBERIA DE HABER UN ENDPOINT PARA PAYMENTS
 @login_required
 def cancel_booking(request, ride_id):
     """Cancela la reserva de un viaje para el usuario actual."""
@@ -169,6 +169,9 @@ def cancel_booking(request, ride_id):
     
     ride.passengers.remove(request.user)
     ride.save()
+    
+    update_payments_on_booking_cancel(request.user, ride)
+
     
     messages.success(request, RIDE_BOOKING_CANCELLED_SUCCESS)
     return redirect(RIDE_DETAIL_URL, ride_id=ride.id)
