@@ -1,3 +1,6 @@
+//==========================================
+// Autor:Álvaro Pérez Gregorio
+//==========================================
 // Dashboard JavaScript
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar el selector de período
