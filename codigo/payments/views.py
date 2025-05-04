@@ -1,3 +1,6 @@
+# ==========================================
+# Autor: David Colás Martín
+# ==========================================
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
@@ -126,13 +129,20 @@ def create_payment(request, ride_id):
         return redirect("rides:ride_detail", ride_id=ride_id)
 
     # Modificar esta consulta para buscar correctamente solo pagos activos o completados
-    existing_payment = Payment.objects.filter(
-        payer=request.user,
-        ride=ride,
-    ).exclude(
-        status__in=[PAYMENT_STATUS_CANCELLED, PAYMENT_STATUS_FAILED, PAYMENT_STATUS_REFUNDED]
-    ).first()
-    
+    existing_payment = (
+        Payment.objects.filter(
+            payer=request.user,
+            ride=ride,
+        )
+        .exclude(
+            status__in=[
+                PAYMENT_STATUS_CANCELLED,
+                PAYMENT_STATUS_FAILED,
+                PAYMENT_STATUS_REFUNDED,
+            ]
+        )
+        .first()
+    )
 
     if existing_payment:
         if existing_payment.status == PAYMENT_STATUS_COMPLETED:

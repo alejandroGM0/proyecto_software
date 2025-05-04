@@ -1,3 +1,6 @@
+# ==========================================
+# Autor: David Colás Martín
+# ==========================================
 """
 Funciones de utilidad internas para la aplicación de reportes.
 """

@@ -1,3 +1,6 @@
+# ==========================================
+# Autor: David Colás Martín
+# ==========================================
 """
 Constantes utilizadas en la aplicación de reportes.
 """
