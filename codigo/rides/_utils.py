@@ -50,6 +50,10 @@ def filter_rides_complex(
     max_price=None,
     available_seats=None,
     driver=None,
+    time_from=None,
+    time_to=None,
+    allows_smoking=None,
+    allows_pets=None
 ):
     """
     Filtra viajes con criterios complejos.
@@ -72,8 +76,101 @@ def filter_rides_complex(
         )
     if driver:
         rides = rides.filter(driver__username__icontains=driver)
+    
+    # Nuevos filtros
+    if time_from is not None:
+        # Filtra viajes por hora de salida mínima (hora del día)
+        rides = rides.filter(departure_time__time__gte=time_from)
+    if time_to is not None:
+        # Filtra viajes por hora de salida máxima (hora del día)
+        rides = rides.filter(departure_time__time__lte=time_to)
+    if allows_smoking is not None:
+        # Filtra viajes donde el conductor permite fumar
+        rides = rides.filter(driver__profile__pref_smoking=allows_smoking)
+    if allows_pets is not None:
+        # Filtra viajes donde el conductor permite mascotas
+        rides = rides.filter(driver__profile__pref_pets=allows_pets)
 
     return rides.order_by("departure_time")
+
+
+def process_search_params(request_data):
+    """
+    Procesa los parámetros de búsqueda de viajes y devuelve los valores formateados
+    correctamente para ser usados en el filtrado.
+    """
+    from datetime import datetime
+    from rides.constants import (
+        ORIGIN_KEY, DESTINATION_KEY, DATE_KEY, 
+        TIME_FROM_KEY, TIME_TO_KEY, 
+        PRICE_MIN_KEY, PRICE_MAX_KEY,
+        ALLOWS_SMOKING_KEY, ALLOWS_PETS_KEY
+    )
+    
+    origin = request_data.get(ORIGIN_KEY, '')
+    destination = request_data.get(DESTINATION_KEY, '')
+    date = request_data.get(DATE_KEY, None)
+    time_from = request_data.get(TIME_FROM_KEY, None)
+    time_to = request_data.get(TIME_TO_KEY, None)
+    price_min = request_data.get(PRICE_MIN_KEY, None)
+    price_max = request_data.get(PRICE_MAX_KEY, None)
+    allows_smoking = request_data.get(ALLOWS_SMOKING_KEY, None)
+    allows_pets = request_data.get(ALLOWS_PETS_KEY, None)
+    
+    date_obj = None
+    if date and date.strip():
+        try:
+            date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+        except ValueError:
+            date_obj = None
+    
+    time_from_obj = None
+    if time_from and time_from.strip():
+        try:
+            time_from_obj = datetime.strptime(time_from, '%H:%M').time()
+        except ValueError:
+            time_from_obj = None
+    
+    time_to_obj = None
+    if time_to and time_to.strip():
+        try:
+            time_to_obj = datetime.strptime(time_to, '%H:%M').time()
+        except ValueError:
+            time_to_obj = None
+    
+    price_min_val = None
+    if price_min and price_min.strip():
+        try:
+            price_min_val = float(price_min)
+        except ValueError:
+            price_min_val = None
+    
+    price_max_val = None
+    if price_max and price_max.strip():
+        try:
+            price_max_val = float(price_max)
+        except ValueError:
+            price_max_val = None
+    
+    allows_smoking_val = None
+    if allows_smoking == 'on':
+        allows_smoking_val = True
+    
+    allows_pets_val = None
+    if allows_pets == 'on':
+        allows_pets_val = True
+    
+    return {
+        'origin': origin,
+        'destination': destination,
+        'date': date_obj,
+        'time_from': time_from_obj,
+        'time_to': time_to_obj,
+        'min_price': price_min_val,
+        'max_price': price_max_val,
+        'allows_smoking': allows_smoking_val,
+        'allows_pets': allows_pets_val
+    }
 
 
 def get_ride_context(ride: Ride, user: User = None) -> dict:

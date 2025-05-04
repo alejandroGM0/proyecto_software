@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from ._utils import filter_rides_complex, get_ride_context, paginate_rides
+from ._utils import filter_rides_complex, get_ride_context, paginate_rides, process_search_params
 from .constants import (AVAILABLE_SEATS_KEY, DATE_KEY, DESTINATION_KEY,
                         EDIT_MODE_KEY, FORM_ERROR, FORM_KEY, IS_DRIVER_KEY,
                         IS_PASSENGER_KEY, NO_PERMISSION_ERROR, ORIGIN_KEY,
@@ -16,7 +16,9 @@ from .constants import (AVAILABLE_SEATS_KEY, DATE_KEY, DESTINATION_KEY,
                         RIDE_DETAIL_TEMPLATE, RIDE_DETAIL_URL,
                         RIDE_FORM_TEMPLATE, RIDE_FULL_ERROR, RIDE_KEY,
                         RIDE_LIST_TEMPLATE, RIDE_LIST_URL, RIDE_OWN_ERROR,
-                        RIDE_UPDATED_SUCCESS, RIDES_KEY, SEARCH_FORM_KEY)
+                        RIDE_UPDATED_SUCCESS, RIDES_KEY, SEARCH_FORM_KEY,
+                        TIME_FROM_KEY, TIME_TO_KEY, PRICE_MIN_KEY, PRICE_MAX_KEY,
+                        ALLOWS_SMOKING_KEY, ALLOWS_PETS_KEY, RIDE_BOOKING_CANCELLED_SUCCESS)
 from .forms import RideForm, RideSearchForm
 from .models import Ride
 from .public import (add_passenger_to_ride, get_active_rides, get_ride_by_id,
@@ -52,18 +54,30 @@ def search_ride(request):
     if request.user.is_authenticated:
         update_last_activity(request.user)
 
-    query_origin = request.GET.get(ORIGIN_KEY, "")
-    query_destination = request.GET.get(DESTINATION_KEY, "")
-
-    rides = get_rides_by_origin_destination(query_origin, query_destination)
+    search_form = RideSearchForm(request.GET or None)
+    
+    search_params = process_search_params(request.GET)
+    
+    rides = filter_rides_complex(
+        origin=search_params['origin'],
+        destination=search_params['destination'],
+        date=search_params['date'],
+        time_from=search_params['time_from'],
+        time_to=search_params['time_to'],
+        min_price=search_params['min_price'],
+        max_price=search_params['max_price'],
+        allows_smoking=search_params['allows_smoking'],
+        allows_pets=search_params['allows_pets']
+    )
 
     page_number = request.GET.get(PAGE_KEY, 1)
     page_obj = paginate_rides(rides, page_number, 6)
 
     context = {
         "page_obj": page_obj,
-        "query_origin": query_origin,
-        "query_destination": query_destination,
+        "query_origin": search_params['origin'],
+        "query_destination": search_params['destination'],
+        "search_form": search_form,
     }
 
     return render(request, "rides/search_ride.html", context)
@@ -88,7 +102,7 @@ def book_ride(request, ride_id):
     if not user_can_book_ride(request.user, ride):
         messages.error(request, "No puedes reservar este viaje.")
         return redirect("rides:ride_detail", ride_id=ride.id)
-    # Ya no añadimos al pasajero aquí, sino que lo redirigimos al proceso de pago
+    #CREATE_PAYMENT DEBERIA DE CAMBIAR
     return redirect("payments:create_payment", ride_id=ride.id)
 
 
@@ -136,3 +150,25 @@ def edit_ride(request, ride_id):
         form = RideForm(instance=ride)
 
     return render(request, RIDE_FORM_TEMPLATE, {FORM_KEY: form, EDIT_MODE_KEY: True})
+
+
+#DEBERIA DE HABER UN ENDPOINT PARA PAYMENTS
+@login_required
+def cancel_booking(request, ride_id):
+    """Cancela la reserva de un viaje para el usuario actual."""
+    update_last_activity(request.user)
+    
+    ride = get_ride_by_id(ride_id)
+    if not ride:
+        messages.error(request, "El viaje no existe.")
+        return redirect(RIDE_LIST_URL)
+    
+    if request.user not in ride.passengers.all():
+        messages.error(request, "No tienes una reserva en este viaje.")
+        return redirect(RIDE_DETAIL_URL, ride_id=ride.id)
+    
+    ride.passengers.remove(request.user)
+    ride.save()
+    
+    messages.success(request, RIDE_BOOKING_CANCELLED_SUCCESS)
+    return redirect(RIDE_DETAIL_URL, ride_id=ride.id)

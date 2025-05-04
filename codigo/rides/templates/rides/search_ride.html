@@ -16,47 +16,55 @@
 
     .page-header {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
     }
     
     .page-title {
         font-size: 2.5rem;
         font-weight: 600;
-        letter-spacing: -0.003em;
+        letter-spacing: -0.015em;
         color: var(--text-primary);
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
     }
     
     .search-container {
         background-color: var(--card-background);
-        border-radius: 12px;
+        border-radius: 16px;
         padding: 1.5rem;
-        margin: 0 auto 2rem;
-        max-width: 800px; 
-        box-shadow: 0 2px 8px var(--shadow);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        margin: 0 auto 2.5rem;
+        max-width: 1000px; 
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
     .search-container:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px var(--shadow);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
     }
 
     .search-form {
         display: flex;
-        gap: 1rem;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .basic-filters {
+        display: flex;
         flex-wrap: wrap;
-        justify-content: center; 
+        gap: 1rem;
+        margin-bottom: 0.5rem;
     }
 
     .search-input {
         flex: 1;
         min-width: 200px;
-        height: 44px;
+        height: 48px;
         padding: 0 1rem;
         border: 1px solid var(--border-color);
-        border-radius: 8px;
+        border-radius: 10px;
         font-size: 1rem;
+        font-weight: 400;
+        background-color: rgba(255, 255, 255, 0.8);
         transition: all 0.2s ease;
     }
 
@@ -64,6 +72,213 @@
         outline: none;
         border-color: var(--primary-color);
         box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+        background-color: #fff;
+    }
+    
+    .button {
+        height: 48px;
+        min-width: 120px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .button-primary {
+        background-color: var(--primary-color);
+        box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+    }
+    
+    .button-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 122, 255, 0.35);
+    }
+    
+    .button-secondary {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--text-primary);
+    }
+    
+    .button-secondary:hover {
+        background-color: rgba(0, 0, 0, 0.09);
+    }
+    
+    .divider {
+        width: 100%;
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 0.5rem 0;
+    }
+    
+    .advanced-filters {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: all 0.4s ease;
+    }
+    
+    .advanced-filters.visible {
+        max-height: 800px;
+        opacity: 1;
+        padding-top: 1.5rem;
+    }
+    
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .filter-label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+    
+    .filter-sublabel {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: -0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .range-inputs {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+    
+    .range-inputs .search-input {
+        min-width: 0;
+        flex: 1;
+    }
+    
+    .range-separator {
+        color: var(--text-secondary);
+    }
+    
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background-color: rgba(0, 0, 0, 0.02);
+        border-radius: 10px;
+        transition: background-color 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .checkbox-group:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+    
+    .checkbox-container {
+        position: relative;
+        width: 24px;
+        height: 24px;
+    }
+    
+    .checkbox-input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+    
+    .checkbox-checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 24px;
+        width: 24px;
+        background-color: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+    
+    .checkbox-input:checked ~ .checkbox-checkmark {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    .checkbox-checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+        left: 9px;
+        top: 5px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+    
+    .checkbox-input:checked ~ .checkbox-checkmark:after {
+        display: block;
+    }
+    
+    .checkbox-label {
+        font-size: 0.95rem;
+        font-weight: 400;
+        color: var(--text-primary);
+        flex: 1;
+    }
+    
+    .checkbox-icon {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-right: 0.5rem;
+    }
+    
+    .advanced-toggle {
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        background-color: rgba(0, 122, 255, 0.05);
+        transition: all 0.2s ease;
+        width: auto;
+    }
+    
+    .advanced-toggle:hover {
+        background-color: rgba(0, 122, 255, 0.1);
+    }
+    
+    .advanced-toggle i {
+        margin-right: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .advanced-toggle.active i {
+        transform: rotate(180deg);
+    }
+    
+    .search-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 0.5rem;
     }
     
     .section-title {
@@ -71,7 +286,7 @@
         font-weight: 500;
         margin: 1.5rem 0;
         color: var(--text-primary);
-        text-align: center; /* Centrar el título */
+        text-align: center;
     }
 
     .rides-grid {
@@ -80,14 +295,30 @@
         gap: 1.5rem;
         justify-content: center;
     }
-
-    /* Override ride price color */
-    .ride-price {
-        font-weight: 600;
-        color: var(--text-secondary);
-        font-size: 1.15rem;
+    
+    .profile-ride-card {
+        background-color: var(--card-background);
+        border-radius: 14px;
+        padding: 1.5rem;
+        position: relative;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.04);
     }
     
+    .profile-ride-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .ride-price {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1.15rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
    
     .pagination-container {
         display: flex;
@@ -108,57 +339,26 @@
         box-shadow: 0 2px 8px var(--shadow);
     }
     
-    .page-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 36px;
-        height: 36px;
-        padding: 0;
-        border-radius: 50%;
-        font-size: 0.95rem;
-        color: var(--text-primary);
-        background-color: transparent;
-        transition: all 0.2s ease;
-        font-weight: 400;
-        border: none;
-        cursor: pointer;
-    }
-    
-    .page-button:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-        transform: none;
-    }
-    
-    .page-button.active {
-        background-color: var(--primary-color);
-        color: white;
-        font-weight: 500;
-    }
-    
-    .page-button.disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
-        pointer-events: none;
-    }
-    
-    .page-arrow {
-        padding: 0 0.5rem;
-        font-size: 1.1rem;
-        color: var(--primary-color);
-    }
-
     @media (max-width: 768px) {
         .page-title {
             font-size: 2rem;
         }
         
         .search-form {
+            gap: 1rem;
+        }
+        
+        .basic-filters {
             flex-direction: column;
         }
         
         .search-input {
             width: 100%;
+        }
+        
+        .filters-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
         }
         
         .rides-grid {
@@ -182,16 +382,79 @@
     
     <div class="search-container">
         <form method="get" class="search-form">
-            <input type="text" name="origin" placeholder="Ciudad de origen" value="{{ query_origin }}" class="search-input">
-            <input type="text" name="destination" placeholder="Ciudad de destino" value="{{ query_destination }}" class="search-input">
-            <button type="submit" class="button button-primary">
-                <i class="fas fa-search"></i> Buscar
-            </button>
+            <div class="basic-filters">
+                <input type="text" name="origin" placeholder="Ciudad de origen" value="{{ request.GET.origin }}" class="search-input">
+                <input type="text" name="destination" placeholder="Ciudad de destino" value="{{ request.GET.destination }}" class="search-input">
+                <input type="date" name="date" placeholder="Fecha" value="{{ request.GET.date }}" class="search-input">
+                <button type="submit" class="button button-primary">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="advanced-toggle" id="advancedToggle">
+                <i class="fas fa-chevron-down"></i> Filtros avanzados
+            </div>
+            
+            <div class="advanced-filters" id="advancedFilters">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Horario de salida</label>
+                        <div class="range-inputs">
+                            <input type="time" name="time_from" value="{{ request.GET.time_from }}" class="search-input" placeholder="Desde">
+                            <span class="range-separator">a</span>
+                            <input type="time" name="time_to" value="{{ request.GET.time_to }}" class="search-input" placeholder="Hasta">
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Rango de precio</label>
+                        <div class="range-inputs">
+                            <input type="number" name="price_min" value="{{ request.GET.price_min }}" class="search-input" placeholder="Min" min="0" step="0.01">
+                            <span class="range-separator">a</span>
+                            <input type="number" name="price_max" value="{{ request.GET.price_max }}" class="search-input" placeholder="Max" min="0" step="0.01">
+                        </div>
+                        <p class="filter-sublabel">Introduce el rango de precio en euros</p>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Preferencias</label>
+                    
+                    <label class="checkbox-group" for="allowsSmoking">
+                        <div class="checkbox-container">
+                            <input type="checkbox" name="allows_smoking" id="allowsSmoking" class="checkbox-input" {% if request.GET.allows_smoking == 'on' %}checked{% endif %}>
+                            <span class="checkbox-checkmark"></span>
+                        </div>
+                        <span class="checkbox-icon"><i class="fas fa-smoking"></i></span>
+                        <span class="checkbox-label">Permite fumar</span>
+                    </label>
+                    
+                    <label class="checkbox-group" for="allowsPets">
+                        <div class="checkbox-container">
+                            <input type="checkbox" name="allows_pets" id="allowsPets" class="checkbox-input" {% if request.GET.allows_pets == 'on' %}checked{% endif %}>
+                            <span class="checkbox-checkmark"></span>
+                        </div>
+                        <span class="checkbox-icon"><i class="fas fa-paw"></i></span>
+                        <span class="checkbox-label">Permite mascotas</span>
+                    </label>
+                </div>
+                
+                <div class="search-actions">
+                    <a href="{% url 'rides:search_ride' %}" class="button button-secondary">
+                        <i class="fas fa-times"></i> Limpiar
+                    </a>
+                    <button type="submit" class="button button-primary">
+                        <i class="fas fa-filter"></i> Aplicar filtros
+                    </button>
+                </div>
+            </div>
         </form>
     </div>
     
-    {% if query_origin or query_destination %}
-    <h2 class="section-title">Resultados para {% if query_origin %}{{ query_origin }}{% endif %}{% if query_origin and query_destination %} a {% endif %}{% if query_destination %}{{ query_destination }}{% endif %}</h2>
+    {% if query_origin or query_destination or request.GET.date or request.GET.time_from or request.GET.price_min %}
+    <h2 class="section-title">Resultados de búsqueda</h2>
     {% else %}
     <h2 class="section-title">Todos los viajes disponibles</h2>
     {% endif %}
@@ -219,6 +482,14 @@
                     <i class="fas fa-users info-icon"></i> 
                     {{ ride.seats_available }}/{{ ride.total_seats }} asientos
                 </p>
+                
+                {% if ride.driver.profile.pref_smoking %}
+                <p><i class="fas fa-smoking info-icon"></i> Permite fumar</p>
+                {% endif %}
+                
+                {% if ride.driver.profile.pref_pets %}
+                <p><i class="fas fa-paw info-icon"></i> Permite mascotas</p>
+                {% endif %}
             </div>
             <p class="ride-price">
                 <i class="fas fa-tag info-icon"></i> 
@@ -251,8 +522,8 @@
                 <i class="fas fa-car-side"></i>
             </div>
             <p>No hay viajes disponibles con los criterios de búsqueda especificados.</p>
-            <a href="{% url 'rides:ride_list' %}" class="button button-primary">
-                <i class="fas fa-sync"></i> Ver todos los viajes
+            <a href="{% url 'rides:search_ride' %}" class="button button-primary">
+                <i class="fas fa-sync"></i> Limpiar filtros
             </a>
         </div>
         {% endfor %}
@@ -261,18 +532,16 @@
     {% if page_obj.paginator.num_pages > 1 %}
     <div class="pagination-container">
         <div class="pagination">
-            <a href="{% if page_obj.has_previous %}?{% if query_origin %}origin={{ query_origin }}&{% endif %}{% if query_destination %}destination={{ query_destination }}&{% endif %}page={{ page_obj.previous_page_number }}{% else %}#{% endif %}" class="page-button page-arrow {% if not page_obj.has_previous %}disabled{% endif %}">
+            <a href="{% if page_obj.has_previous %}?{% if request.GET.origin %}origin={{ request.GET.origin }}&{% endif %}{% if request.GET.destination %}destination={{ request.GET.destination }}&{% endif %}{% if request.GET.date %}date={{ request.GET.date }}&{% endif %}{% if request.GET.time_from %}time_from={{ request.GET.time_from }}&{% endif %}{% if request.GET.time_to %}time_to={{ request.GET.time_to }}&{% endif %}{% if request.GET.price_min %}price_min={{ request.GET.price_min }}&{% endif %}{% if request.GET.price_max %}price_max={{ request.GET.price_max }}&{% endif %}{% if request.GET.allows_smoking %}allows_smoking={{ request.GET.allows_smoking }}&{% endif %}{% if request.GET.allows_pets %}allows_pets={{ request.GET.allows_pets }}&{% endif %}page={{ page_obj.previous_page_number }}{% else %}#{% endif %}" class="page-button page-arrow {% if not page_obj.has_previous %}disabled{% endif %}">
                 ‹
             </a>
-            
             
             {% for i in page_obj.paginator.page_range %}
                 {% if page_obj.number == i %}
                     <a class="page-button active">{{ i }}</a>
                 {% elif i > page_obj.number|add:"-3" and i < page_obj.number|add:"3" %}
-                    <a href="?{% if query_origin %}origin={{ query_origin }}&{% endif %}{% if query_destination %}destination={{ query_destination }}&{% endif %}page={{ i }}" class="page-button">{{ i }}</a>
+                    <a href="?{% if request.GET.origin %}origin={{ request.GET.origin }}&{% endif %}{% if request.GET.destination %}destination={{ request.GET.destination }}&{% endif %}{% if request.GET.date %}date={{ request.GET.date }}&{% endif %}{% if request.GET.time_from %}time_from={{ request.GET.time_from }}&{% endif %}{% if request.GET.time_to %}time_to={{ request.GET.time_to }}&{% endif %}{% if request.GET.price_min %}price_min={{ request.GET.price_min }}&{% endif %}{% if request.GET.price_max %}price_max={{ request.GET.price_max }}&{% endif %}{% if request.GET.allows_smoking %}allows_smoking={{ request.GET.allows_smoking }}&{% endif %}{% if request.GET.allows_pets %}allows_pets={{ request.GET.allows_pets }}&{% endif %}page={{ i }}" class="page-button">{{ i }}</a>
                 {% endif %}
-                
                 
                 {% if i == 1 and page_obj.number > 3 %}
                     <span class="page-button disabled">...</span>
@@ -283,12 +552,46 @@
                 {% endif %}
             {% endfor %}
             
-            
-            <a href="{% if page_obj.has_next %}?{% if query_origin %}origin={{ query_origin }}&{% endif %}{% if query_destination %}destination={{ query_destination }}&{% endif %}page={{ page_obj.next_page_number }}{% else %}#{% endif %}" class="page-button page-arrow {% if not page_obj.has_next %}disabled{% endif %}">
+            <a href="{% if page_obj.has_next %}?{% if request.GET.origin %}origin={{ request.GET.origin }}&{% endif %}{% if request.GET.destination %}destination={{ request.GET.destination }}&{% endif %}{% if request.GET.date %}date={{ request.GET.date }}&{% endif %}{% if request.GET.time_from %}time_from={{ request.GET.time_from }}&{% endif %}{% if request.GET.time_to %}time_to={{ request.GET.time_to }}&{% endif %}{% if request.GET.price_min %}price_min={{ request.GET.price_min }}&{% endif %}{% if request.GET.price_max %}price_max={{ request.GET.price_max }}&{% endif %}{% if request.GET.allows_smoking %}allows_smoking={{ request.GET.allows_smoking }}&{% endif %}{% if request.GET.allows_pets %}allows_pets={{ request.GET.allows_pets }}&{% endif %}page={{ page_obj.next_page_number }}{% else %}#{% endif %}" class="page-button page-arrow {% if not page_obj.has_next %}disabled{% endif %}">
                 ›
             </a>
         </div>
     </div>
     {% endif %}
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const advancedToggle = document.getElementById('advancedToggle');
+        const advancedFilters = document.getElementById('advancedFilters');
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasAdvancedParams = urlParams.has('time_from') || urlParams.has('time_to') || 
+                                 urlParams.has('price_min') || urlParams.has('price_max') ||
+                                 urlParams.has('allows_smoking') || urlParams.has('allows_pets');
+                                 
+        if (hasAdvancedParams) {
+            advancedFilters.classList.add('visible');
+            advancedToggle.classList.add('active');
+            advancedToggle.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar filtros';
+        }
+        
+        advancedToggle.addEventListener('click', function() {
+            advancedFilters.classList.toggle('visible');
+            this.classList.toggle('active');
+            
+            if (advancedFilters.classList.contains('visible')) {
+                this.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar filtros';
+            } else {
+                this.innerHTML = '<i class="fas fa-chevron-down"></i> Filtros avanzados';
+            }
+            
+            setTimeout(function() {
+                if (advancedFilters.classList.contains('visible')) {
+                    advancedFilters.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }, 100);
+        });
+    });
+</script>
 {% endblock %}

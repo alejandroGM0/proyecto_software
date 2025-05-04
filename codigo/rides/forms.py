@@ -49,6 +49,39 @@ class RideSearchForm(forms.Form):
         required=False,
         widget=forms.DateInput(attrs={'type': 'date'})
     )
+    time_from = forms.TimeField(
+        label='Desde las',
+        required=False,
+        widget=forms.TimeInput(attrs={'type': 'time'})
+    )
+    time_to = forms.TimeField(
+        label='Hasta las',
+        required=False,
+        widget=forms.TimeInput(attrs={'type': 'time'})
+    )
+    price_min = forms.DecimalField(
+        label='Precio mínimo',
+        required=False,
+        min_value=0,
+        widget=forms.NumberInput(attrs={'placeholder': 'Min', 'step': '0.01'})
+    )
+    price_max = forms.DecimalField(
+        label='Precio máximo',
+        required=False,
+        min_value=0,
+        widget=forms.NumberInput(attrs={'placeholder': 'Max', 'step': '0.01'})
+    )
+    allows_smoking = forms.BooleanField(
+        label='Permite fumar',
+        required=False,
+        widget=forms.CheckboxInput()
+    )
+    allows_pets = forms.BooleanField(
+        label='Permite mascotas',
+        required=False,
+        widget=forms.CheckboxInput()
+    )
 
     class Meta:
-        fields = [ORIGIN_KEY, DESTINATION_KEY, DATE_KEY]
+        fields = [ORIGIN_KEY, DESTINATION_KEY, DATE_KEY, 'time_from', 'time_to', 
+                 'price_min', 'price_max', 'allows_smoking', 'allows_pets']

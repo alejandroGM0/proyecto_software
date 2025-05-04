@@ -72,25 +72,25 @@
 
     .search-form form {
         display: flex;
-        gap: 1rem;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
         flex-wrap: wrap;
     }
 
     .search-input {
-        flex: 1;
-        min-width: 200px;
+        flex: 0 0 auto;
+        width: 240px;
         height: 44px;
-        padding: 0 1rem;
+        padding: 0 0.5rem;
         border: 1px solid var(--border-color);
-        border-radius: 8px;
-        font-size: 1rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
         transition: all 0.2s ease;
     }
 
-    .search-input:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+    input[type="date"].search-input {
+        flex: 0 0 auto;
+        width: 125px;
     }
 
     .content-section {
@@ -150,6 +150,7 @@
             <form method="get" action="{% url 'rides:search_ride' %}">
                 <input type="text" name="origin" placeholder="Ciudad de origen" value="{{ query_origin }}" class="search-input">
                 <input type="text" name="destination" placeholder="Ciudad de destino" value="{{ query_destination }}" class="search-input">
+                <input type="date" name="date" placeholder="Fecha" value="{{ request.GET.date }}" class="search-input">
                 <button type="submit" class="button button-primary">
                     <i class="fas fa-search"></i> Buscar
                 </button>
@@ -183,6 +184,14 @@
                         <i class="fas fa-users info-icon"></i> 
                         {{ ride.seats_available }}/{{ ride.total_seats }} asientos
                     </p>
+                    
+                    {% if ride.driver.profile.pref_smoking %}
+                    <p><i class="fas fa-smoking info-icon"></i> Permite fumar</p>
+                    {% endif %}
+                    
+                    {% if ride.driver.profile.pref_pets %}
+                    <p><i class="fas fa-paw info-icon"></i> Permite mascotas</p>
+                    {% endif %}
                 </div>
                 <p class="ride-price">
                     <i class="fas fa-tag info-icon"></i> 

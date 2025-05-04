@@ -135,6 +135,13 @@
                             </button>
                         </form>
                     {% endif %}
+                {% else %}
+                    <form method="post" action="{% url 'rides:cancel_booking' ride.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="button button-danger">
+                            <i class="fas fa-times-circle"></i> Cancelar reserva
+                        </button>
+                    </form>
                 {% endif %}
             {% endif %}
             {% if user.is_authenticated %}
